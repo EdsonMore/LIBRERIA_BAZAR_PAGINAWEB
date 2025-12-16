@@ -50,10 +50,21 @@ export default function EditarProductoPage() {
       const res = await fetch(`/api/productos/${params.id}`)
       if (res.ok) {
         const data = await res.json()
-        setProducto(data)
+        // IMPORTANTE: Solo guardamos los campos necesarios para editar
+        // Descartamos relacionados, reseñas, y otros campos innecesarios
+        setProducto({
+          id: data.id,
+          nombre: data.nombre || "",
+          descripcion: data.descripcion || "",
+          precio: data.precio || 0,
+          stock: data.stock || 0,
+          categoria_id: data.categoria_id || 0,
+          imagen: data.imagen || "",
+          disponible: data.disponible || false,
+        })
       }
     } catch (error) {
-      console.error("Error:", error)
+      console.error("Error al cargar producto:", error)
     }
   }
 
@@ -87,26 +98,20 @@ export default function EditarProductoPage() {
       return
     }
 
-    // Validar URL de imagen
-    const imagenUrl = producto.imagen?.trim() || ""
-    if (imagenUrl && imagenUrl.length > 1500) {
-      alert(`URL de imagen demasiado larga (${imagenUrl.length} caracteres). Máximo 1500 caracteres.\nPor favor, usa una URL más corta o carga la imagen a un CDN.`)
-      return
-    }
-
     // Redondear precio a 2 decimales
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
     setLoading(true)
     try {
-      // Preparar datos optimizados para enviar
+      // IMPORTANTE: Enviar SOLO los 7 campos necesarios, nada más
+      // Esto asegura que el payload sea pequeño y sin datos innecesarios
       const dataToSend = {
         nombre: producto.nombre.trim(),
         descripcion: producto.descripcion.trim(),
         precio: precioDosDecimales,
         stock: stockNum,
         categoria_id: Number(producto.categoria_id),
-        imagen: imagenUrl,
+        imagen: producto.imagen || "",
         disponible: Boolean(producto.disponible),
       }
 

@@ -48,11 +48,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Categoría inválida" }, { status: 400 })
     }
 
-    // Validar que la imagen no sea demasiado larga (MAX 1500 caracteres)
+    // Validar que la imagen no sea demasiado larga (MAX 500KB después de encoding)
+    // Esto permite base64 de imágenes grandes
     const imagenUrl = imagen?.trim() || null
-    if (imagenUrl && imagenUrl.length > 1500) {
+    if (imagenUrl && imagenUrl.length > 500000) {
       return NextResponse.json(
-        { error: `URL de imagen demasiado larga (${imagenUrl.length} caracteres). Máximo 1500 caracteres.` },
+        { error: `Imagen demasiado grande (${imagenUrl.length} caracteres). Máximo 500000 caracteres.` },
         { status: 400 },
       )
     }
