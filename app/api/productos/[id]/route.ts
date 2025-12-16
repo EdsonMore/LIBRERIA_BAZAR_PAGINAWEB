@@ -4,9 +4,10 @@ import { query, queryOne } from "@/lib/db"
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    console.log("API: Buscando producto ID:", id)
+    console.log(`📦 API GET /api/productos/${id} - iniciando...`)
 
     // Obtener producto básico
+    console.log(`🔍 Buscando producto ID: ${id}`)
     const producto = await queryOne<any>(
       `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id
        FROM productos p
@@ -15,11 +16,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     )
 
     if (!producto) {
-      console.log("API: Producto no encontrado")
+      console.log(`❌ Producto ${id} no encontrado`)
       return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 })
     }
 
-    console.log("API: Producto encontrado")
+    console.log(`✅ Producto ${id} encontrado: ${producto.nombre}`)
 
     // Obtener categoría
     const categoria = await queryOne<any>(
@@ -54,22 +55,37 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       [id],
     )
 
-    return NextResponse.json({
-      id: producto.id,
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      stock: producto.stock,
-      imagen: producto.imagen,
-      categoria_id: producto.categoria_id,
-      categoria_nombre: categoria?.nombre || "Sin categoría",
-      relacionados: relacionados || [],
-      resenas: resenas || [],
-    })
-  } catch (error: any) {
-    console.error("Error al obtener producto:", error.message)
+    console.log(`📊 Datos completos para producto ${id}: ${resenas.length} reseñas, ${relacionados.length} relacionados`)
+
     return NextResponse.json(
-      { error: "Error al obtener producto" },
+      {
+        id: producto.id,
+        nombre: producto.nombre,
+        descripcion: producto.descripcion,
+        precio: producto.precio,
+        stock: producto.stock,
+        imagen: producto.imagen,
+        categoria_id: producto.categoria_id,
+        categoria_nombre: categoria?.nombre || "Sin categoría",
+        relacionados: relacionados || [],
+        resenas: resenas || [],
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        },
+      }
+    )
+  } catch (error: any) {
+    console.error(`❌ Error en GET /api/productos/[id]:`, {
+      message: error.message,
+      code: error.code,
+      errno: error.errno,
+      syscall: error.syscall,
+      stack: error.stack?.split("\n").slice(0, 3),
+    })
+    return NextResponse.json(
+      { error: "Error al obtener producto", details: error.message },
       { status: 500 },
     )
   }

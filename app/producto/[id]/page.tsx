@@ -8,31 +8,41 @@ async function getProducto(id: string) {
   try {
     // Usar URL completa para SSR en Vercel
     const apiUrl = getApiUrl(`/api/productos/${id}`)
-    console.log("Fetching from:", apiUrl)
+    console.log(`🌐 SSR: Fetching producto ${id} from: ${apiUrl}`)
+    
     const res = await fetch(apiUrl, {
       cache: "no-store",
+      headers: {
+        "User-Agent": "NextJS-SSR",
+      },
     })
-    console.log("Response status:", res.status)
+    
+    console.log(`📊 SSR: Response status ${res.status} para producto ${id}`)
+    
     if (!res.ok) {
-      console.error("API error response:", res.status)
+      console.error(`❌ SSR: API error ${res.status} para producto ${id}`)
+      const errorData = await res.text()
+      console.error(`📋 SSR: Error response: ${errorData}`)
       return null
     }
+    
     const data = await res.json()
-    console.log("API data received:", data)
+    console.log(`✅ SSR: Producto ${id} cargado exitosamente`)
     return data
   } catch (error) {
-    console.error("Error al obtener producto:", error)
+    console.error(`❌ SSR: Error fetching producto ${id}:`, error)
     return null
   }
 }
 
 export default async function ProductoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  console.log("Página de producto ID:", id)
+  console.log(`📄 SSR: Renderizando página de producto ${id}`)
+  
   const data = await getProducto(id)
 
   if (!data || !data.id) {
-    console.log("Producto no encontrado, data:", data)
+    console.log(`⚠️ SSR: Producto ${id} no encontrado, mostrando 404`)
     notFound()
   }
 

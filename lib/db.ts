@@ -7,7 +7,8 @@ const poolConfig = process.env.DATABASE_URL
       connectionString: process.env.DATABASE_URL,
       max: 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 5000, // Aumentado para mejor manejo en Vercel
+      statementTimeoutMillis: 10000, // Timeout de query
       ssl: process.env.DATABASE_URL?.includes("localhost") ? false : { rejectUnauthorized: false },
     }
   : {
