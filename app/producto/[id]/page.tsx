@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation"
+import { getApiUrl } from "@/lib/api-url"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import ProductoDetalle from "@/components/producto-detalle"
 
 async function getProducto(id: string) {
   try {
-    // En servidor (SSR): usar ruta relativa /api/... (Next.js la resuelve internamente)
-    // En navegador: usar URL relativa o NEXT_PUBLIC_API_URL
-    const apiUrl = `/api/productos/${id}`
+    // Usar URL completa para SSR en Vercel
+    const apiUrl = getApiUrl(`/api/productos/${id}`)
     console.log("Fetching from:", apiUrl)
     const res = await fetch(apiUrl, {
       cache: "no-store",

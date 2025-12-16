@@ -1,12 +1,13 @@
 import Link from "next/link"
+import { getApiUrl } from "@/lib/api-url"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { Wine, Truck, Shield, CreditCard } from "lucide-react"
 
 async function getCategorias() {
   try {
-    // En servidor (SSR): usar ruta relativa /api/... (Next.js la resuelve internamente)
-    const res = await fetch(`/api/categorias/activas`, {
+    // Usar URL completa para SSR en Vercel
+    const res = await fetch(getApiUrl("/api/categorias/activas"), {
       cache: "no-store",
     })
     if (!res.ok) return []
