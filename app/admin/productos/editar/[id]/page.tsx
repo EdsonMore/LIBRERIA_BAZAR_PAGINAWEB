@@ -61,15 +61,33 @@ export default function EditarProductoPage() {
     e.preventDefault()
     if (!producto) return
 
+    // Validar antes de enviar
+    if (producto.imagen && producto.imagen.length > 2000) {
+      alert("URL de imagen demasiado larga (máximo 2000 caracteres)")
+      return
+    }
+
     setLoading(true)
     try {
+      // Preparar datos optimizados para enviar
+      const dataToSend = {
+        nombre: producto.nombre.trim(),
+        descripcion: producto.descripcion.trim(),
+        precio: Number(producto.precio),
+        stock: Number(producto.stock),
+        categoria_id: Number(producto.categoria_id),
+        imagen: producto.imagen?.trim() || "",
+        disponible: producto.disponible,
+      }
+
       const res = await fetch(`/api/admin/productos/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(producto),
+        body: JSON.stringify(dataToSend),
       })
 
       if (res.ok) {
+        alert("Producto actualizado exitosamente")
         router.push("/admin/productos")
       } else {
         const error = await res.json()

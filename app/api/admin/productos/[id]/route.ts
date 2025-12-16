@@ -10,8 +10,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "No autorizado" }, { status: 403 })
     }
 
+    // Validar el tamaño de la solicitud antes de procesar
+    const contentLength = req.headers.get('content-length')
+    if (contentLength && parseInt(contentLength) > 50 * 1024 * 1024) {
+      return NextResponse.json({ error: "Payload demasiado grande. Máximo 50MB" }, { status: 413 })
+    }
+
     const body = await req.json()
     const { nombre, descripcion, precio, stock, categoria_id, imagen, disponible } = body
+
+    // Validar que la imagen no sea demasiado larga
+    if (imagen && imagen.length > 2000) {
+      return NextResponse.json(
+        { error: "URL de imagen demasiado larga. Máximo 2000 caracteres" },
+        { status: 400 },
+      )
+    }
 
     await query(
       `UPDATE productos 
@@ -23,6 +37,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ message: "Producto actualizado exitosamente" })
   } catch (error) {
     console.error("Error:", error)
+    if (error instanceof SyntaxError) {
+      return NextResponse.json({ error: "JSON inválido en la solicitud" }, { status: 400 })
+    }
     return NextResponse.json({ error: "Error del servidor" }, { status: 500 })
   }
 }
