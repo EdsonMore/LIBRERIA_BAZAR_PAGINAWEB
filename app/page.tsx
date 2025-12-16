@@ -1,18 +1,16 @@
 import Link from "next/link"
-import { getApiUrl } from "@/lib/api-url"
+import { query } from "@/lib/db"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import { Wine, Truck, Shield, CreditCard } from "lucide-react"
 
 async function getCategorias() {
   try {
-    // Usar URL completa para SSR en Vercel
-    const res = await fetch(getApiUrl("/api/categorias/activas"), {
-      cache: "no-store",
-    })
-    if (!res.ok) return []
-    const data = await res.json()
-    return data
+    // Obtener categorías directamente de la BD (evita Deployment Protection de Vercel)
+    const categorias = await query<any>(
+      "SELECT id, nombre FROM categorias WHERE activo = true ORDER BY nombre ASC"
+    )
+    return categorias || []
   } catch (error) {
     console.error("Error al obtener categorías:", error)
     return []

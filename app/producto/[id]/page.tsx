@@ -1,36 +1,80 @@
 import { notFound } from "next/navigation"
-import { getApiUrl } from "@/lib/api-url"
+import { queryOne, query } from "@/lib/db"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
 import ProductoDetalle from "@/components/producto-detalle"
 
 async function getProducto(id: string) {
   try {
-    // Usar URL completa para SSR en Vercel
-    const apiUrl = getApiUrl(`/api/productos/${id}`)
-    console.log(`🌐 SSR: Fetching producto ${id} from: ${apiUrl}`)
-    
-    const res = await fetch(apiUrl, {
-      cache: "no-store",
-      headers: {
-        "User-Agent": "NextJS-SSR",
-      },
-    })
-    
-    console.log(`📊 SSR: Response status ${res.status} para producto ${id}`)
-    
-    if (!res.ok) {
-      console.error(`❌ SSR: API error ${res.status} para producto ${id}`)
-      const errorData = await res.text()
-      console.error(`📋 SSR: Error response: ${errorData}`)
+    console.log(`📦 SSR: Obteniendo producto ${id} directamente de BD`)
+
+    // Obtener producto básico
+    const producto = await queryOne<any>(
+      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id
+       FROM productos p
+       WHERE p.id = $1`,
+      [id],
+    )
+
+    if (!producto) {
+      console.log(`❌ Producto ${id} no encontrado`)
       return null
     }
-    
-    const data = await res.json()
-    console.log(`✅ SSR: Producto ${id} cargado exitosamente`)
-    return data
-  } catch (error) {
-    console.error(`❌ SSR: Error fetching producto ${id}:`, error)
+
+    console.log(`✅ Producto ${id} encontrado: ${producto.nombre}`)
+
+    // Obtener categoría
+    const categoria = await queryOne<any>(
+      "SELECT nombre FROM categorias WHERE id = $1",
+      [producto.categoria_id],
+    )
+
+    // Obtener relacionados
+    const relacionados = await query<any>(
+      "SELECT id, nombre, precio, imagen FROM productos WHERE categoria_id = $1 AND id != $2 LIMIT 4",
+      [producto.categoria_id, id],
+    )
+
+    // Obtener reseñas APROBADAS con datos del usuario
+    const resenas = await query<any>(
+      `SELECT 
+        r.id,
+        r.usuario_id,
+        r.producto_id,
+        r.calificacion,
+        r.comentario,
+        r.fecha,
+        r.estado,
+        u.nombres,
+        u.apellido_paterno as "apellidoPaterno",
+        u.apellido_materno as "apellidoMaterno"
+       FROM resenas r
+       JOIN usuarios u ON r.usuario_id = u.id
+       WHERE r.producto_id = $1 AND r.estado = 'APROBADA'
+       ORDER BY r.fecha DESC 
+       LIMIT 10`,
+      [id],
+    )
+
+    console.log(`📊 Datos completos para producto ${id}: ${resenas.length} reseñas, ${relacionados.length} relacionados`)
+
+    return {
+      id: producto.id,
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      precio: producto.precio,
+      stock: producto.stock,
+      imagen: producto.imagen,
+      categoria_id: producto.categoria_id,
+      categoria_nombre: categoria?.nombre || "Sin categoría",
+      relacionados: relacionados || [],
+      resenas: resenas || [],
+    }
+  } catch (error: any) {
+    console.error(`❌ Error obteniendo producto ${id}:`, {
+      message: error.message,
+      code: error.code,
+    })
     return null
   }
 }
