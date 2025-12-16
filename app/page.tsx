@@ -5,7 +5,8 @@ import { Wine, Truck, Shield, CreditCard } from "lucide-react"
 
 async function getCategorias() {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/categorias/activas`, {
+    // En servidor (SSR): usar ruta relativa /api/... (Next.js la resuelve internamente)
+    const res = await fetch(`/api/categorias/activas`, {
       cache: "no-store",
     })
     if (!res.ok) return []

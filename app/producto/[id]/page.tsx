@@ -5,7 +5,9 @@ import ProductoDetalle from "@/components/producto-detalle"
 
 async function getProducto(id: string) {
   try {
-    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/productos/${id}`
+    // En servidor (SSR): usar ruta relativa /api/... (Next.js la resuelve internamente)
+    // En navegador: usar URL relativa o NEXT_PUBLIC_API_URL
+    const apiUrl = `/api/productos/${id}`
     console.log("Fetching from:", apiUrl)
     const res = await fetch(apiUrl, {
       cache: "no-store",
