@@ -4,7 +4,8 @@ import type React from "react";
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Camera, Upload, X, Link } from "lucide-react";
+import { Camera, Upload, X, Link, RotateCw } from "lucide-react";
+import { useImageCompression } from "@/hooks/use-image-compression";
 
 interface Categoria {
   id: number;
@@ -30,9 +31,11 @@ export default function EditarProductoPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  const { compressImage, compressImageFile } = useImageCompression();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("user");
   const [imagenPreview, setImagenPreview] = useState<string>("");
   const [producto, setProducto] = useState<Producto>({
     id: 0,
@@ -135,6 +138,7 @@ export default function EditarProductoPage() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
+            facingMode: cameraFacing,
             width: { ideal: 1280 },
             height: { ideal: 720 },
           },
@@ -142,7 +146,9 @@ export default function EditarProductoPage() {
         })
       } catch (err) {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: {
+            facingMode: cameraFacing,
+          },
           audio: false,
         })
       }
@@ -213,7 +219,7 @@ export default function EditarProductoPage() {
     }
   };
 
-  const tomarFoto = () => {
+  const tomarFoto = async () => {
     if (videoRef.current && canvasRef.current && producto) {
       try {
         const video = videoRef.current;
@@ -228,10 +234,12 @@ export default function EditarProductoPage() {
           // Dibujar la imagen del video en el canvas
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
           
-          // Convertir a JPEG con buena calidad
+          // Convertir a JPEG y COMPRIMIR
           const fotoDataUrl = canvas.toDataURL("image/jpeg", 0.9);
-          setImagenPreview(fotoDataUrl);
-          setProducto({ ...producto, imagen: fotoDataUrl });
+          const comprimida = await compressImage(fotoDataUrl, 1280, 720, 0.65);
+          
+          setImagenPreview(comprimida);
+          setProducto({ ...producto, imagen: comprimida });
           setShowCamera(false);
         }
       } catch (error) {
@@ -241,16 +249,18 @@ export default function EditarProductoPage() {
     }
   };
 
-  const manejarSubidaArchivo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const manejarSubidaArchivo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && producto) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        setImagenPreview(dataUrl);
-        setProducto({ ...producto, imagen: dataUrl });
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Comprimir archivo antes de usar
+        const comprimida = await compressImageFile(file, 1280, 720, 0.65);
+        setImagenPreview(comprimida);
+        setProducto({ ...producto, imagen: comprimida });
+      } catch (error) {
+        console.error("Error al procesar imagen:", error);
+        alert("Error al procesar la imagen");
+      }
     }
   };
 
@@ -521,6 +531,20 @@ export default function EditarProductoPage() {
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 font-semibold"
                 >
                   📸 Capturar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Cambiar entre cámara frontal y trasera
+                    setCameraFacing(cameraFacing === "user" ? "environment" : "user")
+                    // Reiniciar cámara con nueva orientación
+                    detenerCamara()
+                    setTimeout(() => iniciarCamara(), 100)
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 font-semibold flex items-center justify-center gap-2"
+                >
+                  <RotateCw className="w-4 h-4" />
+                  Voltear
                 </button>
                 <button
                   type="button"

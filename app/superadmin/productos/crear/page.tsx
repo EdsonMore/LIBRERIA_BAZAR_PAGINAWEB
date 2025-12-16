@@ -4,7 +4,8 @@ import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Camera, Upload, X, Link } from "lucide-react"
+import { Camera, Upload, X, Link, RotateCw } from "lucide-react"
+import { useImageCompression } from "@/hooks/use-image-compression"
 
 interface Categoria {
   id: number
@@ -17,10 +18,12 @@ export default function CrearProductoPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const { compressImage, compressImageFile } = useImageCompression()
   
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(false)
   const [showCamera, setShowCamera] = useState(false)
+  const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("user") // "user" = frontal, "environment" = trasera
   const [imagenPreview, setImagenPreview] = useState<string>("")
   const [formData, setFormData] = useState({
     nombre: "",
@@ -76,6 +79,7 @@ export default function CrearProductoPage() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
+            facingMode: cameraFacing, // ← USAR CAMERAFACE STATE
             width: { ideal: 1280 },
             height: { ideal: 720 },
           },
@@ -83,7 +87,9 @@ export default function CrearProductoPage() {
         })
       } catch (err) {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: {
+            facingMode: cameraFacing, // ← USAR CAMERAFACE STATE
+          },
           audio: false,
         })
       }
@@ -154,7 +160,7 @@ export default function CrearProductoPage() {
     }
   }
 
-  const tomarFoto = () => {
+  const tomarFoto = async () => {
     if (videoRef.current && canvasRef.current) {
       try {
         const video = videoRef.current
@@ -169,10 +175,12 @@ export default function CrearProductoPage() {
           // Dibujar la imagen del video en el canvas
           context.drawImage(video, 0, 0, canvas.width, canvas.height)
           
-          // Convertir a JPEG con buena calidad
+          // Convertir a JPEG y COMPRIMIR
           const fotoDataUrl = canvas.toDataURL("image/jpeg", 0.9)
-          setImagenPreview(fotoDataUrl)
-          setFormData({ ...formData, imagen: fotoDataUrl })
+          const comprimida = await compressImage(fotoDataUrl, 1280, 720, 0.65)
+          
+          setImagenPreview(comprimida)
+          setFormData({ ...formData, imagen: comprimida })
           setShowCamera(false)
         }
       } catch (error) {
@@ -182,16 +190,18 @@ export default function CrearProductoPage() {
     }
   }
 
-  const manejarSubidaArchivo = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const manejarSubidaArchivo = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string
-        setImagenPreview(dataUrl)
-        setFormData({ ...formData, imagen: dataUrl })
+      try {
+        // Comprimir archivo antes de usar
+        const comprimida = await compressImageFile(file, 1280, 720, 0.65)
+        setImagenPreview(comprimida)
+        setFormData({ ...formData, imagen: comprimida })
+      } catch (error) {
+        console.error("Error al procesar imagen:", error)
+        alert("Error al procesar la imagen")
       }
-      reader.readAsDataURL(file)
     }
   }
 
@@ -391,6 +401,20 @@ export default function CrearProductoPage() {
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 font-medium"
                 >
                   📸 Capturar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Cambiar entre cámara frontal y trasera
+                    setCameraFacing(cameraFacing === "user" ? "environment" : "user")
+                    // Reiniciar cámara con nueva orientación
+                    detenerCamara()
+                    setTimeout(() => iniciarCamara(), 100)
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium flex items-center justify-center gap-2"
+                >
+                  <RotateCw className="w-4 h-4" />
+                  Voltear
                 </button>
                 <button
                   type="button"
