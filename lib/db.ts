@@ -1,16 +1,27 @@
 import { Pool, QueryResult } from "pg"
 
 // Configuración de la conexión a PostgreSQL
-const pool = new Pool({
-  host: process.env.DATABASE_HOST || "localhost",
-  port: parseInt(process.env.DATABASE_PORT || "5432"),
-  user: process.env.DATABASE_USER || "postgres",
-  password: process.env.DATABASE_PASSWORD || "",
-  database: process.env.DATABASE_NAME || "licoreriaapp",
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-})
+// Si existe DATABASE_URL (Vercel/Neon), úsalo. Si no, usa variables individuales (desarrollo local)
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+      ssl: process.env.DATABASE_URL?.includes("localhost") ? false : { rejectUnauthorized: false },
+    }
+  : {
+      host: process.env.DATABASE_HOST || "localhost",
+      port: parseInt(process.env.DATABASE_PORT || "5432"),
+      user: process.env.DATABASE_USER || "postgres",
+      password: process.env.DATABASE_PASSWORD || "",
+      database: process.env.DATABASE_NAME || "licoreriaapp",
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    }
+
+const pool = new Pool(poolConfig)
 
 /**
  * Convierte placeholders de MySQL (?) a PostgreSQL ($1, $2, etc)
