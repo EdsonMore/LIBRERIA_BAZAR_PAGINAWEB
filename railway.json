@@ -1,0 +1,9 @@
+{
+  "$schema": "https://railway.app/json-schema.json",
+  "build": {
+    "builder": "DOCKERFILE"
+  },
+  "deploy": {
+    "startCommand": "java -jar target/licoreriaApp-0.0.1-SNAPSHOT.jar"
+  }
+}

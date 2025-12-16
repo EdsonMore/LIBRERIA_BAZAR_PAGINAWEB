@@ -1,0 +1,358 @@
+<!-- src/main/resources/templates/fragments/navbar.html -->
+<nav
+  class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top"
+  th:fragment="navbar"
+>
+  <div class="container-fluid">
+    <!-- ========================================= -->
+    <!-- 🔷 LOGO / MARCA -->
+    <!-- ========================================= -->
+    <a
+      class="navbar-brand fw-bold d-flex align-items-center"
+      th:href="@{/}"
+      style="font-size: 1.5rem"
+    >
+      <img
+        th:src="@{/img/logo1.jpg}"
+        alt="Logo Tu Bazar Plus"
+        width="40"
+        height="40"
+        class="me-2"
+      />
+      Tu Bazar Plus
+    </a>
+
+    <!-- Botón de menú móvil -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup"
+      aria-expanded="false"
+      aria-label="Alternar navegación"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- ========================================= -->
+    <!-- 🔹 CONTENIDO DE NAVEGACIÓN -->
+    <!-- ========================================= -->
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <!-- 🟢 MENÚ PÚBLICO -->
+      <div class="navbar-nav me-auto">
+        <a class="nav-link" th:href="@{/}">
+          <i class="bi bi-house"></i> Inicio
+        </a>
+        <a class="nav-link" th:href="@{/productos}">
+          <i class="bi bi-box"></i> Productos
+        </a>
+        <a class="nav-link" th:href="@{/sobre-nosotros}">
+          <i class="bi bi-people"></i> Sobre Nosotros
+        </a>
+        <!-- Ocultar para SuperAdmin -->
+        <a
+          th:unless="${#authorization.expression('hasRole(''SUPER_ADMIN'')')}"
+          class="nav-link"
+          th:href="@{/libro-reclamaciones}"
+        >
+          <i class="bi bi-journal-text"></i> Libro de Reclamaciones
+        </a>
+        <a
+          th:unless="${#authorization.expression('hasRole(''SUPER_ADMIN'')')}"
+          class="nav-link"
+          th:href="@{/contacto}"
+        >
+          <i class="bi bi-envelope"></i> Contacto
+        </a>
+
+        <!-- 🟠 MENÚ SUPER ADMIN (solo visible si tiene rol) -->
+        <div
+          th:if="${#authorization.expression('hasRole(''SUPER_ADMIN'')')}"
+          class="nav-item dropdown"
+        >
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            id="superAdminDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <i class="bi bi-speedometer2"></i> Panel Super Admin
+          </a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" th:href="@{/superAdmin/dashboard}">
+                <i class="bi bi-grid"></i> Dashboard
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" th:href="@{/superAdmin/usuarios}">
+                <i class="bi bi-people"></i> Gestión de Usuarios
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" th:href="@{/superAdmin/roles}">
+                <i class="bi bi-shield-check"></i> Gestión de Roles
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item" th:href="@{/superAdmin/productos}">
+                <i class="bi bi-box-seam"></i> Gestión de Productos
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ========================================= -->
+      <!-- 🔸 CARACTERÍSTICAS SECUNDARIAS -->
+      <!-- ========================================= -->
+      <div class="d-flex align-items-center gap-2">
+        <!-- 🛒 CARRITO (Oculto para SuperAdmin) -->
+        <button
+          th:unless="${#authorization.expression('hasRole(''SUPER_ADMIN'')')}"
+          type="button"
+          class="btn btn-light position-relative"
+          onclick="syncAndOpenCarrito()"
+          title="Ver carrito de compras"
+        >
+          <i class="bi bi-cart3" style="color: #764ba2;"></i>
+          <span
+            id="carrito-count"
+            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            style="display: none"
+          >
+            0
+          </span>
+        </button>
+
+        <!-- � NOTIFICACIONES (Solo para clientes autenticados) -->
+        <div
+          th:if="${#authorization.expression('isAuthenticated() and hasRole(''CLIENTE'')')}"
+          class="dropdown"
+        >
+          <button
+            type="button"
+            class="btn btn-light position-relative"
+            id="notificacionesBtn"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            title="Tus notificaciones"
+          >
+            <i class="bi bi-bell"></i>
+            <span
+              id="notificaciones-count"
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark"
+              style="display: none"
+            >
+              0
+            </span>
+          </button>
+
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            style="max-width: 400px; max-height: 400px; overflow-y: auto;"
+            id="notificacionesDropdown"
+          >
+            <li>
+              <span class="dropdown-header">Notificaciones</span>
+            </li>
+            <li id="notificacionesVacias" class="dropdown-item text-center text-muted py-3">
+              No hay notificaciones
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <a class="dropdown-item text-center small" onclick="marcarTodasComoLeidas()">
+                Marcar todas como leídas
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- �👤 USUARIO AUTENTICADO -->
+        <div
+          th:if="${#authorization.expression('isAuthenticated()')}"
+          class="dropdown"
+        >
+          <a
+            class="btn btn-light dropdown-toggle"
+            href="#"
+            id="userDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            style="color: #764ba2; font-weight: 600;"
+          >
+            <i class="bi bi-person-circle me-1"></i>
+            <span
+              th:if="${session.usuario != null}"
+              th:text="${session.usuario.nombres}"
+              >Usuario</span
+            >
+            <span
+              th:if="${session.usuario == null}"
+              th:text="${#authentication.principal.username}"
+            ></span>
+          </a>
+
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="userDropdown"
+          >
+            <!-- Ocultar para SuperAdmin -->
+            <li
+              th:unless="${#authorization.expression('hasRole(''SUPER_ADMIN'')')}"
+            >
+              <a class="dropdown-item" th:href="@{/perfil}">
+                <i class="bi bi-person"></i> Mi Perfil
+              </a>
+            </li>
+            <li th:if="${#authorization.expression('hasRole(''CLIENTE'')')}">
+              <a class="dropdown-item" th:href="@{/mis-resenas}">
+                <i class="bi bi-chat-square-text"></i> Mis Reseñas
+              </a>
+            </li>
+            <li th:if="${#authorization.expression('hasRole(''CLIENTE'')')}">
+              <a class="dropdown-item" th:href="@{/mis-compras}">
+                <i class="bi bi-bag-check"></i> Mis Compras
+              </a>
+            </li>
+            <li th:if="${#authorization.expression('hasRole(''CLIENTE'')')}">
+              <a class="dropdown-item" th:href="@{/mis-compras-resena}">
+                <i class="bi bi-chat-heart"></i> Reseñar Productos
+              </a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <form th:action="@{/logout}" method="post" class="d-inline">
+                <input
+                  type="hidden"
+                  th:name="${_csrf.parameterName}"
+                  th:value="${_csrf.token}"
+                />
+                <button
+                  type="submit"
+                  class="dropdown-item text-danger border-0 bg-transparent w-100 text-start"
+                >
+                  <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </button>
+              </form>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 👥 SI NO ESTÁ AUTENTICADO -->
+        <div th:unless="${#authorization.expression('isAuthenticated()')}">
+          <a th:href="@{/login}" class="btn btn-light">
+            Iniciar Sesión <i class="bi bi-person-circle"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script>
+// Cargar notificaciones al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  cargarNotificaciones();
+  // Recargar notificaciones cada 30 segundos
+  setInterval(cargarNotificaciones, 30000);
+});
+
+function cargarNotificaciones() {
+  fetch('/api/notificaciones/no-leidas')
+    .then(response => response.json())
+    .then(data => {
+      const cantidad = data.cantidad || 0;
+      const notificaciones = data.notificaciones || [];
+      
+      // Actualizar badge
+      const badge = document.getElementById('notificaciones-count');
+      if (cantidad > 0) {
+        badge.textContent = cantidad;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+      
+      // Actualizar dropdown
+      const dropdown = document.getElementById('notificacionesDropdown');
+      const vacias = document.getElementById('notificacionesVacias');
+      
+      if (notificaciones.length === 0) {
+        vacias.style.display = 'block';
+      } else {
+        vacias.style.display = 'none';
+        
+        // Limpiar notificaciones anteriores (excepto header y footer)
+        const items = dropdown.querySelectorAll('li:not(:first-child):not(:nth-last-child(2)):not(:last-child)');
+        items.forEach(item => item.remove());
+        
+        // Agregar nuevas notificaciones
+        const lastLi = dropdown.querySelector('li:nth-last-child(2)');
+        notificaciones.forEach(notif => {
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <a class="dropdown-item" onclick="marcarComoLeida(${notif.id})">
+              <div class="d-flex justify-content-between align-items-start">
+                <div style="flex: 1;">
+                  <strong>${notif.titulo}</strong>
+                  <p class="mb-0 small text-muted">${notif.mensaje}</p>
+                  <small class="text-muted">${new Date(notif.fechaCreacion).toLocaleDateString()}</small>
+                </div>
+                <button type="button" class="btn-close btn-sm" onclick="event.stopPropagation(); eliminarNotificacion(${notif.id})" style="width: 20px; height: 20px;"></button>
+              </div>
+            </a>
+          `;
+          dropdown.insertBefore(li, lastLi);
+        });
+      }
+    })
+    .catch(error => console.log('Error cargando notificaciones:', error));
+}
+
+function marcarComoLeida(notificacionId) {
+  fetch(`/api/notificaciones/${notificacionId}/marcar-leida`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      cargarNotificaciones();
+    })
+    .catch(error => console.log('Error:', error));
+}
+
+function marcarTodasComoLeidas() {
+  fetch('/api/notificaciones/marcar-todas-leidas', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      cargarNotificaciones();
+    })
+    .catch(error => console.log('Error:', error));
+}
+
+function eliminarNotificacion(notificacionId) {
+  fetch(`/api/notificaciones/${notificacionId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      cargarNotificaciones();
+    })
+    .catch(error => console.log('Error:', error));
+}
+</script>

@@ -1,0 +1,699 @@
+<!-- src/main/resources/templates/detalles-productos.html -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <!-- Incluye la sección head común desde el fragmento de layout -->
+    <th:block th:replace="~{fragments/layout :: head}"></th:block>
+  </head>
+
+  <body th:attr="data-producto-id=${producto.id}">
+    <!-- Barra de navegación principal -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <!-- Script que expone los datos del usuario logueado para uso en JavaScript -->
+    <script th:if="${session.usuario != null}">
+      window.usuarioActual = {
+        nombre: "[[${session.usuario.nombres}]]",
+        id: "[[${session.usuario.id}]]",
+      };
+    </script>
+
+    <main class="container my-5">
+      <!-- Sección principal que se muestra cuando el producto existe -->
+      <div th:if="${producto != null}">
+        <!-- Navegación tipo migas de pan para mejor experiencia de usuario -->
+        <nav aria-label="breadcrumb" class="mb-4">
+          <ol class="breadcrumb p-3 rounded-3 shadow-sm" style="background: linear-gradient(135deg, #f8fafb 0%, #f0f4ff 100%); border: 1px solid #e9ecef;">
+            <li class="breadcrumb-item">
+              <a
+                th:href="@{/}"
+                class="text-decoration-none fw-semibold"
+                style="color: #667eea;"
+              >
+                <i class="bi bi-house-door"></i> Inicio
+              </a>
+            </li>
+            <li class="breadcrumb-item">
+              <a
+                th:href="@{/productos}"
+                class="text-decoration-none fw-semibold"
+                style="color: #667eea;"
+              >
+                <i class="bi bi-grid-3x3-gap"></i> Catálogo
+              </a>
+            </li>
+            <li
+              class="breadcrumb-item active fw-bold"
+              aria-current="page"
+              th:text="${producto.nombre}"
+              style="color: #2c3e50;"
+            >
+              Nombre del Producto
+            </li>
+          </ol>
+        </nav>
+
+        <!-- Contenedor principal de información del producto -->
+        <article class="row g-5 mb-5">
+          <!-- Columna izquierda: imagen principal del producto -->
+          <div class="col-lg-6">
+            <div
+              class="main-image-wrapper position-relative bg-white rounded-4 shadow-lg p-4 border"
+            >
+              <img
+                th:src="${producto.imagen ?: '/img/placeholder.jpg'}"
+                th:alt="${producto.nombre}"
+                class="img-fluid rounded-3"
+                style="width: 100%; height: auto; object-fit: contain"
+              />
+
+              <!-- Badge de disponibilidad en esquina superior izquierda -->
+              <div class="position-absolute top-0 start-0 m-3">
+                <!-- Producto disponible y con stock -->
+                <span
+                  th:if="${producto.disponible and producto.stock > 0}"
+                  class="badge bg-success fs-6 px-3 py-2 rounded-pill shadow"
+                >
+                  <i class="bi bi-check-circle-fill"></i> Disponible
+                </span>
+
+                <!-- Producto agotado (sin stock) -->
+                <span
+                  th:if="${producto.stock == 0}"
+                  class="badge bg-danger fs-6 px-3 py-2 rounded-pill shadow"
+                >
+                  <i class="bi bi-exclamation-triangle-fill"></i> Agotado
+                </span>
+
+                <!-- Producto con stock pero desactivado manualmente -->
+                <span
+                  th:if="${not producto.disponible and producto.stock > 0}"
+                  class="badge bg-secondary fs-6 px-3 py-2 rounded-pill shadow"
+                >
+                  <i class="bi bi-pause-circle-fill"></i> No Disponible
+                </span>
+              </div>
+
+              <!-- Advertencia cuando el stock es bajo -->
+              <div
+                th:if="${producto.stock < 5 and producto.stock > 0}"
+                class="position-absolute top-0 end-0 m-3"
+              >
+                <span
+                  class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill shadow"
+                >
+                  <i class="bi bi-exclamation-triangle-fill"></i> ¡Últimas
+                  unidades!
+                </span>
+              </div>
+
+              <!-- Etiqueta especial para productos premium (precio alto) -->
+              <div
+                th:if="${producto.precio >= 100}"
+                class="position-absolute bottom-0 start-0 m-3"
+              >
+                <span
+                  class="badge bg-dark text-warning fs-6 px-3 py-2 rounded-pill"
+                >
+                  <i class="bi bi-star-fill"></i> Premium
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: información detallada del producto -->
+          <div class="col-lg-6">
+            <!-- Encabezado con categoría y nombre del producto -->
+            <header class="mb-4">
+              <span
+                th:if="${producto.categoria != null}"
+                class="badge bg-primary text-uppercase px-3 py-2 rounded-pill fs-6 mb-3"
+                th:text="${producto.categoria.nombre}"
+              >
+                Categoría
+              </span>
+              <h1
+                class="display-5 fw-bold text-dark lh-sm"
+                th:text="${producto.nombre}"
+              >
+                Nombre del Producto
+              </h1>
+            </header>
+
+            <!-- Sección de precio e información de envío -->
+            <div class="mb-4 p-4 bg-light rounded-3 border">
+              <div class="d-flex align-items-center justify-content-between">
+                <h2 class="text-success fw-bold mb-0">
+                  S/
+                  <span
+                    th:text="${#numbers.formatDecimal(producto.precio, 0, 2)}"
+                    >0.00</span
+                  >
+                </h2>
+                <div class="badge bg-success-subtle text-success px-3 py-2">
+                  <i class="bi bi-truck"></i> Envío disponible
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjeta con información general del producto -->
+            <div
+              class="card border-0 shadow-sm mb-5"
+              style="border-radius: 16px"
+            >
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                  <i class="bi bi-info-circle-fill text-primary fs-4 me-2"></i>
+                  <h5 class="fw-bold text-dark mb-0">
+                    Acerca de este producto
+                  </h5>
+                </div>
+                <!-- Resumen de calificaciones (se carga dinámicamente) -->
+                <div
+                  class="d-flex justify-content-between align-items-center flex-wrap mb-3"
+                  id="rating-summary"
+                >
+                  <div class="fs-2 fw-bold text-warning">-</div>
+                  <div class="text-muted small">- reseñas</div>
+                </div>
+                <!-- Descripción completa del producto -->
+                <p
+                  class="text-muted fs-6 lh-lg mb-0"
+                  th:text="${producto.descripcion}"
+                >
+                  Descripción detallada del producto.
+                </p>
+              </div>
+            </div>
+
+            <!-- Especificaciones técnicas del producto -->
+            <div class="mb-4">
+              <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient bg-primary text-white">
+                  <h6 class="fw-bold mb-0">
+                    <i class="bi bi-list-check me-2"></i>Especificaciones
+                  </h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                  <!-- Información de stock disponible -->
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span class="fw-semibold"
+                      ><i class="bi bi-box-seam text-primary me-2"></i>Stock
+                      disponible</span
+                    >
+                    <span
+                      class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2"
+                    >
+                      <span th:text="${producto.stock}"></span> unidades
+                    </span>
+                  </li>
+                  <!-- Categoría del producto -->
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span class="fw-semibold"
+                      ><i class="bi bi-diagram-3 text-warning me-2"></i
+                      >Categoría</span
+                    >
+                    <span
+                      th:if="${producto.categoria != null}"
+                      class="text-capitalize fw-semibold text-dark"
+                      th:text="${producto.categoria.nombre}"
+                      >Categoría</span
+                    >
+                    <span
+                      th:unless="${producto.categoria != null}"
+                      class="text-capitalize fw-semibold text-muted"
+                    >
+                      Sin categoría
+                    </span>
+                  </li>
+                  <!-- Estado de disponibilidad -->
+                  <li
+                    class="list-group-item d-flex justify-content-between align-items-center"
+                  >
+                    <span class="fw-semibold">
+                      <i class="bi bi-shield-check text-success me-2"></i>Estado
+                    </span>
+                    <!-- Producto disponible y con stock -->
+                    <span
+                      th:if="${producto.disponible and producto.stock > 0}"
+                      class="badge bg-success-subtle text-success px-3 py-2 rounded-pill"
+                    >
+                      <i class="bi bi-check-circle-fill me-1"></i>Disponible
+                    </span>
+
+                    <!-- Producto agotado (sin stock) -->
+                    <span
+                      th:if="${producto.stock == 0}"
+                      class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill"
+                    >
+                      <i class="bi bi-exclamation-triangle-fill me-1"></i
+                      >Agotado
+                    </span>
+
+                    <!-- Producto con stock pero desactivado manualmente -->
+                    <span
+                      th:if="${not producto.disponible and producto.stock > 0}"
+                      class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill"
+                    >
+                      <i class="bi bi-pause-circle-fill me-1"></i>No Disponible
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Botones de acción principales -->
+            <div class="d-grid gap-3 mb-4">
+              <!-- Botón principal: agregar al carrito -->
+              <button
+                class="btn btn-success btn-lg shadow-sm fw-bold py-3 add-to-cart"
+                style="border-radius: 12px"
+                th:attr="data-id=${producto.id}"
+                th:disabled="${!producto.disponible or producto.stock == 0}"
+              >
+                <i class="bi bi-cart-plus-fill me-2 fs-5"></i>
+                <!-- Texto dinámico según el estado -->
+                <span th:if="${producto.disponible and producto.stock > 0}"
+                  >Añadir al carrito</span
+                >
+                <span th:if="${producto.stock == 0}">Producto agotado</span>
+                <span th:if="${not producto.disponible and producto.stock > 0}"
+                  >Producto no disponible</span
+                >
+              </button>
+
+              <!-- Botón para consultar por WhatsApp -->
+              <a
+                th:href="'https://wa.me/51999888777?text=Hola%2C%20estoy%20interesado%20en%20el%20producto%3A%20' + ${producto.nombre}"
+                target="_blank"
+                class="btn btn-success btn-lg fw-semibold py-3 shadow-sm"
+                style="border-radius: 12px"
+              >
+                <i class="bi bi-whatsapp me-2 fs-5"></i> Consultar por WhatsApp
+              </a>
+
+              <!-- Botones secundarios: volver al catálogo y compartir -->
+              <div class="row g-2">
+                <div class="col-6">
+                  <a
+                    th:href="@{/productos}"
+                    class="btn btn-outline-secondary w-100 py-2"
+                  >
+                    <i class="bi bi-arrow-left me-1"></i> Catálogo
+                  </a>
+                </div>
+                <div class="col-6">
+                  <button
+                    class="btn btn-outline-primary w-100 py-2"
+                    type="button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#shareModal"
+                  >
+                    <i class="bi bi-share me-1"></i> Compartir
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección de ayuda y contacto -->
+            <div
+              class="alert alert-info border-0 shadow-sm"
+              style="border-radius: 12px"
+            >
+              <div class="d-flex align-items-start">
+                <i class="bi bi-headset text-info fs-4 me-3"></i>
+                <div class="flex-grow-1">
+                  <h6 class="fw-bold mb-2 text-info">¿Tienes preguntas?</h6>
+                  <p class="mb-3 text-dark small">
+                    Nuestro equipo de expertos está disponible para asesorarte.
+                  </p>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <a
+                      href="https://wa.me/51999888777"
+                      target="_blank"
+                      class="btn btn-success btn-sm"
+                    >
+                      <i class="bi bi-whatsapp me-1"></i> WhatsApp
+                    </a>
+                    <a th:href="@{/contacto}" class="btn btn-primary btn-sm">
+                      <i class="bi bi-envelope me-1"></i> Contacto
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Sección de productos relacionados (solo si existen) -->
+        <section
+          class="related-products mt-5"
+          th:if="${productosRelacionados != null and !productosRelacionados.isEmpty()}"
+        >
+          <!-- Encabezado de productos relacionados -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-collection me-2 text-primary"></i>Productos
+                relacionados
+              </h3>
+              <p class="text-muted mb-0">
+                Otros productos que podrían interesarte.
+              </p>
+            </div>
+            <a th:href="@{/productos}" class="btn btn-outline-primary"
+              >Ver todo el catálogo <i class="bi bi-arrow-right ms-1"></i
+            ></a>
+          </div>
+
+          <!-- Grid de productos relacionados -->
+          <div class="row g-4">
+            <div
+              class="col-6 col-md-6 col-lg-4 col-xl-3"
+              th:each="relacionado : ${productosRelacionados}"
+            >
+              <div
+                class="card h-100 border-0 shadow-sm"
+                style="border-radius: 12px; transition: all 0.3s ease"
+              >
+                <!-- Imagen del producto relacionado con acciones rápidas -->
+                <div
+                  class="position-relative overflow-hidden"
+                  style="border-radius: 12px 12px 0 0"
+                >
+                  <a th:href="@{/producto/{id}(id=${relacionado.id})}">
+                    <img
+                      th:src="${relacionado.imagen ?: '/img/placeholder.jpg'}"
+                      th:alt="${relacionado.nombre}"
+                      class="card-img-top"
+                      style="height: 250px; object-fit: cover"
+                    />
+                  </a>
+                  <!-- Botón flotante para agregar al carrito -->
+                  <div class="position-absolute top-0 end-0 m-2">
+                    <button
+                      class="btn btn-danger btn-sm shadow add-to-cart rounded-circle"
+                      th:attr="data-id=${relacionado.id}"
+                      th:disabled="${!relacionado.disponible or relacionado.stock == 0}"
+                      title="Añadir al carrito"
+                      style="width: 40px; height: 40px"
+                    >
+                      <i class="bi bi-cart-plus"></i>
+                    </button>
+                  </div>
+                  <!-- Indicador de estado del producto -->
+                  <div class="position-absolute bottom-0 start-0 m-2">
+                    <!-- Producto disponible y con stock -->
+                    <span
+                      th:if="${relacionado.disponible and relacionado.stock > 0}"
+                      class="badge bg-success-subtle text-success px-2 py-1"
+                    >
+                      En stock
+                    </span>
+
+                    <!-- Producto agotado (sin stock) -->
+                    <span
+                      th:if="${relacionado.stock == 0}"
+                      class="badge bg-danger-subtle text-danger px-2 py-1"
+                    >
+                      Agotado
+                    </span>
+
+                    <!-- Producto con stock pero desactivado manualmente -->
+                    <span
+                      th:if="${not relacionado.disponible and relacionado.stock > 0}"
+                      class="badge bg-secondary-subtle text-secondary px-2 py-1"
+                    >
+                      No Disponible
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Información del producto relacionado -->
+                <div class="card-body d-flex flex-column p-3">
+                  <span
+                    th:if="${relacionado.categoria != null}"
+                    class="badge bg-primary-subtle text-primary small text-uppercase mb-2 align-self-start"
+                    th:text="${relacionado.categoria.nombre}"
+                  ></span>
+                  <h6 class="card-title fw-bold text-dark mb-2">
+                    <a
+                      th:href="@{/producto/{id}(id=${relacionado.id})}"
+                      class="text-decoration-none text-dark"
+                      th:text="${relacionado.nombre}"
+                      >Nombre</a
+                    >
+                  </h6>
+                  <div
+                    class="d-flex justify-content-between align-items-center mt-auto"
+                  >
+                    <span class="fw-bold text-success fs-5"
+                      >S/
+                      <span
+                        th:text="${#numbers.formatDecimal(relacionado.precio, 0, 2)}"
+                      ></span
+                    ></span>
+                    <a
+                      th:href="@{/producto/{id}(id=${relacionado.id})}"
+                      class="btn btn-outline-primary btn-sm"
+                      ><i class="bi bi-eye me-1"></i> Ver</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sección de reseñas y opiniones de clientes -->
+        <section class="reviews-section mt-5" id="resenas-section">
+          <div class="card border-0 shadow-sm" style="border-radius: 16px">
+            <!-- Encabezado de la sección de reseñas -->
+            <div
+              class="card-header bg-white border-bottom p-3"
+              style="border-radius: 16px 16px 0 0"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center flex-wrap"
+              >
+                <div>
+                  <h4 class="fw-bold mb-1 d-flex align-items-center">
+                    <i class="bi bi-star-fill text-warning me-2"></i> Opiniones
+                    de clientes
+                  </h4>
+                  <p class="text-muted mb-0 small" id="reviews-subtitle">
+                    Cargando reseñas...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cuerpo de la sección de reseñas -->
+            <div class="card-body p-4">
+              <!-- Formulario para usuarios logueados -->
+              <div class="mb-4" th:if="${session.usuario != null}">
+                <button
+                  class="btn btn-primary w-100 py-3"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#formResena"
+                >
+                  <i class="bi bi-pencil-square me-2"></i> Escribe tu opinión
+                </button>
+
+                <!-- Formulario desplegable para escribir reseña -->
+                <div class="collapse mt-3" id="formResena">
+                  <div class="card border shadow-sm">
+                    <div class="card-body">
+                      <!-- Sistema de calificación con estrellas -->
+                      <div class="rating-input mb-4 text-center">
+                        <div
+                          class="star-rating"
+                          style="font-size: 2.5rem; cursor: pointer"
+                        >
+                          <i class="bi bi-star" data-rating="1"></i>
+                          <i class="bi bi-star" data-rating="2"></i>
+                          <i class="bi bi-star" data-rating="3"></i>
+                          <i class="bi bi-star" data-rating="4"></i>
+                          <i class="bi bi-star" data-rating="5"></i>
+                        </div>
+                        <div class="mt-2">
+                          <span
+                            class="badge bg-warning text-dark"
+                            id="selected-rating"
+                            >Selecciona una calificación</span
+                          >
+                        </div>
+                      </div>
+
+                      <!-- Campo de texto para el comentario -->
+                      <div class="mb-3">
+                        <textarea
+                          class="form-control"
+                          id="comentario-resena"
+                          rows="4"
+                          placeholder="Comparte tu experiencia..."
+                          maxlength="500"
+                        ></textarea>
+                        <div class="form-text text-end">
+                          <span id="char-count">0</span>/500
+                        </div>
+                      </div>
+
+                      <!-- Botones de acción del formulario -->
+                      <div class="d-flex gap-2 flex-wrap">
+                        <button
+                          class="btn btn-success flex-grow-1"
+                          id="btn-enviar-resena"
+                        >
+                          <i class="bi bi-send me-2"></i>Publicar
+                        </button>
+                        <button
+                          class="btn btn-outline-secondary"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#formResena"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mensaje para usuarios no logueados -->
+              <div
+                class="alert alert-info"
+                th:unless="${session.usuario != null}"
+              >
+                <i class="bi bi-info-circle me-2"></i>
+                <a th:href="@{/login}" class="alert-link">Inicia sesión</a> para
+                dejar tu opinión.
+              </div>
+
+              <!-- Contenedor de lista de reseñas -->
+              <div id="lista-resenas">
+                <!-- Estado de carga -->
+                <div class="text-center py-5" id="loading-resenas">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                  </div>
+                </div>
+
+                <!-- Estado cuando no hay reseñas -->
+                <div class="text-center py-5 d-none" id="no-resenas">
+                  <i
+                    class="bi bi-chat-square-text display-1 text-muted mb-3"
+                  ></i>
+                  <h5 class="text-muted">Aún no hay opiniones</h5>
+                  <p>Sé el primero en compartir tu experiencia.</p>
+                </div>
+
+                <!-- Contenedor donde se cargan las reseñas dinámicamente -->
+                <div id="resenas-container"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Mensaje que se muestra cuando el producto no existe -->
+      <div class="text-center py-5" th:if="${producto == null}">
+        <div class="container">
+          <div
+            class="alert alert-danger border-0 shadow-lg d-inline-block p-5"
+            style="border-radius: 16px"
+          >
+            <i
+              class="bi bi-exclamation-triangle-fill display-1 text-danger mb-4"
+            ></i>
+            <h3 class="fw-bold mb-3 text-dark">Producto no encontrado</h3>
+            <p class="mb-4 text-muted fs-6">
+              Lo sentimos, el producto que buscas no existe o ha sido
+              descontinuado.
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+              <a th:href="@{/productos}" class="btn btn-primary btn-lg px-4"
+                ><i class="bi bi-grid-3x3-gap me-2"></i> Explorar catálogo</a
+              >
+              <a th:href="@{/}" class="btn btn-outline-secondary btn-lg px-4"
+                ><i class="bi bi-house-door me-2"></i> Ir al inicio</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal para compartir producto en redes sociales -->
+    <div
+      class="modal fade"
+      id="shareModal"
+      tabindex="-1"
+      aria-labelledby="shareModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div
+          class="modal-content border-0 shadow-lg"
+          style="border-radius: 16px"
+        >
+          <div
+            class="modal-header bg-primary text-white"
+            style="border-radius: 16px 16px 0 0"
+          >
+            <h5 class="modal-title fw-bold" id="shareModalLabel">
+              <i class="bi bi-share-fill me-2"></i>Compartir producto
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+          <div class="modal-body text-center p-4">
+            <p class="mb-4 text-muted">
+              Comparte este producto con tus amigos.
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+              <button
+                class="btn btn-success btn-lg px-4"
+                onclick="compartirWhatsApp()"
+              >
+                <i class="bi bi-whatsapp me-2"></i> WhatsApp
+              </button>
+              <button
+                class="btn btn-primary btn-lg px-4"
+                onclick="compartirFacebook()"
+              >
+                <i class="bi bi-facebook me-2"></i> Facebook
+              </button>
+              <button
+                class="btn btn-secondary btn-lg px-4"
+                onclick="copiarEnlace()"
+              >
+                <i class="bi bi-link-45deg me-2"></i> Copiar enlace
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie de página común -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <!-- Scripts comunes de la aplicación -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <!-- Scripts específicos para la página de detalles de productos -->
+    <script th:src="@{/js/detalles-productos.js}"></script>
+    <script th:src="@{/js/resenas.js}"></script>
+
+    <input type="hidden" id="productoId" th:value="${producto.id}" />
+  </body>
+</html>

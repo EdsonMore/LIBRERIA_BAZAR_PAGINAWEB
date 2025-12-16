@@ -1,0 +1,183 @@
+<!-- src/main/resources/templates/fragments/pagination.html -->
+
+<!-- Componente de paginación básica para listas -->
+<nav th:fragment="pagination(page)" th:if="${page.totalPages > 1}">
+  <ul class="pagination justify-content-center">
+    <!-- Enlace a la primera página -->
+    <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=0, size=${page.size})}"
+        aria-label="Primera"
+      >
+        <i class="bi bi-chevron-bar-left"></i>
+      </a>
+    </li>
+
+    <!-- Enlace a la página anterior -->
+    <li class="page-item" th:classappend="${!page.hasPrevious()} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=${page.number - 1}, size=${page.size})}"
+        aria-label="Anterior"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </li>
+
+    <!-- Números de páginas visibles (rango alrededor de la página actual) -->
+    <li
+      class="page-item"
+      th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+      th:if="${i >= page.number - 2 && i <= page.number + 2}"
+      th:classappend="${i == page.number} ? 'active'"
+    >
+      <a
+        class="page-link"
+        th:href="@{''(page=${i}, size=${page.size})}"
+        th:text="${i + 1}"
+      >
+        1
+      </a>
+    </li>
+
+    <!-- Enlace a la página siguiente -->
+    <li class="page-item" th:classappend="${!page.hasNext()} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=${page.number + 1}, size=${page.size})}"
+        aria-label="Siguiente"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </li>
+
+    <!-- Enlace a la última página -->
+    <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=${page.totalPages - 1}, size=${page.size})}"
+        aria-label="Última"
+      >
+        <i class="bi bi-chevron-bar-right"></i>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<!-- Paginación que mantiene parámetros de búsqueda -->
+<nav
+  th:fragment="pagination-search(page, searchParam)"
+  th:if="${page.totalPages > 1}"
+>
+  <ul class="pagination justify-content-center">
+    <!-- Primera página con búsqueda -->
+    <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=0, size=${page.size}, search=${searchParam})}"
+        aria-label="Primera"
+      >
+        <i class="bi bi-chevron-bar-left"></i>
+      </a>
+    </li>
+
+    <!-- Página anterior con búsqueda -->
+    <li class="page-item" th:classappend="${!page.hasPrevious()} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=${page.number - 1}, size=${page.size}, search=${searchParam})}"
+        aria-label="Anterior"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </li>
+
+    <!-- Números de página con búsqueda -->
+    <li
+      class="page-item"
+      th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+      th:if="${i >= page.number - 2 && i <= page.number + 2}"
+      th:classappend="${i == page.number} ? 'active'"
+    >
+      <a
+        class="page-link"
+        th:href="@{''(page=${i}, size=${page.size}, search=${searchParam})}"
+        th:text="${i + 1}"
+      >
+        1
+      </a>
+    </li>
+
+    <!-- Página siguiente con búsqueda -->
+    <li class="page-item" th:classappend="${!page.hasNext()} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=${page.number + 1}, size=${page.size}, search=${searchParam})}"
+        aria-label="Siguiente"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </a>
+    </li>
+
+    <!-- Última página con búsqueda -->
+    <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+      <a
+        class="page-link"
+        th:href="@{''(page=${page.totalPages - 1}, size=${page.size}, search=${searchParam})}"
+        aria-label="Última"
+      >
+        <i class="bi bi-chevron-bar-right"></i>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<!-- Información textual sobre la paginación actual -->
+<div th:fragment="pagination-info(page)" class="text-center text-muted mb-3">
+  <small>
+    Mostrando
+    <strong th:text="${page.number * page.size + 1}">1</strong>
+    -
+    <strong th:text="${page.number * page.size + page.numberOfElements}">
+      10
+    </strong>
+    de
+    <strong th:text="${page.totalElements}">100</strong>
+    resultados
+  </small>
+</div>
+
+<!-- Selector para cambiar cantidad de elementos por página -->
+<div
+  th:fragment="page-size-selector(currentSize)"
+  class="d-flex justify-content-center align-items-center mb-3"
+>
+  <label for="pageSize" class="me-2 mb-0">Mostrar:</label>
+  <select
+    id="pageSize"
+    class="form-select form-select-sm"
+    style="width: auto"
+    onchange="window.location.href = updateQueryStringParameter(window.location.href, 'size', this.value)"
+  >
+    <option value="10" th:selected="${currentSize == 10}">10</option>
+    <option value="20" th:selected="${currentSize == 20}">20</option>
+    <option value="50" th:selected="${currentSize == 50}">50</option>
+    <option value="100" th:selected="${currentSize == 100}">100</option>
+  </select>
+  <span class="ms-2">por página</span>
+</div>
+
+<!-- Script para manejar cambios en la paginación -->
+<script th:fragment="pagination-scripts">
+  // Actualiza un parámetro específico en la URL
+  function updateQueryStringParameter(uri, key, value) {
+    var re = new RegExp("([?&])" + key + "=.*?(&|$)", "i");
+    var separator = uri.indexOf("?") !== -1 ? "&" : "?";
+    if (uri.match(re)) {
+      return uri.replace(re, "$1" + key + "=" + value + "$2");
+    } else {
+      return uri + separator + key + "=" + value;
+    }
+  }
+</script>

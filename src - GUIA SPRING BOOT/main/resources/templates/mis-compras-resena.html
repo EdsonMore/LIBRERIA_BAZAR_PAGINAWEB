@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: head}">
+    <title>Reseñar Productos - Tu Bazar Plus</title>
+  </head>
+
+  <body>
+    <!--  NAVBAR  -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!--  MENSAJES FLASH  -->
+    <div th:replace="~{fragments/messages :: flash-messages}"></div>
+
+    <!--  CONTENIDO PRINCIPAL  -->
+    <main class="container my-5">
+      <div class="row">
+        <div class="col-12">
+          <!-- Header de la página -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-star me-2"></i>Reseñar Productos</h1>
+            <a th:href="@{/}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver al Inicio
+            </a>
+          </div>
+
+          <!-- Alerta informativa -->
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Aquí puedes escribir reseñas para los productos que ya has recibido.
+          </div>
+
+          <!-- Estado: Sin compras pendientes -->
+          <div th:if="${compras == null or compras.size() == 0}" class="text-center py-5">
+            <div class="card shadow">
+              <div class="card-body p-5">
+                <i class="bi bi-inbox display-1 text-muted mb-3"></i>
+                <h4 class="text-muted">No hay compras pendientes de reseña</h4>
+                <p class="text-muted mb-4">Todos tus productos entregados ya han sido reseñados</p>
+                <a th:href="@{/productos}" class="btn btn-primary btn-lg">
+                  <i class="bi bi-shop me-2"></i>Volver a la Tienda
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado: Con compras pendientes -->
+          <div th:if="${compras != null and compras.size() > 0}">
+            <div th:each="compra : ${compras}" class="card mb-4">
+              <div class="card-header bg-light">
+                <div class="row">
+                  <div class="col-md-6">
+                    <strong>Compra #<span th:text="${compra.id}">0</span></strong><br/>
+                    <small class="text-muted" th:text="|Fecha: ${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy')}|">Fecha</small>
+                  </div>
+                  <div class="col-md-6 text-end">
+                    <strong class="text-primary" th:text="|Total: S/ ${#numbers.formatDecimal(compra.total, 1, 2)}|">Total</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <h6 class="mb-3">Productos sin reseña:</h6>
+                <div th:each="detalle : ${compra.detalles}" class="card mb-3">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-md-2">
+                        <img 
+                          th:src="${detalle.productoImagen}" 
+                          alt="Producto" 
+                          class="img-fluid rounded"
+                          style="max-height: 80px; object-fit: cover;"
+                          onerror="this.src='https://via.placeholder.com/80?text=Sin+Imagen'"
+                        />
+                      </div>
+                      <div class="col-md-6">
+                        <h6 th:text="${detalle.productoNombre}">Nombre del producto</h6>
+                        <small class="text-muted" th:text="|Cantidad: ${detalle.cantidad} | Precio: S/ ${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}|">Detalles</small>
+                      </div>
+                      <div class="col-md-4 text-end">
+                        <button 
+                          class="btn btn-primary btn-sm"
+                          th:onclick="|abrirModalResena(${detalle.productoId}, '${detalle.productoNombre}')|"
+                        >
+                          <i class="bi bi-pencil me-1"></i>Escribir Reseña
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal para escribir reseña -->
+    <div class="modal fade" id="modalResena" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Escribir Reseña</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="productoId" />
+            <div class="mb-3">
+              <label class="form-label">Producto</label>
+              <input type="text" class="form-control" id="productoNombre" readonly />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Calificación (1-5 estrellas)</label>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-warning" th:each="i : ${#numbers.sequence(1, 5)}" th:onclick="|setCalificacion(${i})|" th:text="${i}" th:id="|star${i}|"></button>
+              </div>
+              <input type="hidden" id="calificacion" value="0" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Comentario</label>
+              <textarea class="form-control" id="comentario" rows="4" placeholder="Comparte tu opinión..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="enviarResena()">Enviar Reseña</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function abrirModalResena(productoId, productoNombre) {
+        document.getElementById('productoId').value = productoId;
+        document.getElementById('productoNombre').value = productoNombre;
+        document.getElementById('calificacion').value = 0;
+        document.getElementById('comentario').value = '';
+        new bootstrap.Modal(document.getElementById('modalResena')).show();
+      }
+
+      function setCalificacion(valor) {
+        document.getElementById('calificacion').value = valor;
+        for (let i = 1; i <= 5; i++) {
+          const btn = document.getElementById('star' + i);
+          if (i <= valor) {
+            btn.classList.remove('btn-outline-warning');
+            btn.classList.add('btn-warning');
+          } else {
+            btn.classList.add('btn-outline-warning');
+            btn.classList.remove('btn-warning');
+          }
+        }
+      }
+
+      function enviarResena() {
+        const productoId = document.getElementById('productoId').value;
+        const calificacion = document.getElementById('calificacion').value;
+        const comentario = document.getElementById('comentario').value;
+
+        if (!calificacion || calificacion == 0) {
+          alert('Por favor selecciona una calificación');
+          return;
+        }
+
+        if (!comentario || comentario.trim().length < 10) {
+          alert('El comentario debe tener al menos 10 caracteres');
+          return;
+        }
+
+        const formData = {
+          productoId: parseInt(productoId),
+          calificacion: parseInt(calificacion),
+          comentario: comentario
+        };
+
+        fetch('/api/resenas', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('¡Reseña enviada correctamente!');
+            bootstrap.Modal.getInstance(document.getElementById('modalResena')).hide();
+            location.reload();
+          } else {
+            alert('Error: ' + (data.mensaje || 'No se pudo enviar la reseña'));
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Error al enviar la reseña');
+        });
+      }
+    </script>
+
+    <!--  FOOTER  -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+  </body>
+</html>
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-mint: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        --accent-coral: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        --shadow-light: 0 4px 12px rgba(102, 126, 234, 0.08);
+        --text-dark: #2c3e50;
+      }
+
+      body {
+        background: linear-gradient(135deg, #f8fafb 0%, #f0f4ff 100%);
+        color: var(--text-dark);
+      }
+
+      .page-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+      }
+
+      .page-header h1 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .page-header p {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+        opacity: 0.9;
+      }
+
+      .compra-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-light);
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+      }
+
+      .compra-card:hover {
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+        transform: translateY(-2px);
+      }
+
+      .compra-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e9ecef;
+      }
+
+      .compra-info {
+        flex: 1;
+      }
+
+      .compra-id {
+        font-size: 0.85rem;
+        color: #667eea;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .compra-fecha {
+        color: #95a5a6;
+        font-size: 0.95rem;
+        margin-top: 0.25rem;
+      }
+
+      .compra-total {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .producto-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .producto-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .producto-item:hover {
+        background: #f0f4ff;
+      }
+
+      .producto-imagen {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        object-fit: cover;
+        box-shadow: var(--shadow-light);
+      }
+
+      .producto-detalles {
+        flex: 1;
+      }
+
+      .producto-nombre {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.25rem;
+      }
+
+      .producto-cantidad {
+        font-size: 0.9rem;
+        color: #95a5a6;
+      }
+
+      .btn-resena {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+
+      .btn-resena:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+        color: white;
+      }
+
+      .btn-resena:active {
+        transform: translateY(0);
+      }
+
+      .estado-resena {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--shadow-light);
+      }
+
+      .empty-state i {
+        font-size: 3.5rem;
+        color: #bdc3c7;
+        margin-bottom: 1rem;
+      }
+
+      .empty-state h3 {
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+      }
+
+      .empty-state p {
+        color: #95a5a6;
+        margin-bottom: 0;
+      }
+
+      /* Modal de Reseña */
+      .modal-resena .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+      }
+
+      .modal-resena .modal-title {
+        font-weight: 700;
+      }
+
+      .rating-stars {
+        font-size: 2.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .rating-stars i {
+        color: #ffc107;
+        cursor: pointer;
+        margin: 0 0.3rem;
+        transition: all 0.2s ease;
+      }
+
+      .rating-stars i:hover,
+      .rating-stars i.selected {
+        transform: scale(1.1);
+      }
+
+      .form-control,
+      .form-select {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+      }
+
+      .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .page-header {
+          padding: 2rem 0;
+        }
+
+        .compra-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        .producto-item {
+          flex-wrap: wrap;
+        }
+
+        .btn-resena {
+          width: 100%;
+          padding: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="container">
+        <h1><i class="bi bi-chat-square-heart me-2"></i>Reseña Tus Compras</h1>
+        <p>Comparte tu opinión sobre los productos que has recibido</p>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container my-4">
+      <div class="row">
+        <div class="col-lg-10 mx-auto">
+          <!-- Mensaje de error -->
+          <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <span th:text="${error}">Error</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+
+          <!-- Estado vacío -->
+          <div th:if="${#lists.isEmpty(compras)}" class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>No hay compras pendientes de reseña</h3>
+            <p>Todos tus productos entregados ya han sido reseñados</p>
+            <a href="/" class="btn btn-outline-primary mt-3">
+              <i class="bi bi-shop me-2"></i>Volver a la Tienda
+            </a>
+          </div>
+
+          <!-- Compras pendientes de reseña -->
+          <div th:unless="${#lists.isEmpty(compras)}">
+            <div th:each="compra : ${compras}" class="compra-card">
+              <!-- Header de la compra -->
+              <div class="compra-header">
+                <div class="compra-info">
+                  <div class="compra-id">Compra #<span th:text="${compra.id}">1</span></div>
+                  <div class="compra-fecha">
+                    <i class="bi bi-calendar me-1"></i>
+                    <span th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                  </div>
+                </div>
+                <div class="compra-total">
+                  S/ <span th:text="${#numbers.formatDecimal(compra.total, 1, 2)}">0.00</span>
+                </div>
+              </div>
+
+              <!-- Productos de la compra -->
+              <div class="productos-lista">
+                <div th:each="detalle : ${compra.detalles}" class="producto-item">
+                  <!-- Imagen del producto -->
+                  <img
+                    th:src="${detalle.productoImagen}"
+                    alt="Producto"
+                    class="producto-imagen"
+                    onerror="this.src='https://via.placeholder.com/70?text=Sin+Imagen'"
+                  />
+
+                  <!-- Detalles del producto -->
+                  <div class="producto-detalles">
+                    <div class="producto-nombre" th:text="${detalle.productoNombre}">Nombre Producto</div>
+                    <div class="producto-cantidad">
+                      Cantidad: <strong th:text="${detalle.cantidad}">1</strong> x
+                      S/ <span th:text="${#numbers.formatDecimal(detalle.precioUnitario, 1, 2)}">0.00</span>
+                    </div>
+                  </div>
+
+                  <!-- Botón de reseña -->
+                  <button
+                    class="btn-resena"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalResena"
+                    th:data-producto-id="${detalle.productoId}"
+                    th:data-producto-nombre="${detalle.productoNombre}"
+                    th:data-producto-imagen="${detalle.productoImagen}"
+                    onclick="abrirModalResena(this)"
+                  >
+                    <i class="bi bi-chat-heart me-1"></i>Reseñar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Reseña -->
+    <div class="modal fade" id="modalResena" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-resena">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Reseña tu Compra</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Producto Info -->
+            <div style="text-align: center; margin-bottom: 1.5rem">
+              <img id="productoModalImagen" src="" alt="Producto" style="max-width: 100px; height: auto; border-radius: 8px; margin-bottom: 1rem" />
+              <h6 id="productoModalNombre" style="color: var(--text-dark)">Nombre del Producto</h6>
+            </div>
+
+            <!-- Formulario -->
+            <form id="formResena">
+              <!-- Calificación -->
+              <div class="mb-3">
+                <label class="form-label">Tu Calificación</label>
+                <div class="rating-stars" id="ratingStars">
+                  <i class="bi bi-star" data-rating="1"></i>
+                  <i class="bi bi-star" data-rating="2"></i>
+                  <i class="bi bi-star" data-rating="3"></i>
+                  <i class="bi bi-star" data-rating="4"></i>
+                  <i class="bi bi-star" data-rating="5"></i>
+                </div>
+                <input type="hidden" id="calificacion" name="calificacion" value="0" />
+                <small class="text-muted"><span id="ratingText">Selecciona una calificación</span></small>
+              </div>
+
+              <!-- Comentario -->
+              <div class="mb-3">
+                <label for="comentario" class="form-label">Tu Comentario</label>
+                <textarea
+                  class="form-control"
+                  id="comentario"
+                  rows="4"
+                  placeholder="Comparte tu experiencia con este producto (mínimo 10 caracteres)..."
+                  maxlength="500"
+                ></textarea>
+                <small class="text-muted"><span id="charCount">0</span>/500</small>
+              </div>
+
+              <!-- Hidden fields -->
+              <input type="hidden" id="productoId" name="productoId" value="0" />
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" style="background: var(--primary-gradient); border: none" onclick="enviarResena()">
+              <i class="bi bi-send me-1"></i>Enviar Reseña
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      let calificacionSeleccionada = 0;
+
+      // Abrir modal con datos del producto
+      function abrirModalResena(button) {
+        const productoId = button.dataset.productoId;
+        const productoNombre = button.dataset.productoNombre;
+        const productoImagen = button.dataset.productoImagen;
+
+        document.getElementById("productoId").value = productoId;
+        document.getElementById("productoModalNombre").textContent = productoNombre;
+        document.getElementById("productoModalImagen").src = productoImagen || "https://via.placeholder.com/100?text=Sin+Imagen";
+
+        // Reset form
+        calificacionSeleccionada = 0;
+        document.getElementById("calificacion").value = 0;
+        document.getElementById("comentario").value = "";
+        document.getElementById("charCount").textContent = "0";
+        document.getElementById("ratingText").textContent = "Selecciona una calificación";
+
+        // Reset stars
+        document.querySelectorAll(".rating-stars i").forEach((star) => {
+          star.classList.remove("selected");
+          star.classList.add("bi-star");
+          star.classList.remove("bi-star-fill");
+        });
+      }
+
+      // Sistema de estrellas
+      document.querySelectorAll(".rating-stars i").forEach((star) => {
+        star.addEventListener("click", function () {
+          calificacionSeleccionada = this.dataset.rating;
+          document.getElementById("calificacion").value = calificacionSeleccionada;
+
+          // Actualizar estrellas
+          document.querySelectorAll(".rating-stars i").forEach((s, index) => {
+            if (index < calificacionSeleccionada) {
+              s.classList.remove("bi-star");
+              s.classList.add("bi-star-fill", "selected");
+            } else {
+              s.classList.add("bi-star");
+              s.classList.remove("bi-star-fill", "selected");
+            }
+          });
+
+          // Actualizar texto
+          const textos = {
+            1: "Muy malo",
+            2: "Malo",
+            3: "Regular",
+            4: "Bueno",
+            5: "Excelente",
+          };
+          document.getElementById("ratingText").textContent = textos[calificacionSeleccionada];
+        });
+      });
+
+      // Contador de caracteres
+      document.getElementById("comentario").addEventListener("input", function () {
+        document.getElementById("charCount").textContent = this.value.length;
+      });
+
+      // Enviar reseña
+      function enviarResena() {
+        const productoId = document.getElementById("productoId").value;
+        const calificacion = document.getElementById("calificacion").value;
+        const comentario = document.getElementById("comentario").value;
+
+        // Validaciones
+        if (!calificacion || calificacion === "0") {
+          Swal.fire("Error", "Debes seleccionar una calificación", "warning");
+          return;
+        }
+
+        if (comentario.trim().length < 10) {
+          Swal.fire("Error", "El comentario debe tener al menos 10 caracteres", "warning");
+          return;
+        }
+
+        // Enviar al servidor
+        const formData = {
+          productoId: parseInt(productoId),
+          calificacion: parseInt(calificacion),
+          comentario: comentario.trim(),
+        };
+
+        Swal.fire({
+          title: "Enviando reseña...",
+          icon: "info",
+          allowOutsideClick: false,
+          didOpen: async () => {
+            Swal.showLoading();
+            try {
+              const response = await fetch("/api/resenas", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+              });
+
+              const data = await response.json();
+
+              if (data.success) {
+                Swal.fire({
+                  title: "¡Éxito!",
+                  text: "Tu reseña ha sido enviada correctamente y está en proceso de moderación",
+                  icon: "success",
+                  confirmButtonText: "Aceptar",
+                }).then(() => {
+                  // Cerrar modal y recargar página
+                  bootstrap.Modal.getInstance(document.getElementById("modalResena")).hide();
+                  setTimeout(() => {
+                    location.reload();
+                  }, 500);
+                });
+              } else {
+                Swal.fire("Error", data.mensaje || "Error al enviar la reseña", "error");
+              }
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire("Error", "Error de conexión al enviar la reseña", "error");
+            }
+          },
+        });
+      }
+    </script>
+  </body>
+</html>

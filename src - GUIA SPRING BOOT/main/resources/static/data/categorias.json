@@ -1,0 +1,64 @@
+[ {
+  "id" : 1,
+  "nombre" : "Útiles Escolares",
+  "descripcion" : "Productos para la escuela y oficina",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 1
+}, {
+  "id" : 2,
+  "nombre" : "Productos Lácteos",
+  "descripcion" : "Leches y derivados lácteos",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 1
+}, {
+  "id" : 3,
+  "nombre" : "Abarrotes",
+  "descripcion" : "Alimentos básicos y productos de despensa",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 1
+}, {
+  "id" : 4,
+  "nombre" : "Juguetes",
+  "descripcion" : "Juguetes educativos y entretenimiento",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 1
+}, {
+  "id" : 5,
+  "nombre" : "Adornos Navidad",
+  "descripcion" : "Decoraciones y adornos para las festividades",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 1
+}, {
+  "id" : 6,
+  "nombre" : "Ropa y Accesorios",
+  "descripcion" : "Prendas de vestir y complementos",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 0
+}, {
+  "id" : 7,
+  "nombre" : "Electrónica",
+  "descripcion" : "Artículos electrónicos y tecnología",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 0
+}, {
+  "id" : 8,
+  "nombre" : "Hogar y Limpieza",
+  "descripcion" : "Artículos para el hogar y limpieza",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 0
+}, {
+  "id" : 9,
+  "nombre" : "Productos de Salud",
+  "descripcion" : "Artículos de salud y bienestar",
+  "activa" : true,
+  "imagen" : "/img/logo1.jpg",
+  "cantidadProductos" : 0
+} ]

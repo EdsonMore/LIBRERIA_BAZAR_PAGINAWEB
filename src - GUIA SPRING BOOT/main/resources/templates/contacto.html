@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <div
+      th:replace="~{fragments/layout :: head}"
+      th:with="titulo='Contacto - Tu Bazar Plus'"
+    ></div>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Hero Section -->
+    <div
+      th:replace="~{fragments/layout :: hero(
+      'Contáctanos',
+      'Estamos aquí para ayudarte. Ya sea que tengas una consulta, sugerencia o simplemente quieras saludar, nos encantaría saber de ti.',
+      false,
+      ~{:: #vacio}
+    )}"
+    >
+      <div id="vacio"></div>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="container my-5">
+      <div class="row g-4">
+        <!-- Formulario de contacto -->
+        <div class="col-lg-7">
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white">
+              <h4 class="fw-bold mb-0">
+                <i class="bi bi-chat-dots me-2"></i>Envíanos un mensaje
+              </h4>
+            </div>
+            <div class="card-body p-4">
+              <form
+                th:action="@{/contacto}"
+                method="post"
+                class="needs-validation"
+                novalidate
+              >
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div
+                      th:replace="~{fragments/form-elements :: input-icon('nombre', 'Nombre completo', 'text', 'Ingrese su nombre completo', true, '', 'person')}"
+                    ></div>
+                  </div>
+                  <div class="col-md-6">
+                    <div
+                      th:replace="~{fragments/form-elements :: input-icon('correo', 'Correo electrónico', 'email', 'nombre@ejemplo.com', true, '', 'envelope')}"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="row g-3 mt-2">
+                  <div class="col-md-6">
+                    <div
+                      th:replace="~{fragments/form-elements :: input-icon('telefono', 'Teléfono (opcional)', 'tel', '+51 999 888 777', false, '', 'telephone')}"
+                    ></div>
+                  </div>
+                  <div class="col-md-6">
+                    <div
+                      th:replace="~{fragments/form-elements :: select('asunto', 'Asunto', ${asuntosContacto}, true, '')}"
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="mt-3">
+                  <div
+                    th:replace="~{fragments/form-elements :: textarea('mensaje', 'Mensaje', 'Escribe tu mensaje aquí...', 5, true, '')}"
+                  ></div>
+                </div>
+
+                <!-- Checkbox de términos -->
+                <div class="mt-3">
+                  <div
+                    th:replace="~{fragments/form-elements :: checkbox('terminos', 'Acepto recibir comunicaciones de Tu Bazar Plus y he leído la política de privacidad', true, false)}"
+                  ></div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                  <button type="reset" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                  </button>
+                  <div
+                    th:replace="~{fragments/form-elements :: submit-button('Enviar Mensaje', 'dark', 'send')}"
+                  ></div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Información de contacto -->
+        <div class="col-lg-5">
+          <!-- Card de información -->
+          <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-secondary text-white">
+              <h4 class="fw-bold mb-0">
+                <i class="bi bi-info-circle me-2"></i>Información de contacto
+              </h4>
+            </div>
+            <div class="card-body">
+              <div class="contact-item d-flex align-items-center mb-3">
+                <div class="bg-primary rounded-circle p-3 me-3">
+                  <i class="bi bi-geo-alt text-white fs-5"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-1">Dirección</h6>
+                  <p class="text-muted mb-0">Catacaos, Piura, Perú</p>
+                </div>
+              </div>
+
+              <div class="contact-item d-flex align-items-center mb-3">
+                <div class="bg-success rounded-circle p-3 me-3">
+                  <i class="bi bi-telephone text-white fs-5"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-1">Teléfono</h6>
+                  <p class="text-muted mb-0">
+                    <a href="tel:+51999888777" class="text-decoration-none"
+                      >+51 999 888 777</a
+                    >
+                  </p>
+                </div>
+              </div>
+
+              <div class="contact-item d-flex align-items-center mb-3">
+                <div class="bg-warning rounded-circle p-3 me-3">
+                  <i class="bi bi-envelope text-white fs-5"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-1">Correo</h6>
+                  <p class="text-muted mb-0">
+                    <a
+                      href="mailto:info@elbuenbeber.com"
+                      class="text-decoration-none"
+                      >info@elbuenbeber.com</a
+                    >
+                  </p>
+                </div>
+              </div>
+
+              <div class="contact-item d-flex align-items-center">
+                <div class="bg-info rounded-circle p-3 me-3">
+                  <i class="bi bi-clock text-white fs-5"></i>
+                </div>
+                <div>
+                  <h6 class="fw-bold mb-1">Horarios</h6>
+                  <p class="text-muted mb-0">Lunes - Sábado: 9am - 11pm</p>
+                  <small class="text-muted">Domingos: Cerrado</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de contacto rápido -->
+          <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-dark text-white">
+              <h5 class="fw-bold mb-0">
+                <i class="bi bi-lightning me-2"></i>Contacto rápido
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <a
+                  href="https://wa.me/51999888777"
+                  target="_blank"
+                  class="btn btn-success btn-lg"
+                >
+                  <i class="bi bi-whatsapp me-2"></i>WhatsApp
+                </a>
+                <a href="tel:+51999888777" class="btn btn-primary btn-lg">
+                  <i class="bi bi-telephone me-2"></i>Llamar ahora
+                </a>
+                <a
+                  href="mailto:info@elbuenbeber.com"
+                  class="btn btn-warning btn-lg"
+                >
+                  <i class="bi bi-envelope me-2"></i>Enviar email
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mapa -->
+          <div class="card shadow-sm border-0">
+            <div class="card-header bg-secondary text-white">
+              <h5 class="fw-bold mb-0">
+                <i class="bi bi-map me-2"></i>Ubicación
+              </h5>
+            </div>
+            <div class="card-body p-0">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.657730402177!2d-80.671!3d-5.266!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9036a1a8a62dbbdb%3A0xf!2sCatacaos%2C%20Piura!5e0!3m2!1ses!2spe!4v1700000000000"
+                width="100%"
+                height="250"
+                style="border: 0"
+                allowfullscreen=""
+                loading="lazy"
+                title="Ubicación de Tu Bazar Plus en Catacaos, Piura"
+              ></iframe>
+            </div>
+            <div class="card-footer text-center">
+              <small class="text-muted">
+                <i class="bi bi-geo-alt me-1"></i>Catacaos, Piura, Perú
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <!-- Script específico de la página -->
+    
+  </body>
+</html>

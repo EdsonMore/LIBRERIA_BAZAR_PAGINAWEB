@@ -1,0 +1,237 @@
+<!-- src/main/resources/templates/superAdmin/gestion-categorias.html -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block
+      th:replace="fragments/superadmin-layout :: head('Gestión de Categorías')"
+    ></th:block>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <!-- Sidebar -->
+        <th:block
+          th:replace="fragments/superadmin-layout :: sidebar('categorias')"
+        ></th:block>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2><i class="bi bi-tags me-2"></i>Gestión de Categorías</h2>
+              <p class="text-muted mb-0">
+                Administra las categorías de productos de tu tienda
+              </p>
+            </div>
+            <button class="btn btn-primary" onclick="categoriaManager.abrirModalAgregar()">
+              <i class="bi bi-plus-circle"></i> Nueva Categoría
+            </button>
+          </div>
+
+          <!-- Mensajes -->
+          <div th:replace="fragments/messages :: flash-messages"></div>
+
+          <!-- Tarjetas de Categorías -->
+          <div class="row">
+            <div
+              th:each="categoria : ${categorias}"
+              class="col-md-6 col-lg-4 mb-4"
+            >
+              <div
+                class="card h-100 shadow-sm"
+                style="transition: transform 0.2s"
+              >
+                <div th:if="${categoria.imagen}" class="text-center p-3">
+                  <img
+                    th:src="@{${categoria.imagen}}"
+                    th:alt="${categoria.nombre}"
+                    class="categoria-img rounded"
+                    onerror="this.src='/img/placeholder.jpg'"
+                  />
+                </div>
+                <div class="card-body">
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-3"
+                  >
+                    <h5 class="card-title" th:text="${categoria.nombre}"></h5>
+                    <span
+                      th:class="${categoria.activa ? 'badge bg-success' : 'badge bg-secondary'}"
+                      th:text="${categoria.activa ? 'Activa' : 'Inactiva'}"
+                    >
+                    </span>
+                  </div>
+
+                  <p
+                    class="card-text text-muted small"
+                    th:text="${categoria.descripcion} ?: 'Sin descripción'"
+                  ></p>
+
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <small class="text-muted">
+                      <i class="bi bi-box"></i>
+                      <span th:text="${categoria.cantidadProductos}"></span>
+                      productos
+                    </small>
+                    <div class="btn-group btn-group-sm">
+                      <button
+                        class="btn btn-outline-warning btn-editar-categoria"
+                        th:data-id="${categoria.id}"
+                        title="Editar categoría"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-secondary btn-toggle-activa"
+                        th:data-id="${categoria.id}"
+                        th:title="${categoria.activa ? 'Desactivar' : 'Activar'}"
+                      >
+                        <i
+                          th:class="${categoria.activa ? 'bi bi-eye-slash' : 'bi bi-eye'}"
+                        ></i>
+                      </button>
+                      <button
+                        class="btn btn-outline-danger btn-eliminar-categoria"
+                        th:data-id="${categoria.id}"
+                        th:data-nombre="${categoria.nombre}"
+                        th:disabled="${categoria.cantidadProductos > 0}"
+                        title="Eliminar categoría"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div th:if="${categoria.cantidadProductos > 0}" class="mt-2">
+                    <small class="text-warning">
+                      <i class="bi bi-exclamation-triangle"></i>
+                      No se puede eliminar (tiene productos)
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay categorías -->
+          <div th:if="${categorias.isEmpty()}" class="text-center py-5">
+            <i class="bi bi-tags display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">No hay categorías registradas</h4>
+            <p class="text-muted">Comienza agregando tu primera categoría</p>
+            <button class="btn btn-primary" onclick="categoriaManager.abrirModalAgregar()">
+              <i class="bi bi-plus-circle"></i> Agregar Primera Categoría
+            </button>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal para Agregar/Editar Categoría -->
+    <div class="modal fade" id="modalCategoria" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalTitulo">Nueva Categoría</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <form
+            id="formCategoria"
+            th:action="@{/superAdmin/categorias/guardar}"
+            method="post"
+            enctype="multipart/form-data"
+          >
+            <div class="modal-body">
+              <input type="hidden" id="categoriaId" name="id" value="0" />
+
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre de la Categoría *</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nombre"
+                  name="nombre"
+                  required
+                  placeholder="Ej: Whisky"
+                  maxlength="100"
+                />
+                <div class="form-text">Máximo 100 caracteres</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea
+                  class="form-control"
+                  id="descripcion"
+                  name="descripcion"
+                  rows="3"
+                  placeholder="Describe esta categoría..."
+                  maxlength="500"
+                ></textarea>
+                <div class="form-text">Máximo 500 caracteres</div>
+              </div>
+
+              <div class="mb-3">
+                <label for="imagenFile" class="form-label">Imagen de la Categoría</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="imagenFile"
+                  name="imagenFile"
+                  accept="image/jpeg,image/png,image/webp"
+                />
+                <div class="form-text">
+                  Formatos aceptados: JPG, PNG, WebP (máx. 5MB). Tamaño recomendado: 400x400px
+                </div>
+                <div id="imagenPreview" class="mt-2 text-center d-none">
+                  <img
+                    id="previewImg"
+                    src="#"
+                    alt="Vista previa"
+                    class="img-thumbnail"
+                    style="max-height: 150px"
+                  />
+                  <div class="mt-1">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      onclick="categoriaManager.limpiarImagen()"
+                    >
+                      <i class="bi bi-trash"></i> Quitar imagen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                <i class="bi bi-x-circle"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" id="btnGuardar">
+                <i class="bi bi-check-circle"></i> Guardar Categoría
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <th:block th:replace="fragments/superadmin-layout :: scripts"></th:block>
+
+    <!-- JavaScript específico para categorías -->
+    <script th:src="@{/js/superadmin/categorias.js}"></script>
+  </body>
+</html>

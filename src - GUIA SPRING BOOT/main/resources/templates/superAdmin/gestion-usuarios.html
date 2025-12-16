@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block
+      th:replace="fragments/superadmin-layout :: head('Gestión de Usuarios')"
+    ></th:block>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <!-- Sidebar -->
+        <th:block
+          th:replace="fragments/superadmin-layout :: sidebar('usuarios')"
+        ></th:block>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2><i class="bi bi-people me-2"></i> Gestion de Usuarios</h2>
+              <p class="text-muted mb-0">
+                Administra los usuarios registrados en el sistema
+              </p>
+            </div>
+            <button class="btn btn-outline-info" onclick="exportarUsuarios()">
+              <i class="bi bi-download"></i> Exportar CSV
+            </button>
+          </div>
+
+          <!-- Mensajes -->
+          <div th:replace="fragments/messages :: flash-messages"></div>
+
+          <!-- Estadísticas -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-primary">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h4 th:text="${usuarios != null ? usuarios.size() : 0}">
+                      0
+                    </h4>
+                    <p class="mb-0">Total Usuarios</p>
+                  </div>
+                  <i class="bi bi-people fs-1"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-info">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h4 th:text="${usuariosConTelefono}">0</h4>
+                    <p class="mb-0">Con Teléfono</p>
+                  </div>
+                  <i class="bi bi-telephone fs-1"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-success">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h4 th:text="${usuariosConDireccion}">0</h4>
+                    <p class="mb-0">Con Dirección</p>
+                  </div>
+                  <i class="bi bi-geo-alt fs-1"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-warning">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h4 th:text="${usuariosConGenero}">0</h4>
+                    <p class="mb-0">Género Registrado</p>
+                  </div>
+                  <i class="bi bi-gender-ambiguous fs-1"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros -->
+          <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="input-group">
+                    <span class="input-group-text"
+                      ><i class="bi bi-search"></i
+                    ></span>
+                    <input
+                      type="text"
+                      id="buscarUsuario"
+                      class="form-control"
+                      placeholder="Buscar por nombre, email o DNI..."
+                      onkeyup="filtrarUsuarios()"
+                    />
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <select
+                    class="form-select"
+                    id="filtroGenero"
+                    onchange="filtrarUsuarios()"
+                  >
+                    <option value="">Todos los géneros</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Prefiero no decirlo">
+                      Prefiero no decirlo
+                    </option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <select
+                    class="form-select"
+                    id="filtroTelefono"
+                    onchange="filtrarUsuarios()"
+                  >
+                    <option value="">Todos</option>
+                    <option value="con_telefono">Con Teléfono</option>
+                    <option value="sin_telefono">Sin Teléfono</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabla de Usuarios -->
+          <div class="card shadow-sm">
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <h5 class="card-title mb-0">Lista de Usuarios Registrados</h5>
+              <span class="badge bg-primary" id="contadorUsuarios">
+                <span th:text="${usuarios != null ? usuarios.size() : 0}"
+                  >0</span
+                >
+                usuarios
+              </span>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Usuario</th>
+                      <th>Nombres</th>
+                      <th>Apellidos</th>
+                      <th>DNI</th>
+                      <th>Email</th>
+                      <th>Roles</th>
+                      <th>Teléfono</th>
+                      <th>Género</th>
+                      <th>Estado</th>
+                      <th>Fecha Registro</th>
+                      <th>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tablaUsuarios">
+                    <tr th:each="usuario : ${usuarios}">
+                      <td th:text="${usuario.id}">1</td>
+                      <td>
+                        <span th:text="${usuario.user}">usuario123</span>
+                      </td>
+                      <td th:text="${usuario.nombres}">Juan</td>
+                      <td>
+                        <span th:text="${usuario.apellidoPaterno}">Pérez</span>
+                        <span
+                          th:if="${usuario.apellidoMaterno != null}"
+                          th:text="' ' + ${usuario.apellidoMaterno}"
+                          >García</span
+                        >
+                      </td>
+                      <td>
+                        <span
+                          th:if="${usuario.dni != null}"
+                          th:text="${usuario.dni}"
+                          >12345678</span
+                        >
+                        <span th:if="${usuario.dni == null}" class="text-muted"
+                          >No registrado</span
+                        >
+                      </td>
+                      <td th:text="${usuario.correo}">correo@ejemplo.com</td>
+
+                      <!-- COLUMNA ROLES - CORREGIDA SIN ERRORES -->
+                      <td>
+                        <div class="d-flex flex-wrap gap-1">
+                          <span
+                            th:each="rol : ${usuario.roles}"
+                            th:classappend="'badge ' + (${rol.nombre} == 'ROLE_SUPER_ADMIN' ? 'bg-danger' : 
+                                                      (${rol.nombre} == 'ROLE_ADMIN' ? 'bg-warning' : 
+                                                      (${rol.nombre} == 'ROLE_ENCARGADO_PRODUCTOS' ? 'bg-info' : 
+                                                      (${rol.nombre} == 'ROLE_ENCARGADO_VENTAS' ? 'bg-success' : 
+                                                      (${rol.nombre} == 'ROLE_CLIENTE' ? 'bg-primary' : 'bg-secondary')))))"
+                          >
+                            <i class="bi bi-shield-check me-1"></i>
+                            <span
+                              th:text="${#strings.replace(rol.nombre, 'ROLE_', '')}"
+                              >ADMIN</span
+                            >
+                          </span>
+                          <span
+                            th:if="${usuario.roles == null or usuario.roles.isEmpty()}"
+                            class="text-muted small"
+                            >Sin roles</span
+                          >
+                        </div>
+                      </td>
+
+                      <td>
+                        <span
+                          th:if="${usuario.numero != null and !usuario.numero.isEmpty()}"
+                          th:text="${usuario.numero}"
+                          >987654321</span
+                        >
+                        <span
+                          th:if="${usuario.numero == null or usuario.numero.isEmpty()}"
+                          class="text-muted"
+                          >No registrado</span
+                        >
+                      </td>
+                      <td>
+                        <span
+                          th:if="${usuario.genero == 'Masculino'}"
+                          class="badge bg-primary"
+                          >Masculino</span
+                        >
+                        <span
+                          th:if="${usuario.genero == 'Femenino'}"
+                          class="badge"
+                          style="background-color: #e83e8c"
+                          >Femenino</span
+                        >
+                        <span
+                          th:if="${usuario.genero == 'Prefiero no decirlo'}"
+                          class="badge bg-secondary"
+                          >Prefiero no decirlo</span
+                        >
+                        <span
+                          th:if="${usuario.genero == 'Otro'}"
+                          class="badge bg-secondary"
+                          >Otro</span
+                        >
+                        <span
+                          th:if="${usuario.genero == null or usuario.genero.isEmpty()}"
+                          class="text-muted"
+                          >No registrado</span
+                        >
+                      </td>
+                      <td>
+                        <span
+                          class="badge"
+                          th:classappend="${usuario.activo} ? 'bg-success' : 'bg-danger'"
+                          th:text="${usuario.activo} ? 'Activo' : 'Inactivo'"
+                        ></span>
+                      </td>
+                      <td>
+                        <small
+                          th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy HH:mm')}"
+                          >01/01/2024 12:00</small
+                        >
+                      </td>
+                      <td>
+                        <div class="btn-group btn-group-sm">
+                          <button
+                            class="btn btn-outline-primary btn-editar-usuario"
+                            th:data-id="${usuario.id}"
+                            title="Editar usuario"
+                          >
+                            <i class="bi bi-pencil"></i>
+                          </button>
+                          <button
+                            class="btn btn-outline-info btn-gestionar-roles"
+                            th:data-id="${usuario.id}"
+                            th:data-nombre="${usuario.nombres + ' ' + usuario.apellidoPaterno}"
+                            title="Gestionar roles"
+                          >
+                            <i class="bi bi-shield-plus"></i>
+                          </button>
+                          <button
+                            th:data-usuario-id="${usuario.id}"
+                            th:data-activo="${usuario.activo}"
+                            class="btn btn-cambiar-estado"
+                            th:classappend="${usuario.activo} ? 'btn-outline-warning' : 'btn-outline-success'"
+                            type="button"
+                            th:title="${usuario.activo} ? 'Inhabilitar usuario' : 'Habilitar usuario'"
+                          >
+                            <i
+                              class="bi"
+                              th:classappend="${usuario.activo} ? 'bi-ban' : 'bi-check-circle'"
+                            ></i>
+                          </button>
+                          <button
+                            class="btn btn-outline-danger btn-eliminar-usuario"
+                            th:data-id="${usuario.id}"
+                            th:data-nombre="${usuario.nombres + ' ' + usuario.apellidoPaterno}"
+                            title="Eliminar usuario"
+                          >
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr th:if="${usuarios == null or usuarios.isEmpty()}">
+                      <td colspan="11" class="text-center text-muted py-4">
+                        <i class="bi bi-people display-4 d-block mb-2"></i>
+                        No hay usuarios registrados
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal Gestionar Roles -->
+    <div class="modal fade" id="modalGestionarRoles" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-shield-plus me-2"></i>
+              Gestionar Roles:
+              <span id="nombreUsuarioRoles" class="text-primary"></span>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="usuarioIdRoles" />
+
+            <!-- Roles Actuales -->
+            <div class="mb-4">
+              <h6 class="fw-bold text-success mb-3">
+                <i class="bi bi-check-circle me-2"></i>Roles Asignados
+              </h6>
+              <div id="rolesAsignados" class="d-flex flex-wrap gap-2"></div>
+              <div
+                id="sinRolesAsignados"
+                class="text-muted text-center py-3"
+                style="display: none"
+              >
+                <i class="bi bi-shield-slash display-6"></i>
+                <p class="mt-2">El usuario no tiene roles asignados</p>
+              </div>
+            </div>
+
+            <!-- Roles Disponibles -->
+            <div class="mb-3">
+              <h6 class="fw-bold text-primary mb-3">
+                <i class="bi bi-plus-circle me-2"></i>Asignar Nuevo Rol
+              </h6>
+              <div class="input-group">
+                <select class="form-select" id="selectRolDisponible">
+                  <option value="">Seleccionar rol para asignar...</option>
+                </select>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="asignarRol()"
+                >
+                  <i class="bi bi-plus-lg"></i> Asignar
+                </button>
+              </div>
+            </div>
+
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Información:</strong> Los roles definen los permisos y
+              acceso del usuario en el sistema.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-x-circle"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Editar Usuario -->
+    <div class="modal fade" id="modalEditarUsuario" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Usuario</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <form
+            th:action="@{/superAdmin/usuarios/editar}"
+            method="post"
+            id="formEditarUsuario"
+          >
+            <div class="modal-body">
+              <input type="hidden" id="editUsuarioId" name="id" />
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="editNombres" class="form-label">Nombres *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editNombres"
+                    name="nombres"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="editApellidoPaterno" class="form-label"
+                    >Apellido Paterno *</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editApellidoPaterno"
+                    name="apellidoPaterno"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="editApellidoMaterno" class="form-label"
+                    >Apellido Materno</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editApellidoMaterno"
+                    name="apellidoMaterno"
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="editCorreo" class="form-label">Email *</label>
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="editCorreo"
+                    name="correo"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="editUser" class="form-label">Usuario *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editUser"
+                    name="user"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="editNumero" class="form-label">Teléfono</label>
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="editNumero"
+                    name="numero"
+                    placeholder="Ej: 987654321"
+                  />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="editGenero" class="form-label">Género</label>
+                  <select class="form-select" name="genero" id="editGenero">
+                    <option value="">Seleccionar género</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Prefiero no decirlo">
+                      Prefiero no decirlo
+                    </option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="editTipoDoc" class="form-label"
+                    >Tipo Documento</label
+                  >
+                  <select class="form-select" name="tipoDoc" id="editTipoDoc">
+                    <option value="">Seleccionar tipo</option>
+                    <option value="DNI">DNI</option>
+                    <option value="RUC">RUC</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                    <option value="CARNET_EXTRANJERIA">
+                      Carnet Extranjería
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="editDireccion1" class="form-label"
+                  >Dirección Principal</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editDireccion1"
+                  name="direccion1"
+                  placeholder="Dirección de envío principal"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="editDireccion2" class="form-label"
+                  >Dirección Secundaria (Opcional)</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editDireccion2"
+                  name="direccion2"
+                  placeholder="Dirección alternativa"
+                />
+              </div>
+
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Los campos marcados con * son obligatorios. El DNI y fecha de
+                nacimiento no se pueden modificar por seguridad.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                <i class="bi bi-x-circle"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary" id="btnGuardar">
+                <i class="bi bi-check-lg"></i> Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <th:block th:replace="fragments/superadmin-layout :: scripts"></th:block>
+
+    <script>
+      // Variables globales
+      let modalGestionarRoles = null;
+      let rolesDisponibles = [];
+      let modalEditarUsuario = null;
+      let formularioEnviado = false;
+
+      // Inicialización cuando el DOM está listo
+      document.addEventListener("DOMContentLoaded", function () {
+        // Inicializar modales
+        modalGestionarRoles = new bootstrap.Modal(
+          document.getElementById("modalGestionarRoles")
+        );
+        modalEditarUsuario = new bootstrap.Modal(
+          document.getElementById("modalEditarUsuario")
+        );
+
+        // Event delegation para botones
+        document.addEventListener("click", function (e) {
+          // Botón gestionar roles
+          if (e.target.closest(".btn-gestionar-roles")) {
+            const button = e.target.closest(".btn-gestionar-roles");
+            gestionarRolesUsuario(
+              button.getAttribute("data-id"),
+              button.getAttribute("data-nombre")
+            );
+          }
+
+          // Botón editar usuario
+          if (e.target.closest(".btn-editar-usuario")) {
+            const button = e.target.closest(".btn-editar-usuario");
+            cargarUsuarioParaEditar(button.getAttribute("data-id"));
+          }
+
+          // Botón cambiar estado usuario
+          if (e.target.closest(".btn-cambiar-estado")) {
+            const button = e.target.closest(".btn-cambiar-estado");
+            const usuarioId = button.getAttribute("data-usuario-id");
+            const activo = button.getAttribute("data-activo") === "true";
+            cambiarEstadoUsuario(usuarioId, activo);
+          }
+
+          // Botón eliminar usuario
+          if (e.target.closest(".btn-eliminar-usuario")) {
+            const button = e.target.closest(".btn-eliminar-usuario");
+            confirmarEliminacion(
+              button.getAttribute("data-id"),
+              button.getAttribute("data-nombre")
+            );
+          }
+        });
+
+        // Prevenir envío duplicado del formulario
+        document
+          .getElementById("formEditarUsuario")
+          .addEventListener("submit", function (e) {
+            if (formularioEnviado) {
+              e.preventDefault();
+              return;
+            }
+            formularioEnviado = true;
+            document.getElementById("btnGuardar").disabled = true;
+            document.getElementById("btnGuardar").innerHTML =
+              '<i class="bi bi-hourglass-split"></i> Guardando...';
+          });
+
+        console.log("✅ Gestión de Usuarios inicializada correctamente");
+      });
+
+      // ========== FUNCIONES DE GESTIÓN DE ROLES ==========
+      async function gestionarRolesUsuario(usuarioId, nombreUsuario) {
+        try {
+          document.getElementById("nombreUsuarioRoles").textContent =
+            nombreUsuario;
+          document.getElementById("usuarioIdRoles").value = usuarioId;
+
+          await Promise.all([
+            cargarRolesUsuario(usuarioId),
+            cargarRolesDisponibles(),
+          ]);
+
+          modalGestionarRoles.show();
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire("Error", "No se pudieron cargar los roles", "error");
+        }
+      }
+
+      async function cargarRolesUsuario(usuarioId) {
+        try {
+          const response = await fetch(`/superAdmin/usuarios/${usuarioId}`);
+          if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+          const usuario = await response.json();
+          const contenedor = document.getElementById("rolesAsignados");
+          const sinRoles = document.getElementById("sinRolesAsignados");
+
+          contenedor.innerHTML = "";
+
+          if (usuario.roles && usuario.roles.length > 0) {
+            sinRoles.style.display = "none";
+            contenedor.style.display = "flex";
+
+            usuario.roles.forEach((rol) => {
+              const badge = document.createElement("span");
+              badge.className = `badge ${getClaseRol(
+                rol.nombre
+              )} d-flex align-items-center`;
+              badge.innerHTML = `
+                            <i class="bi bi-shield-check me-1"></i>
+                            ${rol.nombre.replace("ROLE_", "")}
+                            <button type="button" class="btn-close btn-close-white ms-2" 
+                                    onclick="removerRol(${usuarioId}, ${
+                rol.id
+              })"
+                                    style="font-size: 0.7rem;"></button>
+                        `;
+              contenedor.appendChild(badge);
+            });
+          } else {
+            contenedor.style.display = "none";
+            sinRoles.style.display = "block";
+          }
+        } catch (error) {
+          console.error("Error cargando roles del usuario:", error);
+          throw error;
+        }
+      }
+
+      async function cargarRolesDisponibles() {
+        try {
+          const response = await fetch("/superAdmin/roles/todos");
+          if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+          rolesDisponibles = await response.json();
+          const select = document.getElementById("selectRolDisponible");
+
+          // Limpiar opciones excepto la primera
+          while (select.children.length > 1) {
+            select.removeChild(select.lastChild);
+          }
+
+          rolesDisponibles.forEach((rol) => {
+            const option = document.createElement("option");
+            option.value = rol.id;
+            option.textContent = `${rol.nombre} - ${
+              rol.descripcion || "Sin descripción"
+            }`;
+            select.appendChild(option);
+          });
+        } catch (error) {
+          console.error("Error cargando roles disponibles:", error);
+          throw error;
+        }
+      }
+
+      // Función para obtener headers con CSRF token
+      function getCSRFHeaders() {
+        const token = document
+          .querySelector('meta[name="_csrf"]')
+          ?.getAttribute("content");
+        const header = document
+          .querySelector('meta[name="_csrf_header"]')
+          ?.getAttribute("content");
+        const headers = { "Content-Type": "application/json" };
+        if (token && header) {
+          headers[header] = token;
+        }
+        return headers;
+      }
+
+      async function asignarRol() {
+        const usuarioId = document.getElementById("usuarioIdRoles").value;
+        const rolId = document.getElementById("selectRolDisponible").value;
+
+        if (!rolId) {
+          Swal.fire("Advertencia", "Por favor selecciona un rol", "warning");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/superAdmin/usuarios/${usuarioId}/asignar-rol/${rolId}`,
+            {
+              method: "POST",
+              headers: getCSRFHeaders(),
+            }
+          );
+
+          if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+          await response.text();
+
+          Swal.fire({
+            icon: "success",
+            title: "Rol asignado",
+            text: "El rol se asignó correctamente al usuario",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+
+          await cargarRolesUsuario(usuarioId);
+          document.getElementById("selectRolDisponible").value = "";
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire("Error", "No se pudo asignar el rol", "error");
+        }
+      }
+
+      async function removerRol(usuarioId, rolId) {
+        Swal.fire({
+          title: "¿Remover rol?",
+          text: "¿Estás seguro de remover este rol del usuario?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Sí, remover",
+          cancelButtonText: "Cancelar",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(
+                `/superAdmin/usuarios/${usuarioId}/remover-rol/${rolId}`,
+                {
+                  method: "POST",
+                  headers: getCSRFHeaders(),
+                }
+              );
+
+              if (!response.ok)
+                throw new Error(`Error HTTP: ${response.status}`);
+
+              Swal.fire({
+                icon: "success",
+                title: "Rol removido",
+                text: "El rol se removió correctamente",
+                timer: 2000,
+                showConfirmButton: false,
+              });
+
+              await cargarRolesUsuario(usuarioId);
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire("Error", "No se pudo remover el rol", "error");
+            }
+          }
+        });
+      }
+
+      function getClaseRol(nombreRol) {
+        const clases = {
+          ROLE_SUPER_ADMIN: "bg-danger",
+          ROLE_ADMIN: "bg-warning",
+          ROLE_ENCARGADO_PRODUCTOS: "bg-info",
+          ROLE_ENCARGADO_VENTAS: "bg-success",
+          ROLE_CLIENTE: "bg-primary",
+        };
+        return clases[nombreRol] || "bg-secondary";
+      }
+
+      // ========== FUNCIONES DE EDICIÓN DE USUARIOS ==========
+      async function cargarUsuarioParaEditar(usuarioId) {
+        try {
+          const response = await fetch(`/superAdmin/usuarios/${usuarioId}`);
+          if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+          const usuario = await response.json();
+
+          // Llenar formulario con datos del usuario
+          document.getElementById("editUsuarioId").value = usuario.id || "";
+          document.getElementById("editNombres").value = usuario.nombres || "";
+          document.getElementById("editApellidoPaterno").value =
+            usuario.apellidoPaterno || "";
+          document.getElementById("editApellidoMaterno").value =
+            usuario.apellidoMaterno || "";
+          document.getElementById("editCorreo").value = usuario.correo || "";
+          document.getElementById("editUser").value = usuario.user || ""; // ✅ AGREGAR ESTA LÍNEA
+          document.getElementById("editNumero").value = usuario.numero || "";
+          document.getElementById("editDireccion1").value =
+            usuario.direccion1 || "";
+          document.getElementById("editDireccion2").value =
+            usuario.direccion2 || "";
+          document.getElementById("editGenero").value = usuario.genero || "";
+          document.getElementById("editTipoDoc").value = usuario.tipoDoc || "";
+
+          modalEditarUsuario.show();
+        } catch (error) {
+          console.error("Error:", error);
+          Swal.fire(
+            "Error",
+            "No se pudo cargar los datos del usuario",
+            "error"
+          );
+        }
+      }
+      async function cambiarEstadoUsuario(usuarioId, activo) {
+        const accion = activo ? "inhabilitar" : "habilitar";
+        const accionCapital = activo ? "Inhabilitar" : "Habilitar";
+
+        Swal.fire({
+          title: `¿${accionCapital} usuario?`,
+          text: `¿Estás seguro de ${accion} este usuario? ${
+            activo
+              ? "No podrá iniciar sesión."
+              : "Podrá iniciar sesión nuevamente."
+          }`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: activo ? "#ffc107" : "#28a745",
+          cancelButtonColor: "#6c757d",
+          confirmButtonText: `Sí, ${accion}`,
+          cancelButtonText: "Cancelar",
+        }).then(async (result) => {
+          if (result.isConfirmed) {
+            try {
+              const response = await fetch(
+                `/superAdmin/usuarios/${usuarioId}/cambiar-estado`,
+                {
+                  method: "POST",
+                  headers: getCSRFHeaders(),
+                }
+              );
+
+              const data = await response.json();
+
+              if (data.success) {
+                Swal.fire({
+                  icon: "success",
+                  title: "Estado actualizado",
+                  text: data.message,
+                  timer: 2000,
+                  showConfirmButton: false,
+                }).then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire("Error", data.message, "error");
+              }
+            } catch (error) {
+              console.error("Error:", error);
+              Swal.fire(
+                "Error",
+                "No se pudo cambiar el estado del usuario",
+                "error"
+              );
+            }
+          }
+        });
+      }
+
+      function confirmarEliminacion(usuarioId, nombreUsuario) {
+        Swal.fire({
+          title: "¿Estás seguro?",
+          text: `¿Deseas eliminar al usuario "${nombreUsuario}"? Esta acción no se puede deshacer.`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = `/superAdmin/usuarios/eliminar/${usuarioId}`;
+          }
+        });
+      }
+
+      // ========== FUNCIONES DE FILTRADO ==========
+      function filtrarUsuarios() {
+        const busqueda = document
+          .getElementById("buscarUsuario")
+          .value.toLowerCase();
+        const filtroGenero = document.getElementById("filtroGenero").value;
+        const filtroTelefono = document.getElementById("filtroTelefono").value;
+        const filas = document.querySelectorAll("#tablaUsuarios tr");
+        let contador = 0;
+
+        filas.forEach((fila) => {
+          // Saltar la fila de "no hay usuarios"
+          if (fila.cells.length === 1) return;
+
+          const celdas = fila.cells;
+          if (celdas.length < 11) return;
+
+          // Obtener datos de cada columna
+          const usuario = celdas[1].textContent.toLowerCase();
+          const nombres = celdas[2].textContent.toLowerCase();
+          const apellidos = celdas[3].textContent.toLowerCase();
+          const dni = celdas[4].textContent.toLowerCase();
+          const email = celdas[5].textContent.toLowerCase();
+          const telefono = celdas[7].textContent;
+          const genero = celdas[8].textContent;
+
+          // Verificar búsqueda
+          const coincideBusqueda =
+            !busqueda ||
+            usuario.includes(busqueda) ||
+            nombres.includes(busqueda) ||
+            apellidos.includes(busqueda) ||
+            dni.includes(busqueda) ||
+            email.includes(busqueda);
+
+          // Verificar filtro de género
+          const coincideGenero = !filtroGenero || genero.includes(filtroGenero);
+
+          // Verificar filtro de teléfono
+          const tieneTelefono =
+            telefono !== "No registrado" && telefono.trim() !== "";
+          const coincideTelefono =
+            !filtroTelefono ||
+            (filtroTelefono === "con_telefono" && tieneTelefono) ||
+            (filtroTelefono === "sin_telefono" && !tieneTelefono);
+
+          // Mostrar/ocultar fila según los filtros
+          if (coincideBusqueda && coincideGenero && coincideTelefono) {
+            fila.style.display = "";
+            contador++;
+          } else {
+            fila.style.display = "none";
+          }
+        });
+
+        // Actualizar contador
+        document.getElementById(
+          "contadorUsuarios"
+        ).innerHTML = `<span>${contador}</span> usuarios`;
+      }
+
+      // ========== FUNCIÓN DE EXPORTACIÓN ==========
+      function exportarUsuarios() {
+        const filas = document.querySelectorAll(
+          '#tablaUsuarios tr:not([style*="display: none"])'
+        );
+        let csv =
+          "ID,Usuario,Nombres,Apellidos,DNI,Email,Roles,Teléfono,Género,Fecha Registro\n";
+
+        filas.forEach((fila) => {
+          // Saltar filas vacías o con una sola celda
+          if (fila.cells.length <= 1) return;
+
+          const celdas = fila.cells;
+          const datos = [
+            celdas[0].textContent,
+            `"${celdas[1].textContent}"`,
+            `"${celdas[2].textContent}"`,
+            `"${celdas[3].textContent}"`,
+            celdas[4].textContent,
+            `"${celdas[5].textContent}"`,
+            `"${celdas[6].textContent}"`,
+            celdas[7].textContent,
+            `"${celdas[8].textContent}"`,
+            `"${celdas[9].textContent}"`,
+          ];
+          csv += datos.join(",") + "\n";
+        });
+
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `usuarios_${new Date().toISOString().split("T")[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        Swal.fire({
+          icon: "success",
+          title: "Exportación exitosa",
+          text: "El archivo CSV se ha descargado correctamente",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    </script>
+  </body>
+</html>

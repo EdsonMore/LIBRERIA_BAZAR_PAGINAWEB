@@ -1,0 +1,586 @@
+<!-- src/main/resources/templates/superAdmin/gestion-roles.html -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block
+      th:replace="fragments/superadmin-layout :: head('Gestión de Roles')"
+    ></th:block>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <!-- Sidebar -->
+        <th:block
+          th:replace="fragments/superadmin-layout :: sidebar('roles')"
+        ></th:block>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2>
+                <i class="bi bi-shield-check text-danger me-2"></i>Gestión de
+                Roles
+              </h2>
+              <p class="text-muted mb-0">
+                Administra los roles y permisos del sistema
+              </p>
+            </div>
+            <button
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCrearRol"
+            >
+              <i class="bi bi-plus-circle"></i> Crear Rol
+            </button>
+          </div>
+
+          <!-- Mensajes -->
+          <div th:replace="fragments/messages :: flash-messages"></div>
+
+          <!-- Información sobre roles del sistema -->
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Información:</strong> Los roles del sistema (marcados en
+            rojo) no pueden ser eliminados ni renombrados. Solo puedes editar su
+            descripción.
+          </div>
+
+          <!-- Tarjetas de Roles -->
+          <div class="row">
+            <div th:each="rol : ${roles}" class="col-md-6 col-lg-4 mb-4">
+              <div
+                class="card role-card h-100 shadow-sm"
+                th:classappend="${rol.nombre.startsWith('ROLE_SUPER') || rol.nombre.startsWith('ROLE_ADMIN') || rol.nombre.startsWith('ROLE_ENCARGADO') || rol.nombre.startsWith('ROLE_CLIENTE')} ? 'sistema' : 'personalizado'"
+              >
+                <div class="card-body">
+                  <!-- Header del rol -->
+                  <div
+                    class="d-flex justify-content-between align-items-start mb-3"
+                  >
+                    <div class="flex-grow-1">
+                      <h5 class="card-title mb-2">
+                        <i class="bi bi-shield-fill me-2"></i>
+                        <span th:text="${rol.nombre}">ROLE_NAME</span>
+                      </h5>
+                      <span
+                        th:if="${rol.nombre.startsWith('ROLE_SUPER') || rol.nombre.startsWith('ROLE_ADMIN') || rol.nombre.startsWith('ROLE_ENCARGADO') || rol.nombre.startsWith('ROLE_CLIENTE')}"
+                        class="badge badge-role-sistema"
+                      >
+                        <i class="bi bi-lock-fill"></i> Rol del Sistema
+                      </span>
+                      <span
+                        th:unless="${rol.nombre.startsWith('ROLE_SUPER') || rol.nombre.startsWith('ROLE_ADMIN') || rol.nombre.startsWith('ROLE_ENCARGADO') || rol.nombre.startsWith('ROLE_CLIENTE')}"
+                        class="badge badge-role-personalizado"
+                      >
+                        <i class="bi bi-pencil-fill"></i> Rol Personalizado
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Descripción -->
+                  <p
+                    class="card-text text-muted mb-4"
+                    th:text="${rol.descripcion} ?: 'Sin descripción'"
+                  >
+                    Descripción del rol
+                  </p>
+
+                  <!-- Usuarios con este rol -->
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-muted small mb-2">
+                      <i class="bi bi-people me-1"></i>Usuarios con este rol:
+                    </h6>
+                    <div
+                      th:if="${rol.usuarios != null and !rol.usuarios.isEmpty()}"
+                    >
+                      <div class="d-flex flex-wrap gap-1">
+                        <span
+                          th:each="usuario : ${rol.usuarios}"
+                          class="badge bg-light text-dark small"
+                        >
+                          <i class="bi bi-person me-1"></i>
+                          <span th:text="${usuario.nombres}"></span>
+                        </span>
+                      </div>
+                      <small
+                        class="text-muted"
+                        th:text="'Total: ' + ${rol.usuarios.size()}"
+                      ></small>
+                    </div>
+                    <div
+                      th:if="${rol.usuarios == null or rol.usuarios.isEmpty()}"
+                    >
+                      <span class="text-muted small"
+                        >No hay usuarios con este rol</span
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Permisos asignados -->
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-muted small mb-2">
+                      <i class="bi bi-shield-check me-1"></i>Permisos asignados:
+                    </h6>
+                    <div
+                      th:if="${rol.permisos != null and !rol.permisos.isEmpty()}"
+                    >
+                      <span
+                        class="badge bg-success"
+                        th:text="${rol.permisos.size()} + ' permisos'"
+                      ></span>
+                    </div>
+                    <div
+                      th:if="${rol.permisos == null or rol.permisos.isEmpty()}"
+                    >
+                      <span class="text-muted small"
+                        >Sin permisos asignados</span
+                      >
+                    </div>
+                  </div>
+
+                  <!-- Rutas asignadas (NUEVA SECCIÓN) -->
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-muted small mb-2">
+                      <i class="bi bi-signpost me-1"></i>Rutas asignadas:
+                    </h6>
+                    <div class="d-flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-info btn-ver-rutas"
+                        th:data-rol-id="${rol.id}"
+                        th:data-rol-nombre="${rol.nombre}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalRutasRol"
+                        onclick="cargarRutasDelRol(this)"
+                        title="Ver todas las rutas asignadas a este rol"
+                      >
+                        <i class="bi bi-eye me-1"></i> Ver rutas
+                      </button>
+                      <span class="badge bg-info" id="badge-rutas-rol-count" style="display: none;"></span>
+                    </div>
+                  </div>
+
+                  <!-- Información adicional -->
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <small class="text-muted">
+                      <i class="bi bi-key"></i> ID:
+                      <span th:text="${rol.id}">1</span>
+                    </small>
+
+                    <!-- Botones de acción -->
+                    <div class="btn-group btn-group-sm">
+                      <!-- Botón editar -->
+                      <button
+                        class="btn btn-outline-warning btn-editar-rol"
+                        th:data-id="${rol.id}"
+                        th:data-nombre="${rol.nombre}"
+                        th:data-descripcion="${rol.descripcion}"
+                        title="Editar rol"
+                      >
+                        <i class="bi bi-pencil"></i>
+                      </button>
+
+                      <!-- Botón gestionar permisos -->
+                      <a
+                        th:href="@{/superAdmin/permisos/rol/{id}(id=${rol.id})}"
+                        class="btn btn-outline-info"
+                        title="Gestionar permisos"
+                      >
+                        <i class="bi bi-shield-check"></i>
+                      </a>
+
+                      <!-- Botón eliminar -->
+                      <button
+                        class="btn btn-outline-danger btn-eliminar-rol"
+                        th:data-id="${rol.id}"
+                        th:data-nombre="${rol.nombre}"
+                        th:disabled="${rol.nombre.startsWith('ROLE_SUPER') || rol.nombre.startsWith('ROLE_ADMIN') || rol.nombre.startsWith('ROLE_ENCARGADO') || rol.nombre.startsWith('ROLE_CLIENTE')}"
+                        title="Eliminar rol"
+                      >
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Mensaje de protección para roles del sistema -->
+                  <div
+                    th:if="${rol.nombre.startsWith('ROLE_SUPER') || rol.nombre.startsWith('ROLE_ADMIN') || rol.nombre.startsWith('ROLE_ENCARGADO') || rol.nombre.startsWith('ROLE_CLIENTE')}"
+                    class="mt-3"
+                  >
+                    <small class="text-danger">
+                      <i class="bi bi-shield-lock"></i>
+                      Protegido - No se puede eliminar
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje si no hay roles -->
+          <div
+            th:if="${roles == null or roles.isEmpty()}"
+            class="text-center py-5"
+          >
+            <i class="bi bi-shield-check display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">No hay roles registrados</h4>
+            <p class="text-muted">
+              Comienza creando tu primer rol personalizado
+            </p>
+            <button
+              class="btn btn-primary"
+              data-bs-toggle="modal"
+              data-bs-target="#modalCrearRol"
+            >
+              <i class="bi bi-plus-circle"></i> Crear Primer Rol
+            </button>
+          </div>
+
+          <!-- Roles del sistema -->
+          <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-danger text-white">
+              <h5 class="card-title mb-0">
+                <i class="bi bi-info-circle me-2"></i>Roles del Sistema
+              </h5>
+            </div>
+            <div class="card-body">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Rol</th>
+                    <th>Descripción</th>
+                    <th>Permisos</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>ROLE_SUPER_ADMIN</strong></td>
+                    <td>Administrador principal con acceso total</td>
+                    <td>
+                      <span class="badge bg-danger">Todos los permisos</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>ROLE_ADMIN</strong></td>
+                    <td>Administrador de roles y usuarios</td>
+                    <td>
+                      <span class="badge bg-warning">Gestión completa</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>ROLE_ENCARGADO_PRODUCTOS</strong></td>
+                    <td>Gestión de productos y categorías</td>
+                    <td><span class="badge bg-info">Productos</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ROLE_ENCARGADO_VENTAS</strong></td>
+                    <td>Gestión de ventas y pedidos</td>
+                    <td><span class="badge bg-success">Ventas</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>ROLE_CLIENTE</strong></td>
+                    <td>Usuario cliente del sistema</td>
+                    <td><span class="badge bg-secondary">Compras</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal Crear Rol -->
+    <div class="modal fade" id="modalCrearRol" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Rol
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <form th:action="@{/superAdmin/roles/crear}" method="post">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Rol *</label>
+                <div class="input-group">
+                  <span class="input-group-text">ROLE_</span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nombre"
+                    name="nombre"
+                    required
+                    placeholder="Ej: VENDEDOR"
+                  />
+                </div>
+                <div class="form-text">
+                  El nombre debe ser en mayúsculas y sin espacios
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea
+                  class="form-control"
+                  id="descripcion"
+                  name="descripcion"
+                  rows="3"
+                  placeholder="Describe los permisos y funciones de este rol..."
+                ></textarea>
+              </div>
+
+              <div class="alert alert-info">
+                <i class="bi bi-lightbulb me-2"></i>
+                <strong>Consejo:</strong> Usa nombres descriptivos como
+                ROLE_SUPERVISOR, ROLE_ALMACENERO, etc.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                <i class="bi bi-x-circle"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Crear Rol
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Editar Rol -->
+    <div class="modal fade" id="modalEditarRol" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="bi bi-pencil me-2"></i>Editar Rol
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <form th:action="@{/superAdmin/roles/editar}" method="post">
+            <div class="modal-body">
+              <input type="hidden" id="editRolId" name="id" />
+
+              <div class="mb-3">
+                <label class="form-label">Nombre del Rol</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="editRolNombre"
+                  disabled
+                  readonly
+                />
+                <div class="form-text">
+                  El nombre del rol no se puede modificar
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="editDescripcion" class="form-label"
+                  >Descripción</label
+                >
+                <textarea
+                  class="form-control"
+                  id="editDescripcion"
+                  name="descripcion"
+                  rows="3"
+                  placeholder="Describe los permisos y funciones de este rol..."
+                ></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                <i class="bi bi-x-circle"></i> Cancelar
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-circle"></i> Actualizar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <th:block th:replace="fragments/superadmin-layout :: scripts"></th:block>
+
+    <script>
+      let modalEditarRol = null;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        modalEditarRol = new bootstrap.Modal(
+          document.getElementById("modalEditarRol")
+        );
+
+        // Event delegation para botones
+        document.addEventListener("click", function (e) {
+          if (e.target.closest(".btn-editar-rol")) {
+            const button = e.target.closest(".btn-editar-rol");
+            editarRol(
+              button.getAttribute("data-id"),
+              button.getAttribute("data-nombre"),
+              button.getAttribute("data-descripcion")
+            );
+          }
+
+          if (e.target.closest(".btn-eliminar-rol")) {
+            const button = e.target.closest(".btn-eliminar-rol");
+
+            // Verificar si el botón está deshabilitado
+            if (button.disabled) {
+              Swal.fire({
+                icon: "warning",
+                title: "No se puede eliminar",
+                text: "Los roles del sistema están protegidos y no pueden ser eliminados",
+              });
+              return;
+            }
+
+            eliminarRol(
+              button.getAttribute("data-id"),
+              button.getAttribute("data-nombre")
+            );
+          }
+        });
+      });
+
+      function editarRol(id, nombre, descripcion) {
+        document.getElementById("editRolId").value = id;
+        document.getElementById("editRolNombre").value = nombre;
+        document.getElementById("editDescripcion").value = descripcion || "";
+        modalEditarRol.show();
+      }
+
+      function eliminarRol(id, nombre) {
+        Swal.fire({
+          title: "¿Eliminar rol?",
+          text: `¿Estás seguro de eliminar el rol "${nombre}"? Esta acción no se puede deshacer.`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          confirmButtonText: "Sí, eliminar",
+          cancelButtonText: "Cancelar",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = `/superAdmin/roles/eliminar/${id}`;
+          }
+        });
+      }
+
+      function cargarRutasDelRol(button) {
+        const rolId = button.getAttribute("data-rol-id");
+        const rolNombre = button.getAttribute("data-rol-nombre");
+        
+        document.getElementById("modalRutasRolTitle").textContent = `Rutas asignadas al rol: ${rolNombre}`;
+        
+        fetch(`/superAdmin/rutas/rol/${rolId}`)
+          .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+          })
+          .then(data => {
+            const container = document.getElementById("listaRutasRol");
+            container.innerHTML = "";
+            
+            if (!data || data.length === 0) {
+              container.innerHTML = '<div class="alert alert-info">No hay rutas asignadas a este rol</div>';
+              return;
+            }
+            
+            const html = `
+              <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Ruta</th>
+                      <th>Método</th>
+                      <th>Categoría</th>
+                      <th>Tipo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${data.map(ruta => `
+                      <tr>
+                        <td><code>${ruta.ruta}</code></td>
+                        <td>
+                          <span class="badge bg-${
+                            ruta.metodo === 'GET' ? 'info' : 
+                            ruta.metodo === 'POST' ? 'success' : 
+                            ruta.metodo === 'PUT' ? 'warning' : 'danger'
+                          }">
+                            ${ruta.metodo}
+                          </span>
+                        </td>
+                        <td><small>${ruta.categoria}</small></td>
+                        <td>
+                          <span class="badge bg-${ruta.esPublica ? 'success' : 'warning'}">
+                            ${ruta.esPublica ? 'Pública' : 'Privada'}
+                          </span>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `;
+            container.innerHTML = html;
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            document.getElementById("listaRutasRol").innerHTML = 
+              '<div class="alert alert-danger">Error al cargar las rutas</div>';
+          });
+      }
+    </script>
+
+    <!-- Modal para ver rutas asignadas a un rol -->
+    <div class="modal fade" id="modalRutasRol" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-info text-white">
+            <h5 class="modal-title" id="modalRutasRolTitle">
+              <i class="bi bi-signpost me-2"></i>Rutas del Rol
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="listaRutasRol" class="loading">
+              <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

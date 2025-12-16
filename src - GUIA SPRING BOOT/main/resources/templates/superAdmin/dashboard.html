@@ -1,0 +1,446 @@
+<!-- src/main/resources/templates/superAdmin/dashboard.html -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <th:block
+      th:replace="fragments/superadmin-layout :: head('Dashboard')"
+    ></th:block>
+    <style>
+      .stats-card {
+        transition: all 0.3s ease;
+      }
+      .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      }
+      .action-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+      .action-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--bs-primary);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.2);
+      }
+      .welcome-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+      }
+      .quick-access-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .quick-access-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 2px solid #e9ecef;
+      }
+      .quick-access-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .quick-access-item i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <div th:replace="fragments/navbar :: navbar"></div>
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+        <!-- Sidebar -->
+        <th:block
+          th:replace="fragments/superadmin-layout :: sidebar('dashboard')"
+        ></th:block>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10">
+          <!-- Banner de Bienvenida -->
+          <div class="welcome-banner">
+            <div class="row align-items-center">
+              <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-3">
+                  ¡Bienvenido,
+                  <span th:text="${usuario.nombres}">Super Admin</span>! 👋
+                </h1>
+                <p class="lead mb-0">
+                  Panel de Control del Super Administrador - Acceso Total al
+                  Sistema
+                </p>
+              </div>
+              <div class="col-md-4 text-end">
+                <i
+                  class="bi bi-shield-fill-check"
+                  style="font-size: 5rem; opacity: 0.3"
+                ></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensajes Flash -->
+          <div th:replace="fragments/messages :: flash-messages"></div>
+
+          <!-- Estadísticas Principales -->
+          <h5 class="mb-3 text-muted">
+            <i class="bi bi-graph-up me-2"></i>Estadísticas del Sistema
+          </h5>
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-primary h-100">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h3 class="mb-0" th:text="${totalProductos}">0</h3>
+                    <p class="mb-0 small">Total Productos</p>
+                  </div>
+                  <i class="bi bi-box fs-1 opacity-50"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-success h-100">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h3 class="mb-0" th:text="${productosDisponibles}">0</h3>
+                    <p class="mb-0 small">Productos Disponibles</p>
+                  </div>
+                  <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-info h-100">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h3 class="mb-0" th:text="${totalCategorias ?: 0}">0</h3>
+                    <p class="mb-0 small">Categorías</p>
+                  </div>
+                  <i class="bi bi-tags fs-1 opacity-50"></i>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card stats-card text-white bg-warning h-100">
+                <div
+                  class="card-body d-flex justify-content-between align-items-center"
+                >
+                  <div>
+                    <h3 class="mb-0">
+                      S/
+                      <span
+                        th:text="${#numbers.formatDecimal(stockTotal, 1, 2)}"
+                        >0.00</span
+                      >
+                    </h3>
+                    <p class="mb-0 small">Valor Stock Total</p>
+                  </div>
+                  <i class="bi bi-currency-dollar fs-1 opacity-50"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acceso Rápido -->
+          <section class="mb-4">
+            <h5 class="mb-3 text-muted">
+              <i class="bi bi-lightning-charge me-2"></i>Acceso Rápido
+            </h5>
+            <div class="quick-access-grid">
+              <a th:href="@{/superAdmin/usuarios}" class="text-decoration-none">
+                <div class="quick-access-item">
+                  <i class="bi bi-people text-danger"></i>
+                  <h6 class="mb-0">Usuarios</h6>
+                  <small class="text-muted">Gestionar usuarios</small>
+                </div>
+              </a>
+              <a th:href="@{/superAdmin/roles}" class="text-decoration-none">
+                <div class="quick-access-item">
+                  <i class="bi bi-shield-check text-danger"></i>
+                  <h6 class="mb-0">Roles</h6>
+                  <small class="text-muted">Administrar roles</small>
+                </div>
+              </a>
+              <a
+                th:href="@{/superAdmin/productos}"
+                class="text-decoration-none"
+              >
+                <div class="quick-access-item">
+                  <i class="bi bi-box text-primary"></i>
+                  <h6 class="mb-0">Productos</h6>
+                  <small class="text-muted">Gestionar productos</small>
+                </div>
+              </a>
+              <a
+                th:href="@{/superAdmin/categorias}"
+                class="text-decoration-none"
+              >
+                <div class="quick-access-item">
+                  <i class="bi bi-tags text-warning"></i>
+                  <h6 class="mb-0">Categorías</h6>
+                  <small class="text-muted">Gestionar categorías</small>
+                </div>
+              </a>
+              <a th:href="@{/superAdmin/resenas}" class="text-decoration-none">
+                <div class="quick-access-item">
+                  <i class="bi bi-chat-square-text text-info"></i>
+                  <h6 class="mb-0">Reseñas</h6>
+                  <small class="text-muted">Moderar reseñas</small>
+                </div>
+              </a>
+              <a th:href="@{/}" class="text-decoration-none">
+                <div class="quick-access-item">
+                  <i class="bi bi-shop text-secondary"></i>
+                  <h6 class="mb-0">Tienda</h6>
+                  <small class="text-muted">Ver tienda</small>
+                </div>
+              </a>
+            </div>
+          </section>
+
+          <!-- Métricas de Ventas -->
+          <section class="mb-4">
+            <h5 class="mb-3 text-muted">
+              <i class="bi bi-graph-up-arrow me-2"></i>Métricas de Ventas
+            </h5>
+            <div class="row g-3">
+              <!-- Total de Ventas -->
+              <div class="col-md-6 col-lg-3">
+                <div class="card stats-card text-white bg-success h-100">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 class="mb-0">
+                        S/ <span th:text="${#numbers.formatDecimal(totalVentas, 1, 2)}">0.00</span>
+                      </h4>
+                      <p class="mb-0 small">Total de Ventas</p>
+                    </div>
+                    <i class="bi bi-wallet2 fs-1 opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ventas Hoy -->
+              <div class="col-md-6 col-lg-3">
+                <div class="card stats-card text-white bg-info h-100">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 class="mb-0">
+                        S/ <span th:text="${#numbers.formatDecimal(ventasHoy, 1, 2)}">0.00</span>
+                      </h4>
+                      <p class="mb-0 small">Ventas de Hoy</p>
+                    </div>
+                    <i class="bi bi-calendar-check fs-1 opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Total Compras Completadas -->
+              <div class="col-md-6 col-lg-3">
+                <div class="card stats-card text-white bg-warning h-100">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 class="mb-0" th:text="${totalComprasCompletadas}">0</h4>
+                      <p class="mb-0 small">Compras Completadas</p>
+                    </div>
+                    <i class="bi bi-bag-check fs-1 opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ticket Promedio -->
+              <div class="col-md-6 col-lg-3">
+                <div class="card stats-card text-white bg-primary h-100">
+                  <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                      <h4 class="mb-0">
+                        S/ <span th:text="${totalComprasCompletadas > 0 ? #numbers.formatDecimal(totalVentas / totalComprasCompletadas, 1, 2) : '0.00'}">0.00</span>
+                      </h4>
+                      <p class="mb-0 small">Ticket Promedio</p>
+                    </div>
+                    <i class="bi bi-graph-up fs-1 opacity-50"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Productos Más Vendidos -->
+          <section class="row mb-4">
+            <div class="col-lg-6">
+              <div class="card shadow-sm">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                  <h6 class="card-title mb-0">
+                    <i class="bi bi-fire me-2"></i>Top 5 Productos Más Vendidos
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div th:if="${#lists.isEmpty(productosMasVendidos)}" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2 mb-0">No hay datos de ventas disponibles</p>
+                  </div>
+                  <div th:unless="${#lists.isEmpty(productosMasVendidos)}">
+                    <div class="table-responsive">
+                      <table class="table table-sm mb-0">
+                        <thead>
+                          <tr class="text-muted small">
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th class="text-end">Cantidad</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr th:each="item, iter : ${productosMasVendidos}">
+                            <td class="text-muted small"><span th:text="${iter.count}">1</span></td>
+                            <td>
+                              <span th:text="${item.nombre}">Producto</span>
+                            </td>
+                            <td class="text-end fw-bold" th:text="${item.cantidad}">0</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Productos por Ingresos -->
+            <div class="col-lg-6">
+              <div class="card shadow-sm">
+                <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: white;">
+                  <h6 class="card-title mb-0">
+                    <i class="bi bi-cash-coin me-2"></i>Top 5 Productos por Ingresos
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <div th:if="${#lists.isEmpty(topProductosRevenue)}" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                    <p class="mt-2 mb-0">No hay datos de ingresos disponibles</p>
+                  </div>
+                  <div th:unless="${#lists.isEmpty(topProductosRevenue)}">
+                    <div class="table-responsive">
+                      <table class="table table-sm mb-0">
+                        <thead>
+                          <tr class="text-muted small">
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th class="text-end">Ingresos</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr th:each="item, iter : ${topProductosRevenue}">
+                            <td class="text-muted small"><span th:text="${iter.count}">1</span></td>
+                            <td>
+                              <span th:text="${item.nombre}">Producto</span>
+                            </td>
+                            <td class="text-end fw-bold">
+                              S/ <span th:text="${#numbers.formatDecimal(item.ingresos, 1, 2)}">0.00</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Información del Sistema -->
+          <section class="row mt-4">
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h6 class="card-title mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Información del
+                    Sistema
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                      <i class="bi bi-check-circle text-success me-2"></i>
+                      Sistema operativo correctamente
+                    </li>
+                    <li class="mb-2">
+                      <i class="bi bi-database text-primary me-2"></i>
+                      Base de datos conectada
+                    </li>
+                    <li class="mb-2">
+                      <i class="bi bi-shield-check text-warning me-2"></i>
+                      Seguridad activa
+                    </li>
+                    <li>
+                      <i class="bi bi-clock text-info me-2"></i>
+                      Última actualización:
+                      <span
+                        th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}"
+                        >Ahora</span
+                      >
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                  <h6 class="card-title mb-0">
+                    <i class="bi bi-person-circle me-2"></i>Tu Información
+                  </h6>
+                </div>
+                <div class="card-body">
+                  <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                      <strong>Usuario:</strong>
+                      <span th:text="${usuario.user}">admin</span>
+                    </li>
+                    <li class="mb-2">
+                      <strong>Nombre:</strong>
+                      <span
+                        th:text="${usuario.nombres + ' ' + usuario.apellidoPaterno}"
+                        >Admin</span
+                      >
+                    </li>
+                    <li class="mb-2">
+                      <strong>Correo:</strong>
+                      <span th:text="${usuario.correo}">admin@sistema.com</span>
+                    </li>
+                    <li>
+                      <strong>Rol:</strong>
+                      <span class="badge bg-danger">SUPER ADMINISTRADOR</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <th:block th:replace="fragments/superadmin-layout :: scripts"></th:block>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Dashboard del Super Admin cargado correctamente");
+      });
+    </script>
+  </body>
+</html>

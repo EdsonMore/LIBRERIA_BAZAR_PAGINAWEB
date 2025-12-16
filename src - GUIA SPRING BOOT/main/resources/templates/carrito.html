@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: head}">
+    <title>Carrito de Compras - Tu Bazar Plus</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Mensajes flash -->
+    <div th:replace="~{fragments/messages :: flash-messages}"></div>
+
+    <!-- Contenido principal -->
+    <div class="container my-5">
+      <!-- Header -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <h2 class="fw-bold">
+            <i class="bi bi-cart-check me-2"></i>Finalizar Compra
+          </h2>
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+              <li class="breadcrumb-item">
+                <a th:href="@{/}" class="text-decoration-none">Inicio</a>
+              </li>
+              <li class="breadcrumb-item">
+                <a th:href="@{/productos}" class="text-decoration-none"
+                  >Productos</a
+                >
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">
+                Carrito
+              </li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Sección del carrito (siempre presente para permitir render desde JS/localStorage) -->
+      <div class="row g-4" id="carrito-content">
+        <!-- Columna izquierda: Formulario -->
+        <div class="col-lg-8">
+          <!-- Alerta informativa -->
+          <div
+            th:if="${session.usuario != null}"
+            class="alert alert-info border-0 mb-4"
+            role="alert"
+          >
+            <div class="d-flex align-items-start">
+              <i class="bi bi-info-circle fs-4 me-3"></i>
+              <div>
+                <strong>Información de tu cuenta</strong>
+                <p class="mb-0 small">
+                  Los datos se han rellenado automáticamente desde tu registro.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card del formulario -->
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white py-3">
+              <h5 class="mb-0">
+                <i class="bi bi-clipboard-check me-2"></i>Datos de Envío
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              <form
+                th:action="@{/procesar-pago}"
+                method="post"
+                id="formCompra"
+                novalidate
+              >
+                <!-- Indica si el usuario está autenticado: usado por JS -->
+                <input
+                  type="hidden"
+                  id="isLoggedIn"
+                  th:value="${session.usuario != null ? 'true' : 'false'}"
+                />
+                <div class="row g-3">
+                  <!-- Nombre -->
+                  <div class="col-md-6">
+                    <label for="nombre" class="form-label fw-semibold">
+                      <i class="bi bi-person me-1"></i>Nombre
+                    </label>
+                    <input
+                      type="text"
+                      id="nombre"
+                      name="nombre"
+                      class="form-control"
+                      th:value="${session.usuario != null ? session.usuario.nombres : ''}"
+                      placeholder="Ingresa tu nombre"
+                      required
+                    />
+                    <div class="invalid-feedback">
+                      Por favor ingresa tu nombre.
+                    </div>
+                  </div>
+
+                  <!-- Apellido -->
+                  <div class="col-md-6">
+                    <label for="apellido" class="form-label fw-semibold">
+                      <i class="bi bi-person me-1"></i>Apellido
+                    </label>
+                    <input
+                      type="text"
+                      id="apellido"
+                      name="apellido"
+                      class="form-control"
+                      th:value="${session.usuario != null ? (session.usuario.apellidoPaterno + ' ' + session.usuario.apellidoMaterno) : ''}"
+                      placeholder="Ingresa tu apellido"
+                      required
+                    />
+                    <div class="invalid-feedback">
+                      Por favor ingresa tu apellido.
+                    </div>
+                  </div>
+
+                  <!-- Email -->
+                  <div class="col-md-6">
+                    <label for="email" class="form-label fw-semibold">
+                      <i class="bi bi-envelope me-1"></i>Correo Electrónico
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      class="form-control"
+                      th:value="${session.usuario != null ? session.usuario.correo : ''}"
+                      placeholder="correo@ejemplo.com"
+                      required
+                    />
+                    <div class="invalid-feedback">
+                      Por favor ingresa un correo válido.
+                    </div>
+                  </div>
+
+                  <!-- Celular -->
+                  <div class="col-md-6">
+                    <label for="celular" class="form-label fw-semibold">
+                      <i class="bi bi-phone me-1"></i>Teléfono/Celular
+                    </label>
+                    <input
+                      type="tel"
+                      id="celular"
+                      name="celular"
+                      class="form-control"
+                      th:value="${session.usuario != null ? session.usuario.numero : ''}"
+                      placeholder="999 999 999"
+                      pattern="[0-9]{9}"
+                      required
+                    />
+                    <div class="invalid-feedback">
+                      Por favor ingresa un teléfono válido (9 dígitos).
+                    </div>
+                  </div>
+
+                  <!-- DNI -->
+                  <div class="col-md-6">
+                    <label for="dni" class="form-label fw-semibold">
+                      <i class="bi bi-file-person me-1"></i>DNI
+                    </label>
+                    <input
+                      type="text"
+                      id="dni"
+                      name="dni"
+                      class="form-control"
+                      th:value="${session.usuario != null ? session.usuario.dni : ''}"
+                      placeholder="DNI"
+                      pattern="[0-9]{8}"
+                      readonly
+                    />
+                    <div class="invalid-feedback">
+                      Por favor ingresa un DNI válido (8 dígitos).
+                    </div>
+                  </div>
+
+                  <!-- Dirección -->
+                  <div class="col-12">
+                    <label for="direccion" class="form-label fw-semibold">
+                      <i class="bi bi-geo-alt me-1"></i>Dirección de Entrega
+                    </label>
+                    <input
+                      type="text"
+                      id="direccion"
+                      name="direccion"
+                      class="form-control"
+                      th:value="${session.usuario != null ? session.usuario.direccion1 : ''}"
+                      placeholder="Av. Principal 123, Distrito, Ciudad"
+                      required
+                    />
+                    <div class="invalid-feedback">
+                      Por favor ingresa tu dirección.
+                    </div>
+                  </div>
+
+                  <!-- Método de Pago -->
+                  <div class="col-12">
+                    <label for="metodoPago" class="form-label fw-semibold">
+                      <i class="bi bi-credit-card me-1"></i>Método de Pago
+                    </label>
+                    <select
+                      class="form-select"
+                      id="metodoPago"
+                      name="metodoPago"
+                      required
+                    >
+                      <option value="" selected disabled>
+                        Selecciona un método de pago
+                      </option>
+                      <option value="yape">
+                        <i class="bi bi-phone"></i> Yape
+                      </option>
+                      <option value="transferencia">
+                        <i class="bi bi-bank"></i> Transferencia Bancaria
+                      </option>
+                      <option value="contra_entrega">
+                        <i class="bi bi-box-seam"></i> Contra Entrega
+                      </option>
+                    </select>
+                    <div class="invalid-feedback">
+                      Por favor selecciona un método de pago.
+                    </div>
+                  </div>
+
+                  <!-- Botón Finalizar -->
+                  <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-dark btn-lg w-100">
+                      <i class="bi bi-credit-card me-2"></i>Finalizar Compra
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha: Resumen -->
+        <div class="col-lg-4">
+          <div class="position-sticky" style="top: 100px">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-dark text-white py-3">
+                <h5 class="mb-0">
+                  <i class="bi bi-cart3 me-2"></i>Resumen del Pedido
+                </h5>
+              </div>
+              <div class="card-body p-3">
+                <!-- Items del carrito -->
+                <div
+                  class="list-group list-group-flush mb-3"
+                  style="max-height: 400px; overflow-y: auto"
+                >
+                  <div
+                    th:each="item : ${carrito.items}"
+                    class="list-group-item cart-item d-flex align-items-start mb-3 pb-3 border-bottom"
+                    th:attr="id=${'carrito-item-' + item.producto.id}"
+                  >
+                    <!-- Imagen -->
+                    <img
+                      th:src="@{${item.producto.imagen}}"
+                      th:alt="${item.producto.nombre}"
+                      class="rounded me-3 flex-shrink-0"
+                      width="60"
+                      height="60"
+                      style="object-fit: cover"
+                    />
+
+                    <!-- Info producto -->
+                    <div class="flex-grow-1 min-w-0">
+                      <h6
+                        class="mb-2 text-truncate"
+                        th:text="${item.producto.nombre}"
+                      ></h6>
+
+                      <!-- Controles de cantidad -->
+                      <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="btn-group btn-group-sm" role="group">
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-decrement"
+                            th:attr="data-producto-id=${item.producto.id}"
+                          >
+                            <i class="bi bi-dash"></i>
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            class="form-control form-control-sm text-center cantidad-input"
+                            th:attr="data-producto-id=${item.producto.id}, data-precio=${item.producto.precio}, max=${item.producto.stock}"
+                            th:value="${item.cantidad}"
+                            style="width: 60px"
+                          />
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-increment"
+                            th:attr="data-producto-id=${item.producto.id}"
+                          >
+                            <i class="bi bi-plus"></i>
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-outline-danger eliminar-item"
+                          th:attr="data-producto-id=${item.producto.id}"
+                          title="Eliminar producto"
+                        >
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+
+                      <!-- Precio -->
+                      <div class="fw-bold text-success">
+                        <span
+                          th:attr="id=${'subtotal-item-' + item.producto.id}"
+                          th:text="'S/. ' + ${#numbers.formatDecimal(item.subtotal, 0, 2)}"
+                        ></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Totales -->
+                <div class="bg-light p-3 rounded">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal:</span>
+                    <strong
+                      id="subtotal-display"
+                      th:text="'S/. ' + ${#numbers.formatDecimal(carrito.subtotal, 0, 2)}"
+                      >S/. 0.00</strong
+                    >
+                  </div>
+                  <div class="d-flex justify-content-between mb-2" id="igv-row">
+                    <span class="text-muted"><span id="igv-label">IGV (18%):</span></span>
+                    <strong
+                      id="igv-display"
+                      th:text="'S/. ' + ${#numbers.formatDecimal(carrito.igv, 0, 2)}"
+                      >S/. 0.00</strong
+                    >
+                  </div>
+                  <div class="d-flex justify-content-between mb-2" id="envio-row">
+                    <span class="text-muted">Envío:</span>
+                    <strong
+                      id="envio-display"
+                      th:text="'S/. ' + ${#numbers.formatDecimal(carrito.costoEnvio, 0, 2)}"
+                      >S/. 0.00</strong
+                    >
+                  </div>
+                  <hr class="my-2" />
+                  <div class="d-flex justify-content-between fs-5 fw-bold">
+                    <span>Total:</span>
+                    <span
+                      id="total-display"
+                      class="text-success"
+                      th:text="'S/. ' + ${#numbers.formatDecimal(carrito.total, 0, 2)}"
+                      >S/. 0.00</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-grid gap-2 mt-3">
+                  <a th:href="@{/productos}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Seguir Comprando
+                  </a>
+                  <button
+                    type="button"
+                    onclick="limpiarCarrito()"
+                    class="btn btn-outline-danger"
+                  >
+                    <i class="bi bi-trash me-2"></i>Vaciar Carrito
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tarjeta de seguridad -->
+            <div class="card border-0 bg-light mt-3">
+              <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-shield-check text-success fs-3 me-3"></i>
+                  <div>
+                    <h6 class="mb-1">Compra Segura</h6>
+                    <small class="text-muted">Tus datos están protegidos</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <!-- Script de validación del formulario -->
+    <script>
+      // Validación Bootstrap del formulario
+      (function () {
+        "use strict";
+        const form = document.getElementById("formCompra");
+        if (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        }
+      })();
+
+      // 🔴 ELIMINAR la función limpiarCarrito() de aquí
+      // La función limpiarCarrito() ya está en carrito.js
+      // NO definir la función aquí para evitar conflictos
+    </script>
+
+    <!-- Modal de confirmación de pago -->
+    <div
+      class="modal fade"
+      id="modalConfirmPago"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalConfirmPagoLabel">
+              Confirmar pago
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p id="modalPagoMensaje"></p>
+            <ul class="list-unstyled">
+              <li>
+                <strong>Cliente:</strong> <span id="modalClienteNombre"></span>
+              </li>
+              <li>
+                <strong>Dirección:</strong>
+                <span id="modalClienteDireccion"></span>
+              </li>
+              <li>
+                <strong>Método de pago:</strong>
+                <span id="modalMetodoPago"></span>
+              </li>
+              <li>
+                <strong>Monto total:</strong> <span id="modalMontoTotal"></span>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button type="button" id="confirmarPagoBtn" class="btn btn-primary">
+              Confirmar y Pagar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Utilidades para token CSRF
+      function obtenerTokenCSRF() {
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const header = document.querySelector('meta[name="csrf-header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
+        return { token, header };
+      }
+
+      function agregarHeadersCSRF(headers = {}) {
+        const { token, header } = obtenerTokenCSRF();
+        if (token) {
+          headers[header] = token;
+        }
+        return headers;
+      }
+
+      // Validación Bootstrap del formulario
+      (function () {
+        "use strict";
+        const form = document.getElementById("formCompra");
+        if (form) {
+          form.addEventListener(
+            "submit",
+            function (event) {
+              if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add("was-validated");
+            },
+            false
+          );
+        }
+      })();
+    </script>
+    <script>
+      // Interceptar submit para mostrar modal según método de pago
+      (function () {
+        const form = document.getElementById("formCompra");
+        const modalEl = document.getElementById("modalConfirmPago");
+        const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+
+        if (!form) return;
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Si no está logueado, pedir que inicie sesión o registre antes de continuar
+          const isLoggedIn =
+            document.getElementById("isLoggedIn")?.value === "true";
+          if (!isLoggedIn) {
+            Swal.fire({
+              title: "Debes iniciar sesión",
+              text: "Para completar la compra debes iniciar sesión o registrarte.",
+              icon: "warning",
+              showDenyButton: true,
+              showCancelButton: true,
+              confirmButtonText: "Iniciar sesión",
+              denyButtonText: "Registrarme",
+              cancelButtonText: "Cancelar",
+            }).then((result) => {
+              if (result.isConfirmed) {
+                window.location.href = "/login";
+              } else if (result.isDenied) {
+                window.location.href = "/registro";
+              }
+            });
+            return;
+          }
+
+          // Obtener datos del formulario
+          const nombres = document.getElementById("nombre")?.value || "";
+          const apellido = document.getElementById("apellido")?.value || "";
+          const correo = document.getElementById("email")?.value || "";
+          const telefono = document.getElementById("celular")?.value || "";
+          const dni = document.getElementById("dni")?.value || "";
+          const direccion = document.getElementById("direccion")?.value || "";
+          const metodoPagoEl = document.getElementById("metodoPago");
+          const metodoPago = metodoPagoEl ? metodoPagoEl.value : "efectivo";
+
+          // Obtener montos desde la página (renderizados por Thymeleaf o JS)
+          const totalText =
+            document.getElementById("total-display")?.textContent || "";
+          const monto = totalText.replace(/[^0-9.,]/g, "").trim();
+
+          // Rellenar modal
+          document.getElementById("modalClienteNombre").textContent =
+            nombres + " " + apellido;
+          document.getElementById("modalClienteDireccion").textContent =
+            direccion;
+          document.getElementById("modalMetodoPago").textContent = metodoPago;
+          document.getElementById("modalMontoTotal").textContent = totalText;
+
+          const esYape = metodoPago.toLowerCase().includes("yape");
+          const esTransfer = metodoPago.toLowerCase().includes("transfer");
+          const esContraEntrega = metodoPago.toLowerCase().includes("contra_entrega");
+
+          const mensaje = esYape
+            ? "Escanea el QR o realiza la transferencia a la cuenta Yape mostrada después de confirmar."
+            : esTransfer
+            ? "Revisa los datos bancarios para completar la transferencia después de confirmar."
+            : esContraEntrega
+            ? "Tu pedido será separado y estará listo para recoger en tienda. Pagarás al momento de recogerlo."
+            : "Confirmar pedido y proceder al pago en entrega.";
+
+          // Mostrar mensaje y, opcionalmente, una imagen (ej. QR de Yape)
+          const pagoMsgEl = document.getElementById("modalPagoMensaje");
+          if (pagoMsgEl) {
+            if (esYape) {
+              pagoMsgEl.innerHTML = `
+            <p class="mb-3">${mensaje}</p>
+            <div class="text-center">
+              <img src="/img/yape.png" alt="QR Yape" class="img-fluid" style="max-width:220px;">
+              <div class="small text-muted mt-2">Escanea el código para pagar con Yape</div>
+            </div>
+          `;
+            } else if (esTransfer) {
+              pagoMsgEl.innerHTML = `
+            <p class="mb-2">${mensaje}</p>
+            <div class="small text-muted">Datos bancarios: Banco XYZ - Cuenta: 123-456-789 - Titular: TU BAZAR PLUS</div>
+          `;
+            } else if (esContraEntrega) {
+              pagoMsgEl.innerHTML = `
+            <div class="alert alert-info" role="alert">
+              <i class="bi bi-info-circle me-2"></i>
+              <strong>Opción: Recoger en Tienda</strong>
+              <p class="mt-2 mb-0">${mensaje}</p>
+              <p class="mt-2 small text-muted mb-0">
+                📍 <strong>Dirección de tienda:</strong> Av. Principal 123, Distrito - Ciudad
+              </p>
+              <p class="mt-1 small text-muted mb-0">
+                🕐 <strong>Horario:</strong> Lunes a Domingo, 9:00 AM - 8:00 PM
+              </p>
+            </div>
+          `;
+            } else {
+              pagoMsgEl.textContent = mensaje;
+            }
+          }
+
+          // Mostrar modal
+          if (bsModal) bsModal.show();
+
+          // Handler para confirmar pago
+          const confirmarBtn = document.getElementById("confirmarPagoBtn");
+          confirmarBtn.onclick = async function () {
+            confirmarBtn.disabled = true;
+            confirmarBtn.innerHTML =
+              '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Procesando';
+
+            // Recoger items del carrito desde los inputs en el DOM
+            let items = [];
+            const inputsCantidad = document.querySelectorAll(".cantidad-input");
+            inputsCantidad.forEach((input) => {
+              const productoId = input.getAttribute("data-producto-id");
+              const cantidad = parseInt(input.value) || 0;
+              if (productoId && cantidad > 0) {
+                items.push({ id: parseInt(productoId), cantidad });
+              }
+            });
+
+            // Si no hay items en el DOM, intentar obtener de localStorage
+            if (items.length === 0) {
+              try {
+                const raw = localStorage.getItem("carritoAnonimo");
+                items = raw
+                  ? JSON.parse(raw).map((i) => ({
+                      id: i.id,
+                      cantidad: i.cantidad,
+                    }))
+                  : [];
+              } catch (e) {
+                items = [];
+              }
+            }
+
+            // Validar que hay items antes de continuar
+            if (items.length === 0) {
+              Swal.fire("Error", "El carrito está vacío", "error");
+              confirmarBtn.disabled = false;
+              confirmarBtn.innerHTML = "Confirmar y Pagar";
+              if (bsModal) bsModal.hide();
+              return;
+            }
+
+            // Payload
+            const payload = {
+              nombres,
+              apellido,
+              correo,
+              telefono,
+              dni,
+              direccion,
+              metodoPago,
+              items,
+            };
+
+            try {
+              const headers = agregarHeadersCSRF({
+                "Content-Type": "application/json",
+              });
+
+              const resp = await fetch("/api/compras/realizar-guest", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: headers,
+                body: JSON.stringify(payload),
+              });
+
+              const data = await resp.json();
+              if (resp.ok && data.success) {
+                // Limpiar carrito local
+                localStorage.removeItem("carritoAnonimo");
+
+                // Limpiar carrito del servidor también
+                try {
+                  const headersLimpiar = agregarHeadersCSRF({
+                    "Content-Type": "application/json",
+                  });
+
+                  await fetch("/api/carrito/limpiar", {
+                    method: "DELETE",
+                    credentials: "same-origin",
+                    headers: headersLimpiar,
+                  });
+                } catch (e) {
+                  console.warn("No se pudo limpiar carrito del servidor:", e);
+                }
+
+                // Mostrar mensaje y redirigir al home
+                Swal.fire({
+                  title: "Compra realizada",
+                  text: "Tu pedido se registró correctamente",
+                  icon: "success",
+                  timer: 2000,
+                  showConfirmButton: false,
+                }).then(() => (window.location.href = "/"));
+              } else {
+                Swal.fire(
+                  "Error",
+                  (data && data.message) || "No se pudo procesar la compra",
+                  "error"
+                );
+              }
+            } catch (err) {
+              console.error(err);
+              Swal.fire("Error", "Error de conexión", "error");
+            } finally {
+              confirmarBtn.disabled = false;
+              confirmarBtn.innerHTML = "Confirmar y Pagar";
+              if (bsModal) bsModal.hide();
+            }
+          };
+        });
+      })();
+    </script>
+  </body>
+</html>

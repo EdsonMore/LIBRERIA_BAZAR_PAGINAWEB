@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <div th:replace="~{fragments/layout :: head}"></div>
+    <title>Mis Compras - Tu Bazar Plus</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Contenido principal -->
+    <div class="container my-5">
+      <div class="row">
+        <div class="col-12">
+          <!-- Header -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-bag-check"></i> Mis Compras</h2>
+            <a th:href="@{/}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver al Inicio
+            </a>
+          </div>
+
+          <!-- Lista de compras vacía -->
+          <div
+            th:if="${compras == null or #lists.isEmpty(compras)}"
+            class="text-center py-5"
+          >
+            <div class="card shadow">
+              <div class="card-body p-5">
+                <i class="bi bi-bag-x display-1 text-muted mb-3"></i>
+                <h4>No tienes compras realizadas</h4>
+                <p class="text-muted mb-4">
+                  Cuando realices tu primera compra, aparecerá en esta sección.
+                </p>
+                <a th:href="@{/productos}" class="btn btn-primary btn-lg">
+                  <i class="bi bi-box"></i> Explorar Productos
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tarjetas de compras -->
+          <div
+            th:if="${compras != null and !#lists.isEmpty(compras)}"
+            class="row g-4"
+          >
+            <div th:each="compra : ${compras}" class="col-12">
+              <div class="card compra-card shadow-sm">
+                <div class="card-header bg-light">
+                  <div class="row align-items-center">
+                    <div class="col-md-6">
+                      <h5 class="mb-0">
+                        Compra #<span th:text="${compra.id}">0001</span>
+                      </h5>
+                      <small class="text-muted">
+                        <i class="bi bi-calendar"></i>
+                        <span
+                          th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}"
+                        >
+                          01/01/2024 10:30
+                        </span>
+                      </small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                      <span
+                        th:classappend="'badge ' + 
+                          (compra.estado == 'PENDIENTE' ? 'bg-warning' : 
+                          (compra.estado == 'CONFIRMADA' ? 'bg-info' : 
+                          (compra.estado == 'DESPACHADO' ? 'bg-secondary' :
+                          (compra.estado == 'ENVIADA' ? 'bg-primary' : 'bg-success'))))"
+                        class="badge"
+                        th:text="${compra.estado}"
+                      >
+                        PENDIENTE
+                      </span>
+                      <div class="mt-1">
+                        <strong class="h5 text-success">
+                          S/.
+                          <span
+                            th:text="${#numbers.formatDecimal(compra.total, 0, 2)}"
+                            >0.00</span
+                          >
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="row">
+                    <!-- Productos -->
+                    <div class="col-md-6">
+                      <h6>Productos:</h6>
+                      <div
+                        th:each="item : ${compra.items}"
+                        class="d-flex align-items-center mb-2"
+                      >
+                        <img
+                          th:src="${item.producto.imagen}"
+                          th:alt="${item.producto.nombre}"
+                          width="40"
+                          class="rounded me-2"
+                        />
+                        <div class="flex-grow-1">
+                          <div
+                            class="fw-bold"
+                            th:text="${item.producto.nombre}"
+                          ></div>
+                          <small class="text-muted">
+                            Cantidad:
+                            <span th:text="${item.cantidad}">1</span> • S/.
+                            <span
+                              th:text="${#numbers.formatDecimal(item.producto.precio, 0, 2)}"
+                              >0.00</span
+                            >
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Información de envío y pago -->
+                    <div class="col-md-6">
+                      <div class="row">
+                        <div class="col-12 mb-2">
+                          <strong>Método de pago:</strong>
+                          <span 
+                            th:text="${compra.metodoPago == 'contra_entrega' ? 'Contra Entrega' : 
+                                      (compra.metodoPago == 'transferencia' ? 'Transferencia Bancaria' : 
+                                      (compra.metodoPago == 'yape' ? 'Yape' : compra.metodoPago))}"
+                          >Yape</span>
+                        </div>
+                        <div class="col-12 mb-2">
+                          <strong>Dirección de entrega:</strong>
+                          <div
+                            class="text-muted small"
+                            th:text="${compra.direccionEntrega}"
+                          >
+                            Dirección del cliente
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-footer bg-white">
+                  <div class="row align-items-center">
+                    <div class="col-md-6">
+                      <small class="text-muted">
+                        <strong>Items:</strong>
+                        <span th:text="${compra.items.size()}">0</span> •
+                        <strong>Total:</strong>
+                        S/.
+                        <span
+                          th:text="${#numbers.formatDecimal(compra.total, 0, 2)}"
+                          >0.00</span
+                        >
+                      </small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                      <button
+                        th:if="${compra.estado == 'PENDIENTE'}"
+                        class="btn btn-warning btn-sm"
+                        disabled
+                      >
+                        <i class="bi bi-clock"></i> Pendiente
+                      </button>
+                      <button
+                        th:if="${compra.estado == 'CONFIRMADA'}"
+                        class="btn btn-info btn-sm"
+                        disabled
+                      >
+                        <i class="bi bi-check-circle"></i> Confirmada
+                      </button>
+                      <button
+                        th:if="${compra.estado == 'DESPACHADO'}"
+                        class="btn btn-secondary btn-sm"
+                        disabled
+                      >
+                        <i class="bi bi-box-seam"></i> Listo para recoger
+                      </button>
+                      <button
+                        th:if="${compra.estado == 'ENVIADA'}"
+                        class="btn btn-info btn-sm"
+                        disabled
+                      >
+                        <i class="bi bi-truck"></i> En camino
+                      </button>
+                      <button
+                        th:if="${compra.estado == 'ENTREGADA'}"
+                        class="btn btn-success btn-sm"
+                        disabled
+                      >
+                        <i class="bi bi-check-circle"></i> Entregada
+                      </button>
+                      <button
+                        th:onclick="|verDetalleCompra(${compra.id})|"
+                        class="btn btn-primary btn-sm ms-2"
+                      >
+                        <i class="bi bi-eye"></i> Ver Detalles
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Detalle de Compra -->
+    <div class="modal fade" id="modalDetalleCompra" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-light">
+            <h5 class="modal-title" id="modalTitulo">Detalle de Compra</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="modalContenido">
+            <div class="text-center p-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              id="btnGenerarBoleta"
+              class="btn btn-success"
+              style="display: none;"
+              onclick="generarBoleta()"
+            >
+              <i class="bi bi-file-pdf"></i> Descargar Boleta
+            </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // Definir funciones globales ANTES de que se necesiten
+    window.verDetalleCompra = function(compraId) {
+      const modal = new bootstrap.Modal(document.getElementById('modalDetalleCompra'));
+      
+      fetch(`/compras/${compraId}/detalle`)
+        .then(response => {
+          if (!response.ok) throw new Error('Error al cargar detalles');
+          return response.json();
+        })
+        .then(compra => {
+          document.getElementById('modalTitulo').textContent = `Detalle de Compra #${compra.id}`;
+          
+          let metodoPagoTexto = compra.metodoPago;
+          if (compra.metodoPago === 'contra_entrega') metodoPagoTexto = 'Contra Entrega';
+          else if (compra.metodoPago === 'transferencia') metodoPagoTexto = 'Transferencia Bancaria';
+          else if (compra.metodoPago === 'yape') metodoPagoTexto = 'Yape';
+          
+          let productosHTML = '';
+          if (compra.detalles && compra.detalles.length > 0) {
+            productosHTML = `
+              <div class="table-responsive mt-3">
+                <table class="table table-sm table-bordered">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Cantidad</th>
+                      <th>Precio Unit.</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+            `;
+          
+          compra.detalles.forEach(detalle => {
+            productosHTML += `
+              <tr>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <img src="${detalle.productoImagen || '/img/default-product.png'}" 
+                         alt="${detalle.productoNombre}" 
+                         style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px;">
+                    <span>${detalle.productoNombre}</span>
+                  </div>
+                </td>
+                <td class="text-center">${detalle.cantidad}</td>
+                <td class="text-end">S/ ${detalle.precioUnitario.toFixed(2)}</td>
+                <td class="text-end">S/ ${detalle.subtotal.toFixed(2)}</td>
+              </tr>
+            `;
+          });
+          
+          productosHTML += `</tbody></table></div>`;
+        }
+        
+        const contenido = `
+          <div class="text-start">
+            <h6 class="border-bottom pb-2 mb-3"><i class="bi bi-box-seam me-2"></i>Productos</h6>
+            ${productosHTML}
+            
+            <h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-info-circle me-2"></i>Información de Compra</h6>
+            <p><strong>Fecha:</strong> ${new Date(compra.fechaCompra).toLocaleDateString('es-PE')}</p>
+            <p><strong>Método de Pago:</strong> ${metodoPagoTexto}</p>
+            <p><strong>Dirección de Entrega:</strong> ${compra.direccionEntrega}</p>
+            <p><strong>Estado:</strong> <span class="badge bg-${
+              compra.estado === 'PENDIENTE' ? 'warning' :
+              compra.estado === 'CONFIRMADA' ? 'info' :
+              compra.estado === 'DESPACHADO' ? 'secondary' :
+              compra.estado === 'ENVIADA' ? 'primary' :
+              compra.estado === 'ENTREGADA' ? 'success' : 'danger'
+            }">${compra.estado}</span></p>
+            ${compra.numeroSeguimiento ? `<p><strong>Número de Seguimiento:</strong> ${compra.numeroSeguimiento}</p>` : ''}
+            ${compra.estado === 'RECHAZADA' && compra.motivoRechazo ? `<div class="alert alert-danger mt-2"><strong>Motivo de Rechazo:</strong> ${compra.motivoRechazo}</div>` : ''}
+            
+            <h6 class="border-bottom pb-2 mb-3 mt-4"><i class="bi bi-calculator me-2"></i>Resumen de Pago</h6>
+            <div class="row">
+              <div class="col-6"><strong>Subtotal:</strong></div>
+              <div class="col-6 text-end">S/ ${compra.subtotal.toFixed(2)}</div>
+            </div>
+            ${compra.igvActivo && compra.igv && compra.igv > 0 ? `
+            <div class="row">
+              <div class="col-6"><strong>IGV (18%):</strong></div>
+              <div class="col-6 text-end">S/ ${compra.igv.toFixed(2)}</div>
+            </div>
+            ` : ''}
+            ${compra.envioActivo && compra.costoEnvio && compra.costoEnvio > 0 ? `
+            <div class="row">
+              <div class="col-6"><strong>Costo de Envío:</strong></div>
+              <div class="col-6 text-end">S/ ${compra.costoEnvio.toFixed(2)}</div>
+            </div>
+            ` : ''}
+            <div class="row border-top pt-2 mt-2">
+              <div class="col-6"><strong>Total a Pagar:</strong></div>
+              <div class="col-6 text-end"><strong style="font-size: 1.2rem; color: #28a745;">S/ ${compra.total.toFixed(2)}</strong></div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('modalContenido').innerHTML = contenido;
+        
+        // Guardar datos para la función de boleta
+        window.datosCompraActual = compra;
+        
+        // Mostrar botón de boleta solo si está ENTREGADA
+        const btnBoleta = document.getElementById('btnGenerarBoleta');
+        if (compra.estado === 'ENTREGADA') {
+          btnBoleta.style.display = 'inline-block';
+          btnBoleta.onclick = () => window.generarBoleta(compra.id);
+        } else {
+          btnBoleta.style.display = 'none';
+        }
+        
+        modal.show();
+      })
+      .catch(error => {
+        document.getElementById('modalContenido').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Error al cargar los detalles: ${error.message}
+          </div>
+        `;
+        modal.show();
+      });
+    };
+
+    // Función para generar y descargar boleta
+    window.generarBoleta = function(compraId) {
+      const ventana = window.open('', '', 'height=600,width=900');
+      const detalles = window.datosCompraActual || {};
+      
+      let productosHTML = '';
+      if (detalles.detalles && detalles.detalles.length > 0) {
+        detalles.detalles.forEach(detalle => {
+          productosHTML += `
+            <tr>
+              <td>${detalle.productoNombre}</td>
+              <td>${detalle.cantidad}</td>
+              <td>S/ ${detalle.precioUnitario.toFixed(2)}</td>
+              <td>S/ ${detalle.subtotal.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+      }
+      
+      // Construir resumen dinámicamente
+      let resumenHTML = `
+        <div class="resumen-row">
+          <span>Subtotal:</span>
+          <span>S/ ${detalles.subtotal ? detalles.subtotal.toFixed(2) : '0.00'}</span>
+        </div>
+      `;
+      
+      if (detalles.igvActivo && detalles.igv && detalles.igv > 0) {
+        resumenHTML += `
+        <div class="resumen-row">
+          <span>IGV (18%):</span>
+          <span>S/ ${detalles.igv.toFixed(2)}</span>
+        </div>
+        `;
+      }
+      
+      if (detalles.envioActivo && detalles.costoEnvio && detalles.costoEnvio > 0) {
+        resumenHTML += `
+        <div class="resumen-row">
+          <span>Envío:</span>
+          <span>S/ ${detalles.costoEnvio.toFixed(2)}</span>
+        </div>
+        `;
+      }
+      
+      resumenHTML += `
+        <div class="resumen-row total">
+          <span>TOTAL:</span>
+          <span>S/ ${detalles.total ? detalles.total.toFixed(2) : '0.00'}</span>
+        </div>
+      `;
+      
+      ventana.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Boleta - Compra #${compraId}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+              .title { font-size: 24px; font-weight: bold; }
+              .compra-info { margin-bottom: 20px; }
+              .compra-info p { margin: 5px 0; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+              th { background-color: #f2f2f2; font-weight: bold; }
+              .resumen { margin-top: 20px; }
+              .resumen-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+              .resumen-row.total { border-top: 2px solid #333; border-bottom: none; font-weight: bold; font-size: 16px; padding-top: 10px; }
+              .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }
+              @media print { body { padding: 0; } }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div class="title">TU BAZAR PLUS</div>
+              <p>Boleta de Compra</p>
+            </div>
+            
+            <div class="compra-info">
+              <p><strong>Número de Boleta:</strong> #${compraId}</p>
+              <p><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-PE')}</p>
+              <p><strong>Dirección:</strong> ${detalles.direccionEntrega || 'No especificada'}</p>
+            </div>
+            
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unit.</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${productosHTML}
+              </tbody>
+            </table>
+            
+            <div class="resumen">
+              ${resumenHTML}
+            </div>
+            
+            <div class="footer">
+              <p>Gracias por tu compra</p>
+              <p>Tu Bazar Plus - Todos los derechos reservados</p>
+            </div>
+          </body>
+        </html>
+      `);
+      ventana.document.close();
+      ventana.print();
+    };
+    </script>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+  </body>
+</html>

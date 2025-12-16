@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: head}">
+    <title>Mis Reseñas - Tu Bazar Plus</title>
+  </head>
+
+  <body>
+    <!--  NAVBAR  -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!--  MENSAJES FLASH  -->
+    <div th:replace="~{fragments/messages :: flash-messages}"></div>
+
+    <!--  CONTENIDO PRINCIPAL  -->
+    <main class="container my-5">
+      <div class="row">
+        <div class="col-12">
+          <!-- Header de la página -->
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-chat-square-text me-2"></i>Mis Reseñas</h1>
+            <a th:href="@{/}" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-left"></i> Volver al Inicio
+            </a>
+          </div>
+
+          <!-- Alerta informativa sobre moderación -->
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Todas las reseñas pasan por un proceso de moderación antes de ser
+            publicadas.
+          </div>
+
+          <!-- Contenedor principal de reseñas -->
+          <div id="mis-resenas-container">
+            <!-- Estado: Sin reseñas -->
+            <div
+              th:if="${resenas == null or resenas.size() == 0}"
+              class="text-center py-5"
+            >
+              <div class="card shadow">
+                <div class="card-body p-5">
+                  <i
+                    class="bi bi-chat-square-text display-1 text-muted mb-3"
+                  ></i>
+                  <h4 class="text-muted">No tienes reseñas</h4>
+                  <p class="text-muted mb-4">
+                    Tus reseñas aparecerán aquí cuando las escribas.
+                  </p>
+                  <a th:href="@{/productos}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-box"></i> Explorar Productos
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estado: Con reseñas -->
+            <div th:if="${resenas != null and resenas.size() > 0}">
+              <!-- Iteración sobre cada reseña -->
+              <div
+                th:each="resena : ${resenas}"
+                class="card mb-3"
+                th:classappend="${resena.estado == 'APROBADA' ? 'border-success' : (resena.estado == 'RECHAZADA' ? 'border-danger' : 'border-warning')}"
+              >
+                <div class="card-body">
+                  <div class="row">
+                    <!-- Columna izquierda: Información de la reseña -->
+                    <div class="col-md-8">
+                      <!-- Nombre del producto -->
+                      <h6 class="fw-bold">
+                        <span
+                          th:if="${resena.producto != null}"
+                          th:text="${resena.producto.nombre}"
+                        >
+                          Producto
+                        </span>
+                        <span
+                          th:if="${resena.producto == null}"
+                          class="text-muted"
+                        >
+                          Producto no disponible
+                        </span>
+                      </h6>
+
+                      <!-- Calificación con estrellas -->
+                      <div class="mb-2">
+                        <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                          <i
+                            th:class="${i <= resena.calificacion ? 'bi bi-star-fill text-warning' : 'bi bi-star text-muted'}"
+                          ></i>
+                        </th:block>
+                      </div>
+
+                      <!-- Comentario de la reseña -->
+                      <p class="mb-2" th:text="${resena.comentario}">
+                        Comentario de la reseña
+                      </p>
+
+                      <!-- Fecha de creación -->
+                      <small class="text-muted">
+                        <i class="bi bi-calendar me-1"></i>
+                        <span
+                          th:text="${#temporals.format(resena.fecha, 'dd/MM/yyyy HH:mm')}"
+                        >
+                          01/01/2024
+                        </span>
+                      </small>
+                    </div>
+
+                    <!-- Columna derecha: Estado y acciones -->
+                    <div class="col-md-4 text-end">
+                      <!-- Badge de estado con colores según el estado -->
+                      <span
+                        th:class="${'badge fs-6 ' + (resena.estado == 'APROBADA' ? 'bg-success' : (resena.estado == 'RECHAZADA' ? 'bg-danger' : 'bg-warning'))}"
+                        th:text="${resena.estado}"
+                      >
+                        PENDIENTE
+                      </span>
+
+                      <!-- Mensaje adicional para reseñas rechazadas -->
+                      <div th:if="${resena.estado == 'RECHAZADA'}" class="mt-2">
+                        <small class="text-danger">
+                          <i class="bi bi-info-circle me-1"></i>
+                          Tu reseña no cumplió con nuestras políticas
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!--  FOOTER  -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!--  SCRIPTS  -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+  </body>
+</html>

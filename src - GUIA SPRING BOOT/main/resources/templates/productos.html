@@ -1,0 +1,320 @@
+<!-- src/main/resources/templates/productos.html -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <!-- Incluye la sección head común desde el fragmento de layout -->
+    <th:block th:replace="~{fragments/layout :: head}"></th:block>
+  </head>
+
+  <body>
+    <!-- Barra de navegación principal -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <!-- Sección hero con título, subtítulo y buscador integrado -->
+    <section
+      th:replace="~{fragments/layout :: hero(
+        'Nuestros Productos',
+        'Encuentra todo lo que necesitas en nuestro catálogo completo',
+        false,
+        ~{:: #buscador-body}
+      )}"
+    >
+      <!-- Contenido personalizado para el hero: barra de búsqueda -->
+      <div id="buscador-body" class="row justify-content-center">
+        <div class="col-lg-6">
+          <div class="input-group mb-3" style="box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); border-radius: 12px; overflow: hidden;">
+            <input
+              type="text"
+              class="form-control search-bar border-0"
+              placeholder="Buscar productos..."
+              style="padding: 0.75rem 1.5rem; font-size: 1rem;"
+            />
+            <button class="btn border-0" type="button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 0.75rem 1.5rem;">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contenido principal de la página de productos -->
+    <main class="container my-5">
+      <div class="row">
+        <!-- Panel lateral de filtros -->
+        <div class="col-lg-3 mb-4">
+          <div class="filter-sidebar" style="background: linear-gradient(135deg, #f8fafb 0%, #f0f4ff 100%); padding: 1.5rem; border-radius: 16px; border: 1px solid #e9ecef; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.08);">
+            <h5 class="fw-bold mb-3" style="color: #2c3e50;"><i class="bi bi-funnel"></i> Filtros</h5>
+
+            <!-- Filtro por categorías - Se carga dinámicamente -->
+            <div class="mb-4">
+              <h6 class="fw-semibold" style="color: #667eea;">Categoría</h6>
+              <div id="categorias-filtro">
+                <div class="text-muted small" id="loading-categories">
+                  Cargando categorías...
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtro por rango de precios -->
+            <div class="mb-4">
+              <h6 class="fw-semibold" style="color: #667eea;">Precio</h6>
+              <div class="row">
+                <div class="col-6">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Min"
+                    min="0"
+                    id="precioMin"
+                    style="border-radius: 8px; border: 1px solid #e9ecef;"
+                  />
+                </div>
+                <div class="col-6">
+                  <input
+                    type="number"
+                    class="form-control"
+                    placeholder="Max"
+                    min="0"
+                    id="precioMax"
+                    style="border-radius: 8px; border: 1px solid #e9ecef;"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Filtro por disponibilidad -->
+            <div class="mb-4">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="filterAvailable"
+                />
+                <label class="form-check-label" for="filterAvailable"
+                  >Solo disponibles</label
+                >
+              </div>
+            </div>
+
+            <!-- Botón para restablecer todos los filtros -->
+            <button
+              type="button"
+              class="btn btn-outline-danger w-100"
+              id="clearFilters"
+            >
+              <i class="bi bi-x-circle"></i> Limpiar Filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- Sección principal donde se muestran los productos -->
+        <div class="col-lg-9">
+          <!-- Encabezado con contador de productos y selector de ordenamiento -->
+          <div
+            class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
+            th:if="${productos != null and not #lists.isEmpty(productos)}"
+          >
+            <h4 class="fw-bold mb-0">
+              Mostrando
+              <span id="product-count">[[${#lists.size(productos)}]]</span>
+              productos
+            </h4>
+            <div class="d-flex align-items-center">
+              <label for="sortBy" class="form-label me-2 mb-0">Ordenar:</label>
+              <select class="form-select" id="sortBy" style="width: auto">
+                <option value="nombre-asc">Nombre A-Z</option>
+                <option value="nombre-desc">Nombre Z-A</option>
+                <option value="precio-asc">Precio: Menor a Mayor</option>
+                <option value="precio-desc">Precio: Mayor a Menor</option>
+                <option value="stock">Stock disponible</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Grid de productos - Se llena dinámicamente -->
+          <div class="row" id="productos-grid">
+            <!-- Tarjeta individual para cada producto -->
+            <div
+              class="col-6 col-lg-3 col-md-6 mb-4"
+              th:each="producto : ${productos}"
+            >
+              <div
+                class="card h-100 shadow-sm border-0 producto-card"
+                th:attr="data-categoria=${producto.categoria != null ? producto.categoria.nombre : 'sin-categoria'}, data-precio=${producto.precio}, data-disponible=${producto.disponible}"
+                style="cursor: pointer; transition: transform 0.2s"
+              >
+                <!-- Contenedor de imagen con elementos superpuestos -->
+                <div class="position-relative container-fluid">
+                  <img
+                    th:src="${producto.imagen ?: '/img/placeholder.jpg'}"
+                    th:alt="${producto.nombre}"
+                    class="card-img-top"
+                    style="height: 250px; object-fit: cover"
+                  />
+
+                  <!-- Badge para stock bajo -->
+                  <div
+                    th:if="${producto.stock < 5 and producto.stock > 0}"
+                    class="position-absolute top-0 start-0 m-2"
+                  >
+                    <span class="badge bg-warning text-dark"
+                      >¡Pocas disponibles!</span
+                    >
+                  </div>
+
+                  <!-- Badge para productos agotados -->
+                  <div
+                    th:if="${producto.stock == 0}"
+                    class="position-absolute top-0 start-0 m-2"
+                  >
+                    <span class="badge bg-danger">Agotado</span>
+                  </div>
+
+                  <!-- Badge para productos desactivados manualmente -->
+                  <div
+                    th:if="${not producto.disponible and producto.stock > 0}"
+                    class="position-absolute top-0 start-0 m-2"
+                  >
+                    <span class="badge bg-secondary">No Disponible</span>
+                  </div>
+
+                  <!-- Botón flotante para agregar al carrito -->
+                  <button
+                    class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 shadow-sm add-to-cart"
+                    th:attr="data-id=${producto.id}"
+                    th:disabled="${!producto.disponible or producto.stock == 0}"
+                    title="Agregar al carrito"
+                  >
+                    <i class="bi bi-cart-plus"></i>
+                  </button>
+                </div>
+
+                <!-- Contenido informativo de la tarjeta -->
+                <div class="card-body d-flex flex-column">
+                  <!-- Nombre del producto -->
+                  <h6
+                    class="card-title fw-bold mb-1 text-truncate"
+                    th:text="${producto.nombre}"
+                  >
+                    Nombre del Producto
+                  </h6>
+
+                  <!-- Descripción abreviada -->
+                  <p
+                    class="card-text text-muted small flex-grow-1 descripcion-producto"
+                    th:text="${#strings.abbreviate(producto.descripcion, 40)}"
+                  >
+                    Descripción del producto
+                  </p>
+
+                  <!-- Información de precio y stock -->
+                  <div
+                    class="d-flex justify-content-between align-items-center mb-2"
+                  >
+                    <span class="fw-bold text-success">
+                      S/
+                      <span
+                        th:text="${#numbers.formatDecimal(producto.precio, 0, 2)}"
+                        >0.00</span
+                      >
+                    </span>
+                    <small class="text-muted">
+                      Stock: <span th:text="${producto.stock}">0</span>
+                    </small>
+                  </div>
+
+                  <!-- Badges de estado y categoría -->
+                  <div class="mb-3">
+                    <!-- Producto disponible y con stock -->
+                    <span
+                      th:if="${producto.disponible and producto.stock > 0}"
+                      class="badge bg-success"
+                    >
+                      <i class="bi bi-check-circle"></i> Disponible
+                    </span>
+
+                    <!-- Producto agotado (sin stock) -->
+                    <span
+                      th:if="${producto.stock == 0}"
+                      class="badge bg-danger"
+                    >
+                      <i class="bi bi-exclamation-triangle"></i> Agotado
+                    </span>
+
+                    <!-- Producto con stock pero desactivado manualmente -->
+                    <span
+                      th:if="${not producto.disponible and producto.stock > 0}"
+                      class="badge bg-secondary"
+                    >
+                      <i class="bi bi-pause-circle"></i> No Disponible
+                    </span>
+
+                    <!-- Badge de categoría -->
+                    <span
+                      th:if="${producto.categoria != null}"
+                      class="badge bg-primary text-capitalize ms-1"
+                      th:text="${producto.categoria.nombre}"
+                    >
+                      Categoría
+                    </span>
+                    <span
+                      th:unless="${producto.categoria != null}"
+                      class="badge bg-secondary text-capitalize ms-1"
+                    >
+                      Sin categoría
+                    </span>
+                  </div>
+
+                  <!-- Botón para ver detalles completos del producto -->
+                  <a
+                    th:href="@{/producto/{id}(id=${producto.id})}"
+                    class="btn btn-outline-primary btn-sm mt-auto"
+                  >
+                    <i class="bi bi-info-circle"></i> Ver Detalles
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje que se muestra cuando no hay productos que coincidan -->
+          <div
+            class="text-center py-5"
+            id="no-products-message"
+            style="display: none"
+          >
+            <i class="bi bi-search display-1 text-muted"></i>
+            <h4 class="text-muted mt-3">No se encontraron productos</h4>
+            <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+          </div>
+
+          <!-- Controles de paginación -->
+          <nav aria-label="Navegación de productos" class="mt-4">
+            <!-- Lista de páginas - generada dinámicamente -->
+            <ul
+              class="pagination justify-content-center"
+              id="pagination-container"
+            >
+              <!-- La paginación se genera mediante JavaScript -->
+            </ul>
+
+            <!-- Información textual sobre la paginación actual -->
+            <div class="text-center mt-2 text-muted small" id="pagination-info">
+              Cargando productos...
+            </div>
+          </nav>
+        </div>
+      </div>
+    </main>
+
+    <!-- Pie de página común -->
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+    <!-- Scripts comunes de la aplicación -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <!-- Scripts específicos para la funcionalidad de productos -->
+    <script th:src="@{/js/productos.js}"></script>
+    <script th:src="@{/js/detalles-productos.js}"></script>
+  </body>
+</html>

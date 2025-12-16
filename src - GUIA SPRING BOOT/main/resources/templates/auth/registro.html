@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: head}">
+    <title>Registro - Tu Bazar Plus</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Mensajes flash -->
+    <div th:replace="~{fragments/messages :: flash-messages}"></div>
+
+    <!-- Contenido principal -->
+    <div class="container my-5">
+      <!-- Regresar -->
+      <div class="mb-4">
+        <a th:href="@{/}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-2"></i> Regresar al Inicio
+        </a>
+      </div>
+
+      <div class="row justify-content-center">
+        <!-- Logo e información -->
+        <div class="col-lg-5 mb-4 mb-lg-0">
+          <div class="card shadow h-100">
+            <div class="card-body p-5 text-center">
+              <img
+                th:src="@{/img/logo1.jpg}"
+                alt="Logo Tu Bazar Plus"
+                class="img-fluid rounded-circle mb-4"
+                style="max-width: 150px"
+              />
+              <h3 class="text-primary">Únete a Nosotros</h3>
+              <p class="text-muted mb-4">
+                Crea tu cuenta y disfruta de los mejores productos con entrega a
+                domicilio
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario de registro -->
+        <div class="col-lg-7">
+          <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+              <h4 class="mb-0">
+                <i class="bi bi-person-plus me-2"></i>Crear Cuenta
+              </h4>
+            </div>
+            <div class="card-body p-4">
+              <form
+                th:action="@{/registro}"
+                method="post"
+                class="needs-validation"
+                novalidate
+                id="registroForm"
+              >
+                <!-- Búsqueda por DNI -->
+                <div class="row mb-4">
+                  <div class="col-md-8">
+                    <label for="dni" class="form-label">DNI *</label>
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-person-badge"></i>
+                      </span>
+                      <input
+                        type="text"
+                        id="dni"
+                        name="dni"
+                        class="form-control"
+                        maxlength="8"
+                        pattern="[0-9]{8}"
+                        placeholder="Ingrese su DNI"
+                        required
+                      />
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary"
+                        id="btnBuscarDni"
+                      >
+                        <i class="bi bi-search me-1"></i> Buscar
+                      </button>
+                    </div>
+                    <div class="form-text">
+                      Ingrese su DNI para autocompletar datos desde RENIEC
+                    </div>
+                    <div
+                      id="dniLoading"
+                      class="spinner-border spinner-border-sm text-primary d-none mt-2"
+                      role="status"
+                    >
+                      <span class="visually-hidden">Buscando...</span>
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <label for="tipoDoc" class="form-label"
+                      >Tipo Documento *</label
+                    >
+                    <select
+                      id="tipoDoc"
+                      class="form-select"
+                      name="tipoDoc"
+                      required
+                    >
+                      <option value="">Seleccionar</option>
+                      <option value="DNI" selected>DNI</option>
+                      <option value="RUC">RUC</option>
+                      <option value="PASAPORTE">Pasaporte</option>
+                      <option value="CARNET_EXTRANJERIA">
+                        Carnet Extranjería
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Información personal -->
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombres" class="form-label">Nombres *</label>
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-person"></i>
+                      </span>
+                      <input
+                        type="text"
+                        id="nombres"
+                        name="nombres"
+                        class="form-control"
+                        required
+                        placeholder="Se autocompletará con DNI"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="apellidoPaterno" class="form-label"
+                      >Apellido Paterno *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-person"></i>
+                      </span>
+                      <input
+                        type="text"
+                        id="apellidoPaterno"
+                        name="apellidoPaterno"
+                        class="form-control"
+                        required
+                        placeholder="Se autocompletará con DNI"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="apellidoMaterno" class="form-label"
+                      >Apellido Materno *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-person"></i>
+                      </span>
+                      <input
+                        type="text"
+                        id="apellidoMaterno"
+                        name="apellidoMaterno"
+                        class="form-control"
+                        required
+                        placeholder="Se autocompletará con DNI"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="fechaNacimiento" class="form-label"
+                      >Fecha de Nacimiento *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-calendar"></i>
+                      </span>
+                      <input
+                        type="date"
+                        id="fechaNacimiento"
+                        name="fechaNacimiento"
+                        class="form-control"
+                        required
+                      />
+                    </div>
+                    <div class="form-text">Debes ser mayor de 18 años</div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="genero" class="form-label">Género *</label>
+                    <select
+                      id="genero"
+                      class="form-select"
+                      name="genero"
+                      required
+                    >
+                      <option value="">Seleccionar</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Femenino">Femenino</option>
+                      <option value="Prefiero no decirlo">
+                        Prefiero no decirlo
+                      </option>
+                      <option value="X">Otro</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="numero" class="form-label">Teléfono *</label>
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-phone"></i>
+                      </span>
+                      <input
+                        type="tel"
+                        id="numero"
+                        name="numero"
+                        class="form-control"
+                        pattern="[0-9]{9}"
+                        placeholder="912345678"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-12 mb-3">
+                    <label for="direccion1" class="form-label"
+                      >Dirección *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-geo-alt"></i>
+                      </span>
+                      <input
+                        type="text"
+                        id="direccion1"
+                        name="direccion1"
+                        class="form-control"
+                        placeholder="Dirección completa para entregas"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="correo" class="form-label"
+                      >Correo Electrónico *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-envelope"></i>
+                      </span>
+                      <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                        class="form-control"
+                        placeholder="tu@correo.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label"
+                      >Contraseña *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-lock"></i>
+                      </span>
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-control"
+                        placeholder="Mínimo 6 caracteres"
+                        minlength="6"
+                        required
+                      />
+                      <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        id="togglePassword"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                    <div class="form-text">
+                      <small id="password-strength" class="form-text"></small>
+                    </div>
+                  </div>
+
+                  <!-- Confirmación de contraseña -->
+                  <div class="col-md-6 mb-3">
+                    <label for="confirmPassword" class="form-label"
+                      >Confirmar Contraseña *</label
+                    >
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-lock-fill"></i>
+                      </span>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        class="form-control"
+                        placeholder="Repite tu contraseña"
+                        minlength="6"
+                        required
+                      />
+                      <button
+                        class="btn btn-outline-secondary"
+                        type="button"
+                        id="toggleConfirmPassword"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </div>
+                    <div class="invalid-feedback" id="confirmPasswordFeedback">
+                      Las contraseñas no coinciden.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Términos y condiciones -->
+                <div class="mb-4 form-check">
+                  <input
+                    type="checkbox"
+                    id="terminos"
+                    name="terminos"
+                    class="form-check-input"
+                    required
+                  />
+                  <label for="terminos" class="form-check-label">
+                    Acepto los
+                    <a
+                      th:href="@{/terminos}"
+                      class="text-decoration-none"
+                      target="_blank"
+                    >
+                      términos y condiciones
+                    </a>
+                    y la
+                    <a
+                      th:href="@{/privacidad}"
+                      class="text-decoration-none"
+                      target="_blank"
+                    >
+                      política de privacidad
+                    </a>
+                  </label>
+                </div>
+
+                <!-- Botón de registro -->
+                <button
+                  type="submit"
+                  class="btn btn-primary w-100 btn-lg mb-3"
+                  id="submitBtn"
+                >
+                  <i class="bi bi-person-plus me-2"></i>
+                  Crear Cuenta
+                </button>
+
+                <!-- Enlace a login -->
+                <div class="text-center">
+                  <p class="mb-0">
+                    ¿Ya tienes cuenta?
+                    <a th:href="@{/login}" class="text-primary fw-bold"
+                      >Inicia sesión aquí</a
+                    >
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <!-- Script de validaciones para login y registro -->
+    <script th:src="@{/js/login-registro.js}"></script>
+
+    <!-- Scripts específicos de la página -->
+    <script th:inline="javascript">
+      // Tu código JavaScript específico del registro aquí
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("#registroForm");
+        const dniInput = document.getElementById("dni");
+        const btnBuscarDni = document.getElementById("btnBuscarDni");
+        const dniLoading = document.getElementById("dniLoading");
+        const passwordInput = document.getElementById("password");
+        const confirmPasswordInput = document.getElementById("confirmPassword");
+        const togglePassword = document.getElementById("togglePassword");
+        const toggleConfirmPassword = document.getElementById(
+          "toggleConfirmPassword"
+        );
+        const passwordStrength = document.getElementById("password-strength");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Validación del formulario
+        form.addEventListener("submit", function (event) {
+          if (!form.checkValidity() || !validatePasswordMatch()) {
+            event.preventDefault();
+            event.stopPropagation();
+          } else {
+            // Deshabilitar botón durante el envío
+            submitBtn.disabled = true;
+            submitBtn.innerHTML =
+              '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Creando cuenta...';
+          }
+          form.classList.add("was-validated");
+        });
+
+        // Validar edad mínima
+        document
+          .getElementById("fechaNacimiento")
+          .addEventListener("change", function () {
+            const fechaNacimiento = new Date(this.value);
+            const hoy = new Date();
+            const edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+            const ajusteMes = hoy.getMonth() - fechaNacimiento.getMonth();
+            const ajusteDia = hoy.getDate() - fechaNacimiento.getDate();
+
+            if (
+              edad < 18 ||
+              (edad === 18 &&
+                (ajusteMes < 0 || (ajusteMes === 0 && ajusteDia < 0)))
+            ) {
+              this.setCustomValidity(
+                "Debes ser mayor de 18 años para registrarte"
+              );
+            } else {
+              this.setCustomValidity("");
+            }
+          });
+
+        // Búsqueda de DNI (simulada)
+        btnBuscarDni.addEventListener("click", function () {
+          const dni = dniInput.value.trim();
+
+          if (dni.length !== 8) {
+            alert("El DNI debe tener 8 dígitos");
+            return;
+          }
+
+          dniLoading.classList.remove("d-none");
+          btnBuscarDni.disabled = true;
+
+          // Simulación de API RENIEC
+          setTimeout(() => {
+            document.getElementById("nombres").value = "Juan";
+            document.getElementById("apellidoPaterno").value = "Pérez";
+            document.getElementById("apellidoMaterno").value = "Gómez";
+
+            dniLoading.classList.add("d-none");
+            btnBuscarDni.disabled = false;
+          }, 1500);
+        });
+
+        // Validar DNI en tiempo real
+        dniInput.addEventListener("input", function () {
+          this.value = this.value.replace(/[^0-9]/g, "");
+        });
+
+        // Mostrar/ocultar contraseña
+        togglePassword.addEventListener("click", function () {
+          const type =
+            passwordInput.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          passwordInput.setAttribute("type", type);
+          this.querySelector("i").classList.toggle("bi-eye");
+          this.querySelector("i").classList.toggle("bi-eye-slash");
+        });
+
+        // Mostrar/ocultar confirmación de contraseña
+        toggleConfirmPassword.addEventListener("click", function () {
+          const type =
+            confirmPasswordInput.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          confirmPasswordInput.setAttribute("type", type);
+          this.querySelector("i").classList.toggle("bi-eye");
+          this.querySelector("i").classList.toggle("bi-eye-slash");
+        });
+
+        // Validar fortaleza de contraseña
+        passwordInput.addEventListener("input", function () {
+          const password = this.value;
+          let strength = "Débil";
+          let strengthClass = "text-danger";
+
+          if (password.length >= 8) {
+            strength = "Media";
+            strengthClass = "text-warning";
+          }
+
+          if (
+            password.length >= 10 &&
+            /[A-Z]/.test(password) &&
+            /[0-9]/.test(password) &&
+            /[^A-Za-z0-9]/.test(password)
+          ) {
+            strength = "Fuerte";
+            strengthClass = "text-success";
+          }
+
+          passwordStrength.textContent = `Fortaleza: ${strength}`;
+          passwordStrength.className = `form-text ${strengthClass}`;
+
+          validatePasswordMatch();
+        });
+
+        // Validar que las contraseñas coincidan
+        confirmPasswordInput.addEventListener("input", validatePasswordMatch);
+
+        function validatePasswordMatch() {
+          const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+
+          if (confirmPassword && password !== confirmPassword) {
+            confirmPasswordInput.setCustomValidity(
+              "Las contraseñas no coinciden"
+            );
+            return false;
+          } else {
+            confirmPasswordInput.setCustomValidity("");
+            return true;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

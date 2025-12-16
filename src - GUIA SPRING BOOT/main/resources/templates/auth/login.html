@@ -1,0 +1,233 @@
+<!--src/main/resources/templates/auth/login.html-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+  <head th:replace="~{fragments/layout :: head}">
+    <title>Iniciar Sesión - Tu Bazar Plus</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Mensajes flash -->
+    <div th:replace="~{fragments/messages :: flash-messages}"></div>
+
+    <!-- Contenido principal -->
+    <div class="container my-5">
+      <!-- Flecha regresar -->
+      <div class="mb-4">
+        <a th:href="@{/}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-2"></i> Regresar al Inicio
+        </a>
+      </div>
+
+      <div class="row justify-content-center align-items-center min-vh-75">
+        <!-- Imagen/Logo -->
+        <div class="col-lg-5 text-center mb-4 mb-lg-0">
+          <div class="card shadow">
+            <div class="card-body p-5">
+              <img
+                th:src="@{/img/logo1.jpg}"
+                alt="Logo Tu Bazar Plus"
+                class="img-fluid rounded-circle mb-4"
+                style="max-width: 200px"
+              />
+              <h3 class="text-primary">Bienvenido de vuelta</h3>
+              <p class="text-muted">
+                Ingresa a tu cuenta para continuar con tus compras
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="col-lg-5">
+          <div class="card shadow">
+            <div class="card-header bg-dark text-white text-center">
+              <h4 class="mb-0">
+                <i class="bi bi-person-circle me-2"></i>Iniciar Sesión
+              </h4>
+            </div>
+            <div class="card-body p-4">
+              <!-- Mensaje de error -->
+              <div th:if="${param.error}" class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Error en el correo o contraseña. Por favor, inténtalo de nuevo.
+              </div>
+
+              <!-- Mensaje de logout -->
+              <div th:if="${param.logout}" class="alert alert-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Has cerrado sesión correctamente.
+              </div>
+
+              <!-- Mensaje de sesión expirada -->
+              <div th:if="${param.expired}" class="alert alert-warning">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                Tu sesión ha expirado. Por favor, inicia sesión nuevamente.
+              </div>
+
+              <form
+                th:action="@{/login}"
+                method="post"
+                class="needs-validation"
+                novalidate
+                id="loginForm"
+              >
+                <!-- Email -->
+                <div class="mb-3">
+                  <label for="correo" class="form-label"
+                    >Correo Electrónico</label
+                  >
+                  <div class="input-group">
+                    <span class="input-group-text">
+                      <i class="bi bi-envelope"></i>
+                    </span>
+                    <input
+                      type="email"
+                      id="correo"
+                      name="correo"
+                      class="form-control"
+                      placeholder="tu@correo.com"
+                      required
+                    />
+                  </div>
+                  <div class="invalid-feedback">
+                    Por favor ingresa un correo electrónico válido.
+                  </div>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="mb-3">
+                  <label for="password" class="form-label">Contraseña</label>
+                  <div class="input-group">
+                    <span class="input-group-text">
+                      <i class="bi bi-lock"></i>
+                    </span>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      class="form-control"
+                      placeholder="Tu contraseña"
+                      required
+                      minlength="6"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      id="togglePassword"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                  <div class="invalid-feedback">
+                    Por favor ingresa tu contraseña (mínimo 6 caracteres).
+                  </div>
+                </div>
+
+                <!-- Recordarme -->
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    id="remember-me"
+                    name="remember-me"
+                    class="form-check-input"
+                  />
+                  <label for="remember-me" class="form-check-label">
+                    Recordar mi sesión
+                  </label>
+                </div>
+
+                <!-- Botón de envío -->
+                <button
+                  type="submit"
+                  class="btn btn-primary w-100 btn-lg mb-3"
+                  id="submitBtn"
+                >
+                  <i class="bi bi-box-arrow-in-right me-2"></i>
+                  Iniciar Sesión
+                </button>
+
+                <!-- Enlaces adicionales -->
+                <div class="text-center">
+                  <p class="mb-2">
+                    <a
+                      th:href="@{/recuperar-contrasena}"
+                      class="text-decoration-none"
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </a>
+                  </p>
+                  <p class="mb-0">
+                    ¿No tienes cuenta?
+                    <a th:href="@{/registro}" class="text-primary fw-bold"
+                      >Regístrate aquí</a
+                    >
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <script th:src="@{/js/login-registro.js}"></script>
+
+    <!-- Scripts específicos de la página -->
+    <script th:inline="javascript">
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("#loginForm");
+        const passwordInput = document.getElementById("password");
+        const togglePassword = document.getElementById("togglePassword");
+        const submitBtn = document.getElementById("submitBtn");
+
+        // Validación del formulario
+        form.addEventListener("submit", function (event) {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          } else {
+            // Deshabilitar botón durante el envío
+            submitBtn.disabled = true;
+            submitBtn.innerHTML =
+              '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Iniciando sesión...';
+          }
+          form.classList.add("was-validated");
+        });
+
+        // Mostrar/ocultar contraseña
+        togglePassword.addEventListener("click", function () {
+          const type =
+            passwordInput.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          passwordInput.setAttribute("type", type);
+          this.querySelector("i").classList.toggle("bi-eye");
+          this.querySelector("i").classList.toggle("bi-eye-slash");
+        });
+
+        // Validación en tiempo real
+        passwordInput.addEventListener("input", function () {
+          const feedback = this.parentElement.nextElementSibling;
+          if (this.value.length > 0 && this.value.length < 6) {
+            this.setCustomValidity(
+              "La contraseña debe tener al menos 6 caracteres."
+            );
+            feedback.textContent =
+              "La contraseña debe tener al menos 6 caracteres.";
+          } else {
+            this.setCustomValidity("");
+            feedback.textContent = "Por favor ingresa tu contraseña.";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
