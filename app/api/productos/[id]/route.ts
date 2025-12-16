@@ -6,6 +6,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { id } = await params
     console.log(`📦 API GET /api/productos/${id} - iniciando...`)
 
+    if (!id || isNaN(Number(id))) {
+      return NextResponse.json({ error: "ID de producto inválido" }, { status: 400 })
+    }
+
     // Obtener producto básico
     console.log(`🔍 Buscando producto ID: ${id}`)
     const producto = await queryOne<any>(
@@ -23,37 +27,52 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     console.log(`✅ Producto ${id} encontrado: ${producto.nombre}`)
 
     // Obtener categoría
-    const categoria = await queryOne<any>(
-      "SELECT nombre FROM categorias WHERE id = ?",
-      [producto.categoria_id],
-    )
+    let categoria = null
+    try {
+      categoria = await queryOne<any>(
+        "SELECT nombre FROM categorias WHERE id = ?",
+        [producto.categoria_id],
+      )
+    } catch (error) {
+      console.warn(`⚠️ Error obteniendo categoría para producto ${id}:`, error)
+    }
 
     // Obtener relacionados
-    const relacionados = await query<any>(
-      "SELECT id, nombre, precio, imagen FROM productos WHERE categoria_id = ? AND id != ? LIMIT 4",
-      [producto.categoria_id, id],
-    )
+    let relacionados = []
+    try {
+      relacionados = await query<any>(
+        "SELECT id, nombre, precio, imagen FROM productos WHERE categoria_id = ? AND id != ? LIMIT 4",
+        [producto.categoria_id, id],
+      )
+    } catch (error) {
+      console.warn(`⚠️ Error obteniendo productos relacionados para ${id}:`, error)
+    }
 
     // Obtener reseñas APROBADAS con datos del usuario
-    const resenas = await query<any>(
-      `SELECT 
-        r.id,
-        r.usuario_id,
-        r.producto_id,
-        r.calificacion,
-        r.comentario,
-        r.fecha,
-        r.estado,
-        u.nombres,
-        u.apellido_paterno as "apellidoPaterno",
-        u.apellido_materno as "apellidoMaterno"
-       FROM resenas r
-       JOIN usuarios u ON r.usuario_id = u.id
-       WHERE r.producto_id = ? AND r.estado = 'APROBADA'
-       ORDER BY r.fecha DESC 
-       LIMIT 10`,
-      [id],
-    )
+    let resenas = []
+    try {
+      resenas = await query<any>(
+        `SELECT 
+          r.id,
+          r.usuario_id,
+          r.producto_id,
+          r.calificacion,
+          r.comentario,
+          r.fecha,
+          r.estado,
+          u.nombres,
+          u.apellido_paterno as "apellidoPaterno",
+          u.apellido_materno as "apellidoMaterno"
+         FROM resenas r
+         JOIN usuarios u ON r.usuario_id = u.id
+         WHERE r.producto_id = ? AND r.estado = 'APROBADA'
+         ORDER BY r.fecha DESC 
+         LIMIT 10`,
+        [id],
+      )
+    } catch (error) {
+      console.warn(`⚠️ Error obteniendo reseñas para producto ${id}:`, error)
+    }
 
     console.log(`📊 Datos completos para producto ${id}: ${resenas.length} reseñas, ${relacionados.length} relacionados`)
 

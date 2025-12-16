@@ -5,11 +5,13 @@ import { Pool, QueryResult } from "pg"
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000, // Aumentado para mejor manejo en Vercel
-      statementTimeoutMillis: 10000, // Timeout de query
-      ssl: process.env.DATABASE_URL?.includes("localhost") ? false : { rejectUnauthorized: false },
+      max: 5, // Reducido para evitar exhaust en Vercel
+      min: 1,
+      idleTimeoutMillis: 15000, // Reducido para limpiar conexiones inactivas
+      connectionTimeoutMillis: 10000, // Aumentado para mejor manejo en Vercel
+      statementTimeoutMillis: 30000, // Timeout de query aumentado
+      ssl: { rejectUnauthorized: false }, // Para Neon/Railway siempre SSL
+      application_name: 'licoreriaapp',
     }
   : {
       host: process.env.DATABASE_HOST || "localhost",
@@ -18,11 +20,25 @@ const poolConfig = process.env.DATABASE_URL
       password: process.env.DATABASE_PASSWORD || "",
       database: process.env.DATABASE_NAME || "licoreriaapp",
       max: 10,
+      min: 1,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 5000,
     }
 
 const pool = new Pool(poolConfig)
+
+// Manejo de errores del pool
+pool.on('error', (error: Error) => {
+  console.error('❌ Error no esperado en pool:', error)
+})
+
+pool.on('connect', () => {
+  console.log('✅ Conexión al pool establecida')
+})
+
+pool.on('remove', () => {
+  console.log('⚠️ Conexión removida del pool')
+})
 
 /**
  * Convierte placeholders de MySQL (?) a PostgreSQL ($1, $2, etc)
@@ -60,10 +76,15 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] 
     
     return rows
   } catch (error) {
-    console.error("Error en query:", error)
+    console.error("❌ Error en query:", error)
+    // No reintentar, solo propagar el error
     throw error
   } finally {
-    client.release()
+    try {
+      client.release()
+    } catch (releaseError) {
+      console.error("⚠️ Error al liberar conexión:", releaseError)
+    }
   }
 }
 
@@ -73,8 +94,15 @@ export async function queryOne<T = any>(sql: string, params?: any[]): Promise<T 
     const convertedSql = convertMysqlToPostgres(sql)
     const result = await client.query(convertedSql, params)
     return result.rows[0] as T || null
+  } catch (error) {
+    console.error("❌ Error en queryOne:", error)
+    throw error
   } finally {
-    client.release()
+    try {
+      client.release()
+    } catch (releaseError) {
+      console.error("⚠️ Error al liberar conexión:", releaseError)
+    }
   }
 }
 
@@ -84,8 +112,15 @@ export async function execute(sql: string, params?: any[]): Promise<number> {
     const convertedSql = convertMysqlToPostgres(sql)
     const result = await client.query(convertedSql, params)
     return result.rowCount || 0
+  } catch (error) {
+    console.error("❌ Error en execute:", error)
+    throw error
   } finally {
-    client.release()
+    try {
+      client.release()
+    } catch (releaseError) {
+      console.error("⚠️ Error al liberar conexión:", releaseError)
+    }
   }
 }
 
