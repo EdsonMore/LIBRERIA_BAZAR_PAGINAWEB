@@ -61,11 +61,41 @@ export default function EditarProductoPage() {
     e.preventDefault()
     if (!producto) return
 
-    // Validar antes de enviar
-    if (producto.imagen && producto.imagen.length > 2000) {
-      alert("URL de imagen demasiado larga (máximo 2000 caracteres)")
+    // Validar nombre
+    if (!producto.nombre?.trim()) {
+      alert("El nombre del producto es obligatorio")
       return
     }
+
+    // Validar descripción
+    if (!producto.descripcion?.trim()) {
+      alert("La descripción es obligatoria")
+      return
+    }
+
+    // Validar precio
+    const precioNum = parseFloat(String(producto.precio))
+    if (isNaN(precioNum) || precioNum < 0) {
+      alert("El precio debe ser un número válido mayor a 0")
+      return
+    }
+
+    // Validar stock
+    const stockNum = parseInt(String(producto.stock))
+    if (isNaN(stockNum) || stockNum < 0) {
+      alert("El stock debe ser un número entero válido")
+      return
+    }
+
+    // Validar URL de imagen
+    const imagenUrl = producto.imagen?.trim() || ""
+    if (imagenUrl && imagenUrl.length > 1500) {
+      alert(`URL de imagen demasiado larga (${imagenUrl.length} caracteres). Máximo 1500 caracteres.\nPor favor, usa una URL más corta o carga la imagen a un CDN.`)
+      return
+    }
+
+    // Redondear precio a 2 decimales
+    const precioDosDecimales = Math.round(precioNum * 100) / 100
 
     setLoading(true)
     try {
@@ -73,12 +103,15 @@ export default function EditarProductoPage() {
       const dataToSend = {
         nombre: producto.nombre.trim(),
         descripcion: producto.descripcion.trim(),
-        precio: Number(producto.precio),
-        stock: Number(producto.stock),
+        precio: precioDosDecimales,
+        stock: stockNum,
         categoria_id: Number(producto.categoria_id),
-        imagen: producto.imagen?.trim() || "",
-        disponible: producto.disponible,
+        imagen: imagenUrl,
+        disponible: Boolean(producto.disponible),
       }
+
+      console.log("Enviando datos:", dataToSend)
+      console.log("Tamaño del payload:", JSON.stringify(dataToSend).length, "bytes")
 
       const res = await fetch(`/api/admin/productos/${params.id}`, {
         method: "PUT",
@@ -86,16 +119,23 @@ export default function EditarProductoPage() {
         body: JSON.stringify(dataToSend),
       })
 
-      if (res.ok) {
-        alert("Producto actualizado exitosamente")
-        router.push("/admin/productos")
-      } else {
-        const error = await res.json()
-        alert(error.error || "Error al actualizar producto")
+      if (!res.ok) {
+        let errorMsg = "Error al actualizar producto"
+        try {
+          const errorData = await res.json()
+          errorMsg = errorData.error || errorMsg
+        } catch {
+          errorMsg = `Error ${res.status}: ${res.statusText}`
+        }
+        alert(errorMsg)
+        return
       }
+
+      alert("Producto actualizado exitosamente")
+      router.push("/admin/productos")
     } catch (error) {
       console.error("Error:", error)
-      alert("Error al actualizar producto")
+      alert(error instanceof Error ? error.message : "Error al actualizar producto")
     } finally {
       setLoading(false)
     }
@@ -155,23 +195,54 @@ export default function EditarProductoPage() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Precio (S/)</label>
             <input
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]+(\\.[0-9]{1,2})?"
               required
               value={producto.precio}
-              onChange={(e) => setProducto({ ...producto, precio: Number.parseFloat(e.target.value) })}
+              onChange={(e) => {
+                const value = e.target.value
+                // Permitir solo números y un punto
+                if (/^\d*\.?\d*$/.test(value) || value === "") {
+                  setProducto({ ...producto, precio: value === "" ? 0 : value })
+                }
+              }}
+              onBlur={(e) => {
+                const value = parseFloat(String(e.target.value))
+                if (!isNaN(value)) {
+                  // Redondear a 2 decimales
+                  const rounded = Math.round(value * 100) / 100
+                  setProducto({ ...producto, precio: rounded })
+                }
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0.00"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               required
               value={producto.stock}
-              onChange={(e) => setProducto({ ...producto, stock: Number.parseInt(e.target.value) })}
+              onChange={(e) => {
+                const value = e.target.value
+                // Permitir solo números
+                if (/^\d*$/.test(value) || value === "") {
+                  setProducto({ ...producto, stock: value === "" ? 0 : value })
+                }
+              }}
+              onBlur={(e) => {
+                const value = parseInt(e.target.value)
+                if (!isNaN(value)) {
+                  setProducto({ ...producto, stock: value })
+                }
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="0"
             />
           </div>
         </div>
