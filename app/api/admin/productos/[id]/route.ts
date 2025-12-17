@@ -56,28 +56,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // Redondear precio a 2 decimales
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
-    console.log("💾 Guardando producto ID:", id)
-    console.log("💾 Disponible antes de enviar:", disponible, "Tipo:", typeof disponible)
-    console.log("💾 Datos:", { nombre: nombre.trim(), descripcion: descripcion.trim(), precio: precioDosDecimales, stock: stockNum, categoria_id: categoriaNum, disponible: disponible ? true : false })
-
     // Convertir disponible a booleano explícitamente para PostgreSQL
     const disponibleBool = disponible === true || disponible === 1 || disponible === "true" || disponible === "1"
+    const productoId = Number(id)
 
     // NOTA: La imagen se actualiza solo a través de /api/admin/productos/[id]/imagen
+    
     const result = await query(
       `UPDATE productos 
-       SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, disponible = $6
+       SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, disponible = $6::boolean
        WHERE id = $7`,
-      [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponibleBool, id],
+      [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponibleBool, productoId],
     )
 
-    console.log("✅ Producto actualizado. Resultado:", result)
-    
-    if (!result || result.rowCount === 0) {
-      console.error("❌ ADVERTENCIA: No se actualizó ninguna fila. ID probablemente no existe:", id)
-    } else {
-      console.log("✅ Se actualizaron", result.rowCount, "fila(s)")
+    if (!result || (result.rowCount !== undefined && result.rowCount === 0)) {
+      return NextResponse.json({ error: "Producto no encontrado o error en actualización", debug: { id: productoId, rowCount: result?.rowCount } }, { status: 400 })
     }
+
+    // Pequeño delay para garantizar que la BD ha persisted los cambios completamente
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     return NextResponse.json({ message: "Producto actualizado exitosamente", id })
   } catch (error) {

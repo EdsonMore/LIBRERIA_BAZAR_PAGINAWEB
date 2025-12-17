@@ -63,7 +63,24 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] 
   const client = await pool.connect()
   try {
     const convertedSql = convertMysqlToPostgres(sql)
+    console.log("📍 Ejecutando:", convertedSql.substring(0, 100) + "...")
+    
+    // Verificar si es una mutación (UPDATE, DELETE, INSERT)
+    const isMutation = convertedSql.toUpperCase().includes('UPDATE') || 
+                       convertedSql.toUpperCase().includes('DELETE') || 
+                       convertedSql.toUpperCase().includes('INSERT')
+    
+    // Para mutaciones, iniciar transacción explícita
+    if (isMutation) {
+      await client.query('BEGIN')
+    }
+    
     const result = await client.query(convertedSql, params)
+    
+    // Ejecutar COMMIT para mutaciones
+    if (isMutation) {
+      await client.query('COMMIT')
+    }
     
     const rows = result.rows as T[]
     
@@ -77,7 +94,12 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] 
     return rows
   } catch (error) {
     console.error("❌ Error en query:", error)
-    // No reintentar, solo propagar el error
+    // Intentar ROLLBACK si hay error
+    try {
+      await client.query('ROLLBACK')
+    } catch (rollbackError) {
+      console.error("⚠️ Error en ROLLBACK:", rollbackError)
+    }
     throw error
   } finally {
     try {

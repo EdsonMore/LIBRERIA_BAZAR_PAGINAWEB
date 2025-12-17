@@ -368,8 +368,8 @@ export default function EditarProductoPage() {
       const datosActualizar = {
         nombre: producto.nombre,
         descripcion: producto.descripcion,
-        precio: producto.precio,
-        stock: producto.stock,
+        precio: Number(producto.precio),
+        stock: Number(producto.stock),
         categoria_id: producto.categoria_id,
         disponible: producto.disponible,
       };
@@ -393,9 +393,9 @@ export default function EditarProductoPage() {
           router.push("/superadmin/productos");
         }, 1000);
       } else {
-        const error = await res.json();
-        console.error("❌ Error del servidor:", error);
-        alert(error.error || "Error al actualizar producto");
+        const errorData = await res.json();
+        console.error("❌ Error del servidor:", errorData);
+        alert(errorData.error || "Error al actualizar producto");
       }
     } catch (error) {
       console.error("Error:", error);

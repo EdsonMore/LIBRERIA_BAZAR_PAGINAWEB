@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // Obtener producto básico
     console.log(`🔍 Buscando producto ID: ${id}`)
     const producto = await queryOne<any>(
-      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id, p.disponible
+      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id, p.disponible::boolean as disponible
        FROM productos p
        WHERE p.id = ?`,
       [id],
@@ -85,6 +85,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         stock: producto.stock,
         imagen: producto.imagen,
         categoria_id: producto.categoria_id,
+        disponible: producto.disponible,
         categoria_nombre: categoria?.nombre || "Sin categoría",
         relacionados: relacionados || [],
         resenas: resenas || [],
