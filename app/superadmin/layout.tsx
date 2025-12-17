@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
-import { LayoutDashboard, Users, Box, ShoppingCart, FileText, Settings, BarChart3, Menu, X, TrendingUp, LogOut, Store } from "lucide-react"
+import { LayoutDashboard, Users, Box, ShoppingCart, FileText, Settings, BarChart3, Menu, X, TrendingUp, LogOut, Store, CreditCard } from "lucide-react"
 
 export default function SuperAdminLayout({
   children,
@@ -21,6 +21,7 @@ export default function SuperAdminLayout({
     { href: "/superadmin/categorias", label: "Gestión de Categorías", icon: BarChart3 },
     { href: "/superadmin/compras", label: "Gestión de Compras", icon: ShoppingCart },
     { href: "/superadmin/ventas-reportes", label: "Reportes de Ventas", icon: TrendingUp },
+    { href: "/superadmin/deudas", label: "Gestión de Deudas", icon: CreditCard },
     { href: "/superadmin/mis-boletas", label: "Mis Boletas", icon: FileText },
     { href: "/superadmin/resenas", label: "Gestión de Reseñas", icon: Users },
     { href: "/superadmin/configuracion", label: "Configuración del Sistema", icon: Settings },

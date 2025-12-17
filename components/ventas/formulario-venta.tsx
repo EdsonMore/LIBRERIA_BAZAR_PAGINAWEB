@@ -61,6 +61,10 @@ export function FormularioVenta({
   const [productoListaCompra, setProductoListaCompra] = useState('')
   const [cargandoLista, setCargandoLista] = useState(false)
 
+  // Estados para pago inicial
+  const [montoPagado, setMontoPagado] = useState(0)
+  const [descuento, setDescuento] = useState(0)
+
   // Estados de carga y errores
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -195,7 +199,7 @@ export function FormularioVenta({
 
   // Calcular totales
   const subtotal = detalles.reduce((sum, d) => sum + d.cantidad * d.precioUnitario, 0)
-  const total = subtotal // Por ahora sin descuentos
+  const total = subtotal - descuento
 
   // Registrar venta
   const registrarVenta = async () => {
@@ -239,7 +243,8 @@ export function FormularioVenta({
         clienteEmail: clienteEmail || undefined,
         clienteTelefono: clienteTelefono || undefined,
         subtotal,
-        descuento: 0,
+        descuento: descuento || 0,
+        montoPagado: montoPagado || 0,
         detalles: detalles.map((d) => ({
           productoId: d.productoId || undefined,
           nombreProducto: d.nombreProducto,
@@ -274,6 +279,8 @@ export function FormularioVenta({
       setMetodoPago(MetodoPago.EFECTIVO)
       setBusquedaProducto('')
       setProductoSeleccionado(null)
+      setMontoPagado(0)
+      setDescuento(0)
       setCantidadProductoExistente(1)
 
       if (onVentaRegistrada) {
@@ -611,16 +618,85 @@ export function FormularioVenta({
             </div>
           )}
 
+          {/* Sección 5: Pago Inicial y Descuento */}
+          <div className="space-y-4 border-b pb-6">
+            <h3 className="text-lg md:text-xl font-semibold">Pago Inicial (Opcional)</h3>
+            <p className="text-xs md:text-sm text-gray-600">
+              Puedes registrar un pago inicial ahora o dejar la venta como pendiente de pago
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="descuento" className="text-sm md:text-base">Descuento (S/.)</Label>
+                <Input
+                  id="descuento"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={descuento}
+                  onChange={(e) => setDescuento(Number(e.target.value))}
+                  className="text-sm md:text-base h-10 md:h-11"
+                />
+              </div>
+              <div>
+                <Label htmlFor="monto-pagado" className="text-sm md:text-base">Monto Pagado (S/.)</Label>
+                <Input
+                  id="monto-pagado"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={montoPagado}
+                  onChange={(e) => setMontoPagado(Number(e.target.value))}
+                  className="text-sm md:text-base h-10 md:h-11"
+                />
+              </div>
+            </div>
+
+            {montoPagado > 0 && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm font-medium text-blue-900">
+                  ✓ Estado de Pago: {
+                    montoPagado === (subtotal - descuento) ? '💚 PAGADO' :
+                    montoPagado > 0 ? '🟡 PARCIAL' :
+                    '⚪ PENDIENTE'
+                  }
+                </p>
+                <p className="text-xs text-blue-800 mt-1">
+                  Total: S/. {(subtotal - descuento).toFixed(2)} | Pagado: S/. {montoPagado.toFixed(2)} | 
+                  Saldo: S/. {Math.max(0, (subtotal - descuento) - montoPagado).toFixed(2)}
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Resumen de totales */}
           <div className="space-y-2 p-4 bg-slate-100 rounded border text-sm md:text-base">
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span className="font-semibold">S/. {subtotal.toFixed(2)}</span>
             </div>
+            {descuento > 0 && (
+              <div className="flex justify-between text-orange-600">
+                <span>Descuento:</span>
+                <span className="font-semibold">-S/. {descuento.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-base md:text-lg border-t pt-2">
               <span className="font-semibold">Total:</span>
               <span className="font-bold text-primary">S/. {total.toFixed(2)}</span>
             </div>
+            {montoPagado > 0 && (
+              <>
+                <div className="flex justify-between text-sm text-green-600 border-t pt-2">
+                  <span>Monto Pagado:</span>
+                  <span className="font-semibold">+S/. {montoPagado.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold text-red-600">
+                  <span>Saldo Pendiente:</span>
+                  <span>S/. {Math.max(0, total - montoPagado).toFixed(2)}</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Botón registrar */}

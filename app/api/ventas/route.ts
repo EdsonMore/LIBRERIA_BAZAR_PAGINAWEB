@@ -18,6 +18,7 @@ import { getServerSession } from "@/lib/next-auth-types"
  *   clienteTelefono?: string
  *   subtotal: number
  *   descuento: number
+ *   montoPagado?: number (default 0 - para pagos iniciales)
  *   detalles: [
  *     {
  *       productoId?: number
@@ -86,13 +87,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Procesar pago inicial
+    const montoPagado = Math.max(0, body.montoPagado || 0)
+    if (montoPagado > total) {
+      return NextResponse.json(
+        { error: `Monto pagado (${montoPagado}) no puede exceder el total (${total})` },
+        { status: 400 }
+      )
+    }
+
+    const saldoPendiente = total - montoPagado
+    const estadoPago = 
+      saldoPendiente === 0 ? 'PAGADO' :
+      montoPagado > 0 ? 'PARCIAL' :
+      'PENDIENTE'
+
     // Insertar venta
     const ventaResult = await query(
       `INSERT INTO public.ventas (
         vendedor_id, propietario_id, propietario_nombre, metodo_pago, descripcion_metodo_otro,
         cliente_id, cliente_nombre, cliente_email, cliente_telefono,
-        subtotal, descuento, total
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        subtotal, descuento, total, monto_pagado, saldo_pendiente, estado_pago
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       RETURNING id, fecha_hora, created_at`,
       [
         body.vendedorId,
@@ -107,6 +123,9 @@ export async function POST(request: NextRequest) {
         body.subtotal,
         descuento,
         total,
+        montoPagado,
+        saldoPendiente,
+        estadoPago,
       ]
     )
 
@@ -153,11 +172,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Si hay pago inicial, registrarlo en tabla pagos
+    if (montoPagado > 0) {
+      await query(
+        `INSERT INTO public.pagos (
+          venta_id, monto, metodo_pago, usuario_id, es_pago_inicial
+        ) VALUES (?, ?, ?, ?, true)`,
+        [
+          ventaId,
+          montoPagado,
+          body.metodoPago,
+          body.vendedorId, // El vendedor registra el pago
+        ]
+      )
+    }
+
     return NextResponse.json(
       {
         mensaje: "Venta registrada exitosamente",
         ventaId,
         total,
+        montoPagado,
+        saldoPendiente,
+        estadoPago,
       },
       { status: 201 }
     )
