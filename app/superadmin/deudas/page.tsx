@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Search, Filter, Plus, X } from 'lucide-react'
 
 export default function DeudasPage() {
+  const [pestaña, setPestaña] = useState<'pendientes' | 'historial'>('pendientes')
   const [deudas, setDeudas] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [totalDeudasPendientes, setTotalDeudasPendientes] = useState(0)
+  const [totalIngresosPagados, setTotalIngresosPagados] = useState(0)
 
   // Filtros
   const [filtros, setFiltros] = useState({
@@ -36,7 +38,7 @@ export default function DeudasPage() {
   // Cargar deudas
   useEffect(() => {
     cargarDeudas()
-  }, [page, filtros])
+  }, [page, filtros, pestaña])
 
   const cargarDeudas = async () => {
     try {
@@ -47,16 +49,24 @@ export default function DeudasPage() {
       })
 
       if (filtros.busqueda) params.append('busqueda', filtros.busqueda)
-      if (filtros.estado) params.append('estadoPago', filtros.estado)
       if (filtros.fechaInicio) params.append('fechaInicio', filtros.fechaInicio)
       if (filtros.fechaFin) params.append('fechaFin', filtros.fechaFin)
 
-      const response = await fetch(`/api/deudas?${params.toString()}`)
+      let url = ''
+      if (pestaña === 'pendientes') {
+        url = `/api/deudas?${params.toString()}`
+        if (filtros.estado) params.append('estadoPago', filtros.estado)
+      } else {
+        url = `/api/deudas/historial?${params.toString()}`
+      }
+
+      const response = await fetch(url)
       const data = await response.json()
 
       setDeudas(data.deudas)
       setTotalPages(data.pagination.totalPages)
       setTotalDeudasPendientes(Number(data.resumen?.totalDeudasPendientes) || 0)
+      setTotalIngresosPagados(Number(data.resumen?.totalIngresosPagados) || 0)
     } catch (error) {
       console.error('Error al cargar deudas:', error)
     } finally {
@@ -169,6 +179,8 @@ export default function DeudasPage() {
         return 'bg-yellow-100 text-yellow-800 border-yellow-300'
       case 'PAGADO':
         return 'bg-green-100 text-green-800 border-green-300'
+      case 'CANCELADO':
+        return 'bg-orange-100 text-orange-800 border-orange-300'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300'
     }
@@ -180,31 +192,77 @@ export default function DeudasPage() {
         <h1 className="text-3xl md:text-4xl font-bold mb-2">💳 Gestión de Deudas</h1>
         <p className="text-gray-600 mb-8">Administra pagos y deudas de ventas</p>
 
+        {/* Pestañas */}
+        <div className="flex gap-2 mb-8 border-b">
+          <button
+            onClick={() => {
+              setPestaña('pendientes')
+              setPage(1)
+            }}
+            className={`px-4 py-2 font-semibold border-b-2 transition-colors ${
+              pestaña === 'pendientes'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            📋 Pendientes ({pestaña === 'pendientes' ? deudas.length : '?'})
+          </button>
+          <button
+            onClick={() => {
+              setPestaña('historial')
+              setPage(1)
+            }}
+            className={`px-4 py-2 font-semibold border-b-2 transition-colors ${
+              pestaña === 'historial'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            ✅ Historial (Pagadas/Canceladas)
+          </button>
+        </div>
+
         {/* Resumen */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Total Deudas Pendientes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl md:text-3xl font-bold text-red-600">
-                S/. {totalDeudasPendientes.toFixed(2)}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Monto total a cobrar</p>
-            </CardContent>
-          </Card>
+          {pestaña === 'pendientes' ? (
+            <>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Total Deudas Pendientes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl md:text-3xl font-bold text-red-600">
+                    S/. {totalDeudasPendientes.toFixed(2)}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Monto total a cobrar</p>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Cantidad de Deudas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl md:text-3xl font-bold text-orange-600">
-                {deudas.length}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">Deudas activas en el sistema</p>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium">Cantidad de Deudas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl md:text-3xl font-bold text-orange-600">
+                    {deudas.length}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Deudas activas en el sistema</p>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <Card className="md:col-span-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Total Ingresos Pagados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl md:text-3xl font-bold text-green-600">
+                  S/. {totalIngresosPagados.toFixed(2)}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Monto total cobrado en esta sesión</p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Filtros */}
@@ -229,27 +287,29 @@ export default function DeudasPage() {
                 />
               </div>
 
-              {/* Estado */}
-              <div>
-                <Label htmlFor="estado" className="text-sm">Estado</Label>
-                <Select
-                  value={filtros.estado || "todos"}
-                  onValueChange={(v) => {
-                    setFiltros({ ...filtros, estado: v === "todos" ? "" : v })
-                    setPage(1)
-                  }}
-                >
-                  <SelectTrigger id="estado" className="mt-1">
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="PENDIENTE">Pendiente</SelectItem>
-                    <SelectItem value="PARCIAL">Parcial</SelectItem>
-                    <SelectItem value="PAGADO">Pagado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Estado (solo en pestaña de pendientes) */}
+              {pestaña === 'pendientes' && (
+                <div>
+                  <Label htmlFor="estado" className="text-sm">Estado</Label>
+                  <Select
+                    value={filtros.estado || "todos"}
+                    onValueChange={(v) => {
+                      setFiltros({ ...filtros, estado: v === "todos" ? "" : v })
+                      setPage(1)
+                    }}
+                  >
+                    <SelectTrigger id="estado" className="mt-1">
+                      <SelectValue placeholder="Todos" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="PENDIENTE">Pendiente</SelectItem>
+                      <SelectItem value="PARCIAL">Parcial</SelectItem>
+                      <SelectItem value="PAGADO">Pagado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {/* Fecha Inicio */}
               <div>
@@ -287,7 +347,7 @@ export default function DeudasPage() {
         {/* Tabla de Deudas */}
         <Card>
           <CardHeader>
-            <CardTitle>Deudas Pendientes</CardTitle>
+            <CardTitle>{pestaña === 'pendientes' ? 'Deudas Pendientes' : 'Historial de Deudas (Pagadas/Canceladas)'}</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -297,7 +357,9 @@ export default function DeudasPage() {
               </div>
             ) : deudas.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-600">No hay deudas pendientes</p>
+                <p className="text-gray-600">
+                  {pestaña === 'pendientes' ? 'No hay deudas pendientes' : 'No hay deudas pagadas o canceladas'}
+                </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -309,9 +371,16 @@ export default function DeudasPage() {
                       <th className="px-4 py-3 text-left font-semibold">Contacto</th>
                       <th className="px-4 py-3 text-right font-semibold">Total</th>
                       <th className="px-4 py-3 text-right font-semibold">Pagado</th>
-                      <th className="px-4 py-3 text-right font-semibold">Saldo</th>
+                      {pestaña === 'pendientes' && (
+                        <th className="px-4 py-3 text-right font-semibold">Saldo</th>
+                      )}
                       <th className="px-4 py-3 text-center font-semibold">Estado</th>
-                      <th className="px-4 py-3 text-center font-semibold">Acciones</th>
+                      {pestaña === 'historial' && (
+                        <th className="px-4 py-3 text-left font-semibold">Detalles</th>
+                      )}
+                      {pestaña === 'pendientes' && (
+                        <th className="px-4 py-3 text-center font-semibold">Acciones</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
@@ -332,38 +401,58 @@ export default function DeudasPage() {
                         <td className="px-4 py-3 text-right text-xs md:text-sm text-green-600 font-semibold">
                           S/. {Number(deuda.monto_pagado).toFixed(2)}
                         </td>
-                        <td className="px-4 py-3 text-right text-xs md:text-sm text-red-600 font-semibold">
-                          S/. {Number(deuda.saldo_pendiente).toFixed(2)}
-                        </td>
+                        {pestaña === 'pendientes' && (
+                          <td className="px-4 py-3 text-right text-xs md:text-sm text-red-600 font-semibold">
+                            S/. {Number(deuda.saldo_pendiente).toFixed(2)}
+                          </td>
+                        )}
                         <td className="px-4 py-3 text-center">
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getColorEstado(deuda.estado_pago)}`}>
                             {deuda.estado_pago === 'PENDIENTE' && '⚪'}
                             {deuda.estado_pago === 'PARCIAL' && '🟡'}
                             {deuda.estado_pago === 'PAGADO' && '💚'}
+                            {deuda.estado_pago === 'CANCELADO' && '❌'}
                             {' '}
                             {deuda.estado_pago}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={() => abrirModalPago(deuda)}
-                              className="text-xs h-8"
-                            >
-                              Pagar
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => abrirModalCancelacion(deuda)}
-                              className="text-xs h-8"
-                            >
-                              Cancelar
-                            </Button>
-                          </div>
-                        </td>
+                        {pestaña === 'historial' && (
+                          <td className="px-4 py-3 text-xs md:text-sm">
+                            {deuda.estado_pago === 'CANCELADO' && deuda.cancelacion_motivo ? (
+                              <div className="space-y-1">
+                                <p className="font-semibold text-orange-600">Cancelada</p>
+                                <p className="text-gray-600">Motivo: {deuda.cancelacion_motivo}</p>
+                                {deuda.saldo_perdonado && (
+                                  <p className="text-gray-600">Saldo perdonado: S/. {Number(deuda.saldo_perdonado).toFixed(2)}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-green-600 font-semibold">Pagada completamente</p>
+                            )}
+                          </td>
+                        )}
+                        {pestaña === 'pendientes' && (
+                          <td className="px-4 py-3 text-center">
+                            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => abrirModalPago(deuda)}
+                                className="text-xs h-8"
+                              >
+                                Pagar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => abrirModalCancelacion(deuda)}
+                                className="text-xs h-8"
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>

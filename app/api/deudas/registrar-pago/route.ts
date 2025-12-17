@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     const nuevoSaldoPendiente = venta.total - nuevoMontoPagado
     const nuevoEstadoPago = 
       nuevoSaldoPendiente === 0 ? 'PAGADO' :
-      nuevoSaldoPendiente > 0 ? 'PARCIAL' :
+      nuevoMontoPagado > 0 ? 'PARCIAL' :
       'PENDIENTE'
 
     // Registrar pago en tabla pagos

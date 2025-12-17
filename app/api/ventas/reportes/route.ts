@@ -22,7 +22,7 @@ async function getResumen(searchParams: URLSearchParams) {
       MIN(v.fecha_hora) as primera_venta,
       MAX(v.fecha_hora) as ultima_venta
     FROM public.ventas v
-    WHERE 1=1
+    WHERE v.estado_pago = 'PAGADO'
   `
   const params: any[] = []
 
@@ -56,7 +56,7 @@ async function getVentasPorVendedor(searchParams: URLSearchParams) {
       AVG(v.total) as promedio_venta
     FROM public.ventas v
     LEFT JOIN public.usuarios u ON v.vendedor_id = u.id
-    WHERE 1=1
+    WHERE v.estado_pago = 'PAGADO'
   `
   const params: any[] = []
 
@@ -91,7 +91,7 @@ async function getIngresosPorPropietario(searchParams: URLSearchParams) {
       AVG(v.total) as promedio_venta
     FROM public.ventas v
     LEFT JOIN public.usuarios u ON v.propietario_id = u.id
-    WHERE 1=1
+    WHERE v.estado_pago = 'PAGADO'
   `
   const params: any[] = []
 
@@ -127,7 +127,8 @@ async function getProductosMasVendidos(searchParams: URLSearchParams) {
       COUNT(DISTINCT dv.venta_id) as veces_vendido
     FROM public.detalles_venta dv
     LEFT JOIN public.productos p ON dv.producto_id = p.id
-    WHERE dv.es_producto_existente = true AND dv.producto_id IS NOT NULL
+    LEFT JOIN public.ventas v ON dv.venta_id = v.id
+    WHERE dv.es_producto_existente = true AND dv.producto_id IS NOT NULL AND v.estado_pago = 'PAGADO'
   `
   const params: any[] = []
 
@@ -181,7 +182,7 @@ async function getResumenPorMetodoPago(searchParams: URLSearchParams) {
       SUM(v.total) as total_monto,
       AVG(v.total) as promedio_transaccion
     FROM public.ventas v
-    WHERE 1=1
+    WHERE v.estado_pago = 'PAGADO'
   `
   const params: any[] = []
 

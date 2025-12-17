@@ -159,6 +159,16 @@ export async function POST(request: NextRequest) {
         ]
       )
 
+      // Si es producto existente, reducir stock
+      if (esProductoExistente && detalle.productoId) {
+        await query(
+          `UPDATE public.productos 
+           SET stock = stock - ? 
+           WHERE id = ? AND stock >= ?`,
+          [detalle.cantidad, detalle.productoId, detalle.cantidad]
+        )
+      }
+
       // Si es producto no existente, agregarlo a productos_solicitados
       if (!esProductoExistente) {
         await query(
