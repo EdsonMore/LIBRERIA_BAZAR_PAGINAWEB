@@ -23,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "JSON inválido en la solicitud" }, { status: 400 })
     }
 
-    const { nombre, descripcion, precio, stock, categoria_id, imagen, disponible } = body
+    const { nombre, descripcion, precio, stock, categoria_id, disponible } = body
 
     // Validar campos obligatorios
     if (!nombre?.trim() || !descripcion?.trim()) {
@@ -48,24 +48,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Categoría inválida" }, { status: 400 })
     }
 
-    // Validar que la imagen no sea demasiado larga (MAX 500KB después de encoding)
-    // Esto permite base64 de imágenes grandes
-    const imagenUrl = imagen?.trim() || null
-    if (imagenUrl && imagenUrl.length > 500000) {
-      return NextResponse.json(
-        { error: `Imagen demasiado grande (${imagenUrl.length} caracteres). Máximo 500000 caracteres.` },
-        { status: 400 },
-      )
-    }
-
     // Redondear precio a 2 decimales
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
+    // NOTA: La imagen se actualiza solo a través de /api/admin/productos/[id]/imagen
     await query(
       `UPDATE productos 
-       SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, imagen = $6, disponible = $7
-       WHERE id = $8`,
-      [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, imagenUrl, disponible ? true : false, id],
+       SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, disponible = $6
+       WHERE id = $7`,
+      [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponible ? true : false, id],
     )
 
     return NextResponse.json({ message: "Producto actualizado exitosamente" })

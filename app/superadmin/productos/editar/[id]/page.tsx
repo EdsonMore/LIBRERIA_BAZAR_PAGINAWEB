@@ -337,11 +337,20 @@ export default function EditarProductoPage() {
     await new Promise(resolve => setTimeout(resolve, 50));
     
     try {
-      // Aquí enviamos SOLO la URL de la imagen, no base64
+      // Enviar SOLO datos del producto, SIN la imagen
+      const datosActualizar = {
+        nombre: producto.nombre,
+        descripcion: producto.descripcion,
+        precio: producto.precio,
+        stock: producto.stock,
+        categoria_id: producto.categoria_id,
+        disponible: producto.disponible,
+      };
+
       const res = await fetch(`/api/admin/productos/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(producto),
+        body: JSON.stringify(datosActualizar),
       });
 
       if (res.ok) {
@@ -353,6 +362,32 @@ export default function EditarProductoPage() {
     } catch (error) {
       console.error("Error:", error);
       alert("Error al actualizar producto");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const guardarImagenSeparada = async () => {
+    if (!producto || !productId) return;
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/admin/productos/${productId}/imagen`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imagen: producto.imagen }),
+      });
+
+      if (res.ok) {
+        alert("✅ Imagen actualizada exitosamente");
+      } else {
+        const error = await res.json();
+        alert(error.error || "Error al actualizar imagen");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al actualizar imagen");
     } finally {
       setLoading(false);
     }
@@ -641,30 +676,181 @@ export default function EditarProductoPage() {
           </label>
         </div>
 
-        <div className="flex gap-4 pt-4">
+        <canvas ref={canvasRef} width={640} height={480} className="hidden" />
+
+        {/* SECCIÓN 1: GUARDAR DATOS DEL PRODUCTO */}
+        <div className="border-t pt-4 mt-4">
+          <h3 className="font-semibold text-gray-900 mb-3">💾 Guardar datos del producto</h3>
+          <p className="text-sm text-gray-600 mb-4">Nombre, descripción, precio, stock, categoría y disponibilidad</p>
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 font-semibold"
+            >
+              {loading ? "Guardando..." : "✅ Guardar Datos"}
+            </button>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </form>
+
+      {/* SECCIÓN 2: GUARDAR IMAGEN (FUERA DEL FORM) */}
+      <div className="p-6 bg-white rounded-lg shadow mt-6 max-w-2xl mx-auto">
+        <h3 className="font-semibold text-gray-900 mb-3">🖼️ Cambiar imagen del producto</h3>
+        <p className="text-sm text-gray-600 mb-4">La imagen se actualiza de forma independiente</p>
+        
+        {imagenPreview && (
+          <div className="mb-4 relative">
+            <img
+              src={imagenPreview}
+              alt="Preview"
+              className="w-full max-h-64 object-cover rounded-md"
+            />
+            <button
+              type="button"
+              onClick={limpiarImagen}
+              className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            type="button"
+            onClick={() => {
+              if (showCamera) {
+                detenerCamara()
+              }
+              setShowCamera(!showCamera)
+            }}
+            className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-3 rounded-md hover:bg-green-700 text-sm"
           >
-            {loading ? "Guardando..." : "Guardar Cambios"}
+            <Camera className="w-4 h-4" />
+            Cámara
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-3 rounded-md hover:bg-blue-700 text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            Subir
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (showCamera) {
+                detenerCamara()
+                setShowCamera(false)
+              }
+              document.getElementById("urlImageInput")?.focus()
+            }}
+            className="flex items-center justify-center gap-2 bg-purple-600 text-white py-2 px-3 rounded-md hover:bg-purple-700 text-sm"
+          >
+            <Link className="w-4 h-4" />
+            URL
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={manejarSubidaArchivo}
+            className="hidden"
+          />
+        </div>
+
+        {showCamera && (
+          <div className="mb-4 border-2 border-gray-300 rounded-md overflow-hidden bg-black">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              controls={false}
+              style={{
+                width: "100%",
+                height: "100%",
+                maxHeight: "500px",
+                objectFit: "cover",
+                display: "block",
+              }}
+              className="w-full aspect-video object-cover bg-black"
+            />
+            <div className="flex gap-2 bg-gray-900 p-2">
+              <button
+                type="button"
+                onClick={tomarFoto}
+                className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 font-semibold"
+              >
+                📸 Capturar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setCameraFacing(cameraFacing === "user" ? "environment" : "user")
+                  detenerCamara()
+                  setTimeout(() => iniciarCamara(), 100)
+                }}
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 font-semibold flex items-center justify-center gap-2"
+              >
+                <RotateCw className="w-4 h-4" />
+                Voltear
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  detenerCamara()
+                  setShowCamera(false)
+                }}
+                className="flex-1 bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 font-semibold"
+              >
+                ✕ Cerrar
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="urlImageInput" className="block text-sm font-medium text-gray-700 mb-1">
+            O pega la URL de la imagen
+          </label>
+          <input
+            id="urlImageInput"
+            type="url"
+            value={producto.imagen}
+            onChange={(e) => manejarURLImagen(e.target.value)}
+            placeholder="https://ejemplo.com/imagen.jpg"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex gap-4 mt-4">
+          <button
+            type="button"
+            onClick={guardarImagenSeparada}
+            disabled={loading || !producto.imagen}
+            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 font-semibold"
+          >
+            {loading ? "Guardando imagen..." : "✅ Guardar Imagen"}
           </button>
           <button
             type="button"
             onClick={handleDelete}
             className="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
           >
-            Eliminar
-          </button>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
-          >
-            Cancelar
+            Eliminar Producto
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

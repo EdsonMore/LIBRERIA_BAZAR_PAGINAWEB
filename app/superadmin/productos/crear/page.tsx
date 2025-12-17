@@ -272,18 +272,34 @@ export default function CrearProductoPage() {
     await new Promise(resolve => setTimeout(resolve, 50))
 
     try {
+      // Enviar SOLO datos del producto, SIN la imagen
+      const datosCrear = {
+        nombre: formData.nombre,
+        descripcion: formData.descripcion,
+        precio: Number.parseFloat(formData.precio),
+        stock: Number.parseInt(formData.stock),
+        categoria_id: Number.parseInt(formData.categoria_id),
+        disponible: formData.disponible,
+      }
+
       const res = await fetch("/api/admin/productos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          precio: Number.parseFloat(formData.precio),
-          stock: Number.parseInt(formData.stock),
-          categoria_id: Number.parseInt(formData.categoria_id),
-        }),
+        body: JSON.stringify(datosCrear),
       })
 
       if (res.ok) {
+        const nuevoProducto = await res.json()
+        
+        // Si hay imagen, guardarla en el nuevo producto
+        if (formData.imagen) {
+          await fetch(`/api/admin/productos/${nuevoProducto.id}/imagen`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imagen: formData.imagen }),
+          })
+        }
+
         router.push("/superadmin/productos")
       } else {
         const error = await res.json()
