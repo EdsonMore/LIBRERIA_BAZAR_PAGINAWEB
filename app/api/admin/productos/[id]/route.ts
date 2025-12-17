@@ -25,6 +25,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { nombre, descripcion, precio, stock, categoria_id, disponible } = body
 
+    console.log("📝 Datos recibidos:", { nombre, descripcion, precio, stock, categoria_id, disponible })
+
     // Validar campos obligatorios
     if (!nombre?.trim() || !descripcion?.trim()) {
       return NextResponse.json({ error: "Nombre y descripción son obligatorios" }, { status: 400 })
@@ -51,6 +53,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // Redondear precio a 2 decimales
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
+    console.log("💾 Guardando con precio:", precioDosDecimales)
+
     // NOTA: La imagen se actualiza solo a través de /api/admin/productos/[id]/imagen
     await query(
       `UPDATE productos 
@@ -58,6 +62,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
        WHERE id = $7`,
       [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponible ? true : false, id],
     )
+
+    console.log("✅ Producto actualizado con éxito")
 
     return NextResponse.json({ message: "Producto actualizado exitosamente" })
   } catch (error) {

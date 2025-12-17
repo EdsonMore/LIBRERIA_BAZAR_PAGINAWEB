@@ -112,7 +112,7 @@ export default function EditarProductoPage() {
           stock: Number(data.stock ?? 0),
           categoria_id: Number(data.categoria_id ?? 0),
           imagen: data.imagen ?? "",
-          disponible: Boolean(data.disponible),
+          disponible: data.disponible === 1 || data.disponible === true || data.disponible === "true",
         });
         if (data.imagen) {
           setImagenPreview(data.imagen);
@@ -347,16 +347,22 @@ export default function EditarProductoPage() {
         disponible: producto.disponible,
       };
 
+      console.log("📤 Enviando datos:", datosActualizar);
+
       const res = await fetch(`/api/admin/productos/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datosActualizar),
       });
 
+      console.log("📥 Respuesta del servidor:", res.status);
+
       if (res.ok) {
+        alert("✅ Producto actualizado correctamente");
         router.push("/superadmin/productos");
       } else {
         const error = await res.json();
+        console.error("❌ Error del servidor:", error);
         alert(error.error || "Error al actualizar producto");
       }
     } catch (error) {
@@ -661,7 +667,7 @@ export default function EditarProductoPage() {
           <input
             type="checkbox"
             id="disponible"
-            checked={producto?.disponible || false}
+            checked={!!producto?.disponible}
             onChange={(e) =>
               producto &&
               setProducto({ ...producto, disponible: e.target.checked })
