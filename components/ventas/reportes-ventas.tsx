@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface ReportesProps {
   fechaInicio?: Date
@@ -20,6 +21,34 @@ interface Resumen {
   ultima_venta?: string
 }
 
+interface DetalleVenta {
+  detalle_id: number
+  producto_id: number
+  producto_nombre: string
+  cantidad: number
+  precio_unitario: number
+  subtotal: number
+  es_producto_existente: boolean
+}
+
+interface Venta {
+  venta_id: number
+  fecha_hora: string
+  metodo_pago: string
+  total_venta: number
+  estado_pago: string
+  vendedor_id: number
+  vendedor_nombre: string
+  cliente_nombre: string
+  cliente_email: string
+  cliente_telefono: string
+  propietario_id: number
+  propietario_nombre: string
+  detalles: DetalleVenta[]
+  created_at: string
+  updated_at: string
+}
+
 export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
   const [resumen, setResumen] = useState<Resumen | null>(null)
   const [ventasPorVendedor, setVentasPorVendedor] = useState<any[]>([])
@@ -28,8 +57,10 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
   const [productosSolicitados, setProductosSolicitados] = useState<any[]>([])
   const [resumenMetodoPago, setResumenMetodoPago] = useState<any[]>([])
   const [listaCompra, setListaCompra] = useState<any[]>([])
+  const [detallesVentas, setDetallesVentas] = useState<Venta[]>([])
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [ventasExpandidas, setVentasExpandidas] = useState<Set<number>>(new Set())
 
   // Filtros
   const [filtroFechaInicio, setFiltroFechaInicio] = useState(
@@ -73,11 +104,47 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
 
       // Cargar lista de compra
       cargarListaCompra()
+      
+      // Cargar detalles de ventas
+      cargarDetallesVentas()
     } catch (err: any) {
       setError(err.message || 'Error al cargar reportes')
     } finally {
       setCargando(false)
     }
+  }
+
+  // Cargar detalles de ventas para auditoría
+  const cargarDetallesVentas = async () => {
+    try {
+      const params = new URLSearchParams()
+
+      if (filtroFechaInicio) {
+        params.append('fechaInicio', new Date(filtroFechaInicio).toISOString())
+      }
+      if (filtroFechaFin) {
+        params.append('fechaFin', new Date(filtroFechaFin).toISOString())
+      }
+
+      const response = await fetch(`/api/ventas/reportes/detalles?${params.toString()}`)
+      if (response.ok) {
+        const data = await response.json()
+        setDetallesVentas(data.ventas || [])
+      }
+    } catch (err) {
+      console.error('Error al cargar detalles de ventas:', err)
+    }
+  }
+
+  // Toggle para expandir/contraer detalle de venta
+  const toggleVentaExpandida = (ventaId: number) => {
+    const nuevasExpandidas = new Set(ventasExpandidas)
+    if (nuevasExpandidas.has(ventaId)) {
+      nuevasExpandidas.delete(ventaId)
+    } else {
+      nuevasExpandidas.add(ventaId)
+    }
+    setVentasExpandidas(nuevasExpandidas)
   }
 
   // Cargar lista de compra
@@ -183,15 +250,32 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
       )}
 
       {/* Tabs con reportes detallados */}
-      <Tabs defaultValue="vendedor" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1 text-xs md:text-sm">
-          <TabsTrigger value="vendedor" className="px-1 md:px-2 py-1 md:py-2">Vendedor</TabsTrigger>
-          <TabsTrigger value="propietario" className="px-1 md:px-2 py-1 md:py-2">Propietario</TabsTrigger>
-          <TabsTrigger value="productos" className="px-1 md:px-2 py-1 md:py-2 hidden md:flex md:col-span-1">Productos</TabsTrigger>
-          <TabsTrigger value="solicitados" className="px-1 md:px-2 py-1 md:py-2">Solicitados</TabsTrigger>
-          <TabsTrigger value="lista" className="px-1 md:px-2 py-1 md:py-2">📋</TabsTrigger>
-          <TabsTrigger value="metodos" className="px-1 md:px-2 py-1 md:py-2 hidden lg:flex">Pagos</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="vendedor" className="space-y-4 w-full">
+        <div className="overflow-x-auto">
+          <TabsList className="inline-flex w-full md:w-auto gap-2 bg-gray-100 p-1 rounded-lg flex-wrap md:flex-nowrap">
+            <TabsTrigger value="vendedor" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
+              Vendedor
+            </TabsTrigger>
+            <TabsTrigger value="propietario" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
+              Propietario
+            </TabsTrigger>
+            <TabsTrigger value="productos" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
+              Productos
+            </TabsTrigger>
+            <TabsTrigger value="solicitados" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
+              Solicitados
+            </TabsTrigger>
+            <TabsTrigger value="detalles" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap bg-green-100">
+              📋 Detalles
+            </TabsTrigger>
+            <TabsTrigger value="lista" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
+              📝 Compra
+            </TabsTrigger>
+            <TabsTrigger value="metodos" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
+              💳 Pagos
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Ventas por Vendedor */}
         <TabsContent value="vendedor">
@@ -403,6 +487,140 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                   ))
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Detalles de Ventas - Para Auditoría */}
+        <TabsContent value="detalles">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg md:text-xl">📋 Detalles de Ventas - Auditoría</CardTitle>
+              <CardDescription className="text-xs md:text-sm">Información completa de cada venta: productos, cliente, propietario, precio y método de pago</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {detallesVentas.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No hay ventas para auditar</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {detallesVentas.map((venta) => (
+                    <div key={venta.venta_id} className="border rounded-lg overflow-hidden">
+                      {/* Header de la venta - Resumen */}
+                      <button
+                        onClick={() => toggleVentaExpandida(venta.venta_id)}
+                        className="w-full p-3 md:p-4 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 transition-colors flex items-center justify-between"
+                      >
+                        <div className="flex-1 text-left">
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs md:text-sm">
+                            <div>
+                              <p className="text-gray-600 text-xs">Vendedor</p>
+                              <p className="font-semibold truncate">{venta.vendedor_nombre}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600 text-xs">Cliente</p>
+                              <p className="font-semibold truncate">{venta.cliente_nombre}</p>
+                            </div>
+                            <div className="hidden md:block">
+                              <p className="text-gray-600 text-xs">Fecha</p>
+                              <p className="font-semibold">{new Date(venta.fecha_hora).toLocaleDateString('es-PE')}</p>
+                            </div>
+                            <div>
+                              <p className="text-gray-600 text-xs">Método</p>
+                              <p className="font-semibold">{venta.metodo_pago}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-gray-600 text-xs">Total</p>
+                              <p className="font-bold text-green-600">{formatoMoneda(venta.total_venta)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="ml-2 flex-shrink-0">
+                          {ventasExpandidas.has(venta.venta_id) ? (
+                            <ChevronUp className="w-5 h-5 md:w-6 md:h-6" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 md:w-6 md:h-6" />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Detalle expandible */}
+                      {ventasExpandidas.has(venta.venta_id) && (
+                        <div className="p-3 md:p-4 bg-white border-t space-y-4">
+                          {/* Información del cliente y propietario */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b">
+                            <div>
+                              <h4 className="font-semibold text-sm mb-2">👤 Cliente</h4>
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <p><strong>Nombre:</strong> {venta.cliente_nombre}</p>
+                                <p><strong>Email:</strong> {venta.cliente_email || 'N/A'}</p>
+                                <p><strong>Teléfono:</strong> {venta.cliente_telefono || 'N/A'}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-sm mb-2">🏢 Propietario</h4>
+                              <div className="space-y-1 text-xs text-gray-600">
+                                <p><strong>Nombre:</strong> {venta.propietario_nombre}</p>
+                                <p><strong>ID:</strong> {venta.propietario_id}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Tabla de productos vendidos */}
+                          <div>
+                            <h4 className="font-semibold text-sm mb-2">📦 Productos</h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-xs">
+                                <thead className="bg-gray-100 border-b">
+                                  <tr>
+                                    <th className="text-left px-2 py-2">Producto</th>
+                                    <th className="text-center px-2 py-2">Cant.</th>
+                                    <th className="text-right px-2 py-2">P. Unit.</th>
+                                    <th className="text-right px-2 py-2">Subtotal</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {venta.detalles.map((detalle) => (
+                                    <tr key={detalle.detalle_id} className="border-b hover:bg-gray-50">
+                                      <td className="px-2 py-2 font-medium truncate">{detalle.producto_nombre}</td>
+                                      <td className="text-center px-2 py-2">{detalle.cantidad}</td>
+                                      <td className="text-right px-2 py-2">{formatoMoneda(detalle.precio_unitario)}</td>
+                                      <td className="text-right px-2 py-2 font-semibold text-green-600">
+                                        {formatoMoneda(detalle.subtotal)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Resumen de totales */}
+                          <div className="flex justify-end pt-2 border-t">
+                            <div className="text-right space-y-1 text-sm">
+                              <div className="flex gap-4">
+                                <span className="font-semibold">Subtotal:</span>
+                                <span>{formatoMoneda(venta.detalles.reduce((sum, d) => sum + d.subtotal, 0))}</span>
+                              </div>
+                              <div className="flex gap-4 text-lg font-bold text-green-600">
+                                <span>Total:</span>
+                                <span>{formatoMoneda(venta.total_venta)}</span>
+                              </div>
+                              <div className="flex gap-4 text-xs">
+                                <span className="text-gray-600">Estado:</span>
+                                <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded">
+                                  {venta.estado_pago}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

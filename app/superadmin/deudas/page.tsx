@@ -29,6 +29,8 @@ export default function DeudasPage() {
   const [modalPago, setModalPago] = useState(false)
   const [modalCancelacion, setModalCancelacion] = useState(false)
   const [deudaSeleccionada, setDeudaSeleccionada] = useState<any | null>(null)
+  const [detallesDeuda, setDetallesDeuda] = useState<any | null>(null)
+  const [cargandoDetalles, setCargandoDetalles] = useState(false)
   const [montoPago, setMontoPago] = useState(0)
   const [metodoPago, setMetodoPago] = useState('EFECTIVO')
   const [motivoCancelacion, setMotivoCancelacion] = useState('')
@@ -74,9 +76,24 @@ export default function DeudasPage() {
     }
   }
 
-  const abrirModalPago = (deuda: any) => {
+  const abrirModalPago = async (deuda: any) => {
     setDeudaSeleccionada(deuda)
     setMontoPago(deuda.saldo_pendiente)
+    setCargandoDetalles(true)
+    
+    try {
+      // Cargar detalles de la deuda (productos, propietario, etc)
+      const response = await fetch(`/api/deudas/${deuda.venta_id}/detalles`)
+      if (response.ok) {
+        const data = await response.json()
+        setDetallesDeuda(data.venta)
+      }
+    } catch (error) {
+      console.error('Error al cargar detalles:', error)
+    } finally {
+      setCargandoDetalles(false)
+    }
+    
     setModalPago(true)
   }
 
@@ -487,91 +504,178 @@ export default function DeudasPage() {
 
         {/* Modal de Pago */}
         {modalPago && deudaSeleccionada && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="w-full max-w-md">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <Card className="w-full max-w-2xl my-8">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-lg md:text-xl">Registrar Pago</CardTitle>
+                <CardTitle className="text-lg md:text-xl">💳 Registrar Pago</CardTitle>
                 <button
-                  onClick={() => setModalPago(false)}
+                  onClick={() => {
+                    setModalPago(false)
+                    setDetallesDeuda(null)
+                  }}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Info de la deuda */}
-                <div className="p-3 bg-gray-50 rounded space-y-2">
-                  <p className="text-sm">
-                    <span className="font-semibold">Cliente:</span> {deudaSeleccionada.cliente_nombre}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-semibold">Total:</span> S/. {Number(deudaSeleccionada.total).toFixed(2)}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-semibold">Pagado:</span> S/. {Number(deudaSeleccionada.monto_pagado).toFixed(2)}
-                  </p>
-                  <p className="text-sm font-bold text-red-600">
-                    <span>Saldo:</span> S/. {Number(deudaSeleccionada.saldo_pendiente).toFixed(2)}
-                  </p>
-                </div>
-
-                {/* Formulario de pago */}
-                <div>
-                  <Label htmlFor="monto-pago" className="text-sm">Monto a Pagar (S/.) *</Label>
-                  <Input
-                    id="monto-pago"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max={Number(deudaSeleccionada.saldo_pendiente)}
-                    value={montoPago}
-                    onChange={(e) => setMontoPago(Number(e.target.value))}
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Máximo: S/. {Number(deudaSeleccionada.saldo_pendiente).toFixed(2)}
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="metodo-pago" className="text-sm">Método de Pago *</Label>
-                  <Select value={metodoPago} onValueChange={setMetodoPago}>
-                    <SelectTrigger id="metodo-pago" className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="EFECTIVO">💵 Efectivo</SelectItem>
-                      <SelectItem value="YAPE">📱 Yape</SelectItem>
-                      <SelectItem value="PLIN">📱 Plin</SelectItem>
-                      <SelectItem value="TRANSFERENCIA">🏦 Transferencia</SelectItem>
-                      <SelectItem value="OTRO">📝 Otro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {mensajeAccion && (
-                  <div className={`p-3 rounded text-sm ${mensajeAccion.includes('Error') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
-                    {mensajeAccion}
+              <CardContent className="space-y-4 max-h-[70vh] overflow-y-auto">
+                {cargandoDetalles ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-blue-600"></div>
+                    <p className="mt-2 text-sm text-gray-600">Cargando detalles...</p>
                   </div>
-                )}
+                ) : (
+                  <>
+                    {/* Información del Cliente y Propietario */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-3 border-b">
+                      <div className="p-3 bg-blue-50 rounded">
+                        <h4 className="font-semibold text-sm mb-2">👤 Cliente</h4>
+                        <div className="space-y-1 text-xs">
+                          <p><strong>Nombre:</strong> {detallesDeuda?.cliente_nombre}</p>
+                          <p><strong>Email:</strong> {detallesDeuda?.cliente_email || 'N/A'}</p>
+                          <p><strong>Teléfono:</strong> {detallesDeuda?.cliente_telefono || 'N/A'}</p>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded">
+                        <h4 className="font-semibold text-sm mb-2">🏢 Propietario</h4>
+                        <div className="space-y-1 text-xs">
+                          <p><strong>Nombre:</strong> {detallesDeuda?.propietario_nombre || 'N/A'}</p>
+                          <p><strong>Vendedor:</strong> {detallesDeuda?.vendedor_nombre || 'N/A'}</p>
+                          <p><strong>Fecha Venta:</strong> {detallesDeuda?.fecha_hora ? new Date(detallesDeuda.fecha_hora).toLocaleDateString('es-PE') : 'N/A'}</p>
+                        </div>
+                      </div>
+                    </div>
 
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setModalPago(false)}
-                    disabled={cargandoAccion}
-                    className="flex-1"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={registrarPago}
-                    disabled={cargandoAccion}
-                    className="flex-1"
-                  >
-                    {cargandoAccion ? 'Registrando...' : 'Registrar Pago'}
-                  </Button>
-                </div>
+                    {/* Tabla de Productos Vendidos */}
+                    {detallesDeuda?.productos && detallesDeuda.productos.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2">📦 Productos Vendidos</h4>
+                        <div className="overflow-x-auto border rounded">
+                          <table className="w-full text-xs">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="px-2 py-2 text-left">Producto</th>
+                                <th className="px-2 py-2 text-center">Cant.</th>
+                                <th className="px-2 py-2 text-right">P. Unit.</th>
+                                <th className="px-2 py-2 text-right">Subtotal</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {detallesDeuda.productos.map((prod: any) => (
+                                <tr key={prod.detalle_id} className="border-b hover:bg-gray-50">
+                                  <td className="px-2 py-2 font-medium">{prod.producto_nombre}</td>
+                                  <td className="px-2 py-2 text-center">{prod.cantidad}</td>
+                                  <td className="px-2 py-2 text-right">S/. {Number(prod.precio_unitario).toFixed(2)}</td>
+                                  <td className="px-2 py-2 text-right font-semibold text-green-600">
+                                    S/. {Number(prod.subtotal).toFixed(2)}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Resumen Financiero */}
+                    <div className="p-3 bg-gray-50 rounded space-y-2 border-l-4 border-blue-500">
+                      <p className="text-sm">
+                        <span className="font-semibold">Total Venta:</span> 
+                        <span className="ml-2 font-bold">S/. {Number(detallesDeuda?.total).toFixed(2)}</span>
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">Pagado:</span> 
+                        <span className="ml-2 font-bold text-green-600">S/. {Number(detallesDeuda?.monto_pagado).toFixed(2)}</span>
+                      </p>
+                      <p className="text-sm font-bold text-red-600">
+                        <span>Saldo Pendiente:</span> 
+                        <span className="ml-2">S/. {Number(detallesDeuda?.saldo_pendiente).toFixed(2)}</span>
+                      </p>
+                    </div>
+
+                    {/* Historial de Pagos */}
+                    {detallesDeuda?.pagos_realizados && detallesDeuda.pagos_realizados.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold text-sm mb-2">📊 Historial de Pagos</h4>
+                        <div className="bg-gray-50 rounded p-3 space-y-2">
+                          {detallesDeuda.pagos_realizados.map((pago: any) => (
+                            <div key={pago.pago_id} className="flex justify-between text-xs border-b pb-2">
+                              <span>
+                                {new Date(pago.fecha_hora).toLocaleDateString('es-PE')} - {pago.metodo_pago}
+                              </span>
+                              <span className="font-semibold">S/. {Number(pago.monto).toFixed(2)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Formulario de pago */}
+                    <div className="pt-2 border-t">
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="monto-pago" className="text-sm font-semibold">Monto a Pagar (S/.) *</Label>
+                          <Input
+                            id="monto-pago"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max={Number(detallesDeuda?.saldo_pendiente)}
+                            value={montoPago}
+                            onChange={(e) => setMontoPago(Number(e.target.value))}
+                            className="mt-1 text-base font-semibold"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Máximo: S/. {Number(detallesDeuda?.saldo_pendiente).toFixed(2)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="metodo-pago" className="text-sm font-semibold">Método de Pago *</Label>
+                          <Select value={metodoPago} onValueChange={setMetodoPago}>
+                            <SelectTrigger id="metodo-pago" className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="EFECTIVO">💵 Efectivo</SelectItem>
+                              <SelectItem value="YAPE">📱 Yape</SelectItem>
+                              <SelectItem value="PLIN">📱 Plin</SelectItem>
+                              <SelectItem value="TRANSFERENCIA">🏦 Transferencia</SelectItem>
+                              <SelectItem value="OTRO">📝 Otro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {mensajeAccion && (
+                          <div className={`p-3 rounded text-sm ${mensajeAccion.includes('Error') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                            {mensajeAccion}
+                          </div>
+                        )}
+
+                        <div className="flex gap-3 pt-4">
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setModalPago(false)
+                              setDetallesDeuda(null)
+                            }}
+                            disabled={cargandoAccion}
+                            className="flex-1"
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            onClick={registrarPago}
+                            disabled={cargandoAccion}
+                            className="flex-1"
+                          >
+                            {cargandoAccion ? 'Registrando...' : '✓ Registrar Pago'}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -1,35 +1,35 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { ShoppingCart, User, Menu, X, Bell } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ShoppingCart, User, Menu, X, Bell } from "lucide-react";
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [usuario, setUsuario] = useState<any>(null)
-  const [carritoCount, setCarritoCount] = useState(0)
-  const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const pathname = usePathname()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [usuario, setUsuario] = useState<any>(null);
+  const [carritoCount, setCarritoCount] = useState(0);
+  const [notificacionesNoLeidas, setNotificacionesNoLeidas] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const controller = new AbortController()
-    
+    const controller = new AbortController();
+
     fetch("/api/auth/me", { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         if (data?.usuario) {
-          setUsuario(data.usuario)
-          cargarNotificaciones()
+          setUsuario(data.usuario);
+          cargarNotificaciones();
         }
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
-    
-    return () => controller.abort()
-  }, [])
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     // Obtener cantidad de items en carrito cuando cambia el usuario
@@ -38,12 +38,12 @@ export default function Navbar() {
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data?.count !== undefined) {
-            setCarritoCount(data.count)
+            setCarritoCount(data.count);
           }
         })
-        .catch(() => {})
+        .catch(() => {});
     }
-  }, [usuario?.id]) // Solo cambiar si el ID del usuario cambia
+  }, [usuario?.id]); // Solo cambiar si el ID del usuario cambia
 
   // Escuchar evento de actualización del carrito
   useEffect(() => {
@@ -53,67 +53,76 @@ export default function Navbar() {
           .then((res) => (res.ok ? res.json() : null))
           .then((data) => {
             if (data?.count !== undefined) {
-              setCarritoCount(data.count)
+              setCarritoCount(data.count);
             }
           })
-          .catch(() => {})
+          .catch(() => {});
       }
-    }
+    };
 
-    window.addEventListener("carritoActualizado", handleCarritoActualizado)
-    return () => window.removeEventListener("carritoActualizado", handleCarritoActualizado)
-  }, [usuario])
+    window.addEventListener("carritoActualizado", handleCarritoActualizado);
+    return () =>
+      window.removeEventListener(
+        "carritoActualizado",
+        handleCarritoActualizado
+      );
+  }, [usuario]);
 
   const cargarNotificaciones = async () => {
-    if (!usuario) return
+    if (!usuario) return;
     try {
-      const res = await fetch("/api/notificaciones/no-leidas")
+      const res = await fetch("/api/notificaciones/no-leidas");
       if (res.ok) {
-        const data = await res.json()
-        setNotificacionesNoLeidas(data.count || 0)
+        const data = await res.json();
+        setNotificacionesNoLeidas(data.count || 0);
       }
     } catch (error) {
-      console.error("Error al cargar notificaciones:", error)
+      console.error("Error al cargar notificaciones:", error);
     }
-  }
+  };
 
   const isActive = (path: string) => {
-    return pathname === path
-  }
+    return pathname === path;
+  };
 
   const handleLogout = async () => {
-    setIsUserMenuOpen(false)
-    await fetch("/api/auth/logout", { method: "POST" })
-    window.location.href = "/"
-  }
+    setIsUserMenuOpen(false);
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/";
+  };
 
   // Funciones auxiliares para verificar roles
   const hasRole = (roleName: string) => {
-    if (!usuario?.roles || !Array.isArray(usuario.roles) || usuario.roles.length === 0) {
-      return false
+    if (
+      !usuario?.roles ||
+      !Array.isArray(usuario.roles) ||
+      usuario.roles.length === 0
+    ) {
+      return false;
     }
-    
-    return usuario.roles.some((r: any) => {
-      const nombre = typeof r === 'object' ? r.nombre : r
-      return nombre === roleName
-    })
-  }
 
-  const isSuperAdmin = () => hasRole("ROLE_SUPER_ADMIN")
-  const isAdmin = () => hasRole("ROLE_ADMIN")
-  const isCliente = () => hasRole("ROLE_CLIENTE")
+    return usuario.roles.some((r: any) => {
+      const nombre = typeof r === "object" ? r.nombre : r;
+      return nombre === roleName;
+    });
+  };
+
+  const isSuperAdmin = () => hasRole("ROLE_SUPER_ADMIN");
+  const isAdmin = () => hasRole("ROLE_ADMIN");
+  const isCliente = () => hasRole("ROLE_CLIENTE");
   const isVendedor = () => {
     // Verificar si tiene cualquier rol que contenga "VENDEDOR" o roles de ventas
-    if (!usuario?.roles || !Array.isArray(usuario.roles)) return false
+    if (!usuario?.roles || !Array.isArray(usuario.roles)) return false;
     return usuario.roles.some((r: any) => {
-      const nombre = typeof r === 'object' ? r.nombre : r
-      return nombre && (
-        nombre.includes("VENDEDOR") || 
-        nombre.includes("VENTA") ||
-        nombre === "encargado de ventas"
-      )
-    })
-  }
+      const nombre = typeof r === "object" ? r.nombre : r;
+      return (
+        nombre &&
+        (nombre.includes("VENDEDOR") ||
+          nombre.includes("VENTA") ||
+          nombre === "encargado de ventas")
+      );
+    });
+  };
 
   return (
     <nav className="navbar sticky top-0 z-50">
@@ -121,47 +130,73 @@ export default function Navbar() {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <Link href="/" className="navbar-brand flex items-center gap-3">
-            <img 
-              src="/images/logos/logo.jpg" 
-              alt="Tienda Bazar Logo" 
+            <img
+              src="/images/logos/logo.jpg"
+              alt="Tienda Bazar Logo"
               className="h-12 w-auto rounded-lg"
             />
-            <span className="hidden sm:inline font-bold text-lg">Tienda Bazar</span>
+            <span className="hidden sm:inline font-bold text-lg">
+              Tienda Bazar
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link href="/" className={`nav-link ${isActive("/") ? "active" : ""}`}>
+            <Link
+              href="/"
+              className={`nav-link ${isActive("/") ? "active" : ""}`}
+            >
               Inicio
             </Link>
-            <Link href="/productos" className={`nav-link ${isActive("/productos") ? "active" : ""}`}>
+            <Link
+              href="/productos"
+              className={`nav-link ${isActive("/productos") ? "active" : ""}`}
+            >
               Productos
             </Link>
 
             {/* Sobre Nosotros - Solo para público y clientes */}
             {(!usuario || isCliente()) && (
-              <Link href="/sobre-nosotros" className={`nav-link ${isActive("/sobre-nosotros") ? "active" : ""}`}>
+              <Link
+                href="/sobre-nosotros"
+                className={`nav-link ${
+                  isActive("/sobre-nosotros") ? "active" : ""
+                }`}
+              >
                 Sobre Nosotros
               </Link>
             )}
 
             {/* Contacto - Solo para público y clientes */}
             {(!usuario || isCliente()) && (
-              <Link href="/contacto" className={`nav-link ${isActive("/contacto") ? "active" : ""}`}>
+              <Link
+                href="/contacto"
+                className={`nav-link ${isActive("/contacto") ? "active" : ""}`}
+              >
                 Contacto
               </Link>
             )}
 
             {/* Libro de Reclamaciones - Solo para público y clientes */}
             {(!usuario || isCliente()) && (
-              <Link href="/libro-reclamaciones" className={`nav-link ${isActive("/libro-reclamaciones") ? "active" : ""}`}>
+              <Link
+                href="/libro-reclamaciones"
+                className={`nav-link ${
+                  isActive("/libro-reclamaciones") ? "active" : ""
+                }`}
+              >
                 Libro de Reclamaciones
               </Link>
             )}
 
             {/* Cotizar Lista - Solo si es Cliente */}
             {isCliente() && (
-              <Link href="/cotizar-lista" className={`nav-link ${isActive("/cotizar-lista") ? "active" : ""}`}>
+              <Link
+                href="/cotizar-lista"
+                className={`nav-link ${
+                  isActive("/cotizar-lista") ? "active" : ""
+                }`}
+              >
                 📋 Cotizar Lista
               </Link>
             )}
@@ -180,69 +215,6 @@ export default function Navbar() {
                   >
                     Dashboard
                   </Link>
-                  <Link
-                    href="/superadmin/usuarios"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Usuarios
-                  </Link>
-                  <Link
-                    href="/superadmin/roles"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Roles
-                  </Link>
-                  <Link
-                    href="/superadmin/productos"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Productos
-                  </Link>
-                  <Link
-                    href="/superadmin/categorias"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Categorías
-                  </Link>
-                  <Link
-                    href="/superadmin/compras"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Compras
-                  </Link>
-                  <Link
-                    href="/superadmin/ventas-reportes"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Reportes de Ventas
-                  </Link>
-                  <Link
-                    href="/superadmin/mis-boletas"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Mis Boletas
-                  </Link>
-                  <Link
-                    href="/superadmin/resenas"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Reseñas
-                  </Link>
-                  <Link
-                    href="/superadmin/configuracion"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Configuración del Sistema
-                  </Link>
                 </div>
               </div>
             )}
@@ -259,7 +231,7 @@ export default function Navbar() {
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors font-semibold text-green-600"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    📝 Registrar Venta
+                    Registrar Venta
                   </Link>
                 </div>
               </div>
@@ -270,7 +242,11 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {/* Carrito (solo para clientes) */}
             {isCliente() && (
-              <Link href="/carrito" className="relative hover:text-[#667eea] transition-colors" title="Ver carrito">
+              <Link
+                href="/carrito"
+                className="relative hover:text-[#667eea] transition-colors"
+                title="Ver carrito"
+              >
                 <ShoppingCart className="w-6 h-6" />
                 {carritoCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -282,7 +258,11 @@ export default function Navbar() {
 
             {/* Notificaciones (para usuarios autenticados) */}
             {usuario && (
-              <Link href="/notificaciones" className="relative hover:text-[#667eea] transition-colors" title="Notificaciones">
+              <Link
+                href="/notificaciones"
+                className="relative hover:text-[#667eea] transition-colors"
+                title="Notificaciones"
+              >
                 <Bell className="w-6 h-6" />
                 {notificacionesNoLeidas > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -301,7 +281,9 @@ export default function Navbar() {
                 >
                   <User className="w-6 h-6" />
                   <span className="hidden md:inline text-sm font-medium">
-                    {usuario.user ? `@${usuario.user}` : usuario.nombres || "Usuario"}
+                    {usuario.user
+                      ? `@${usuario.user}`
+                      : usuario.nombres || "Usuario"}
                   </span>
                 </button>
                 {isUserMenuOpen && (
@@ -358,8 +340,15 @@ export default function Navbar() {
             )}
 
             {/* Mobile menu button */}
-            <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <button
+              className="md:hidden"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -424,69 +413,15 @@ export default function Navbar() {
             {(isSuperAdmin() || isAdmin() || hasRole("ROLE_PRODUCTOS")) && (
               <>
                 <hr className="my-2" />
-                <div className="text-sm font-bold text-gray-600 px-0 py-1">📊 Panel SuperAdmin</div>
+                <div className="text-sm font-bold text-gray-600 px-0 py-1">
+                  📊 Panel SuperAdmin
+                </div>
                 <Link
                   href="/superadmin"
                   className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
-                </Link>
-                <Link
-                  href="/superadmin/usuarios"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Usuarios
-                </Link>
-                <Link
-                  href="/superadmin/roles"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Roles
-                </Link>
-                <Link
-                  href="/superadmin/productos"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Productos
-                </Link>
-                <Link
-                  href="/superadmin/categorias"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Categorías
-                </Link>
-                <Link
-                  href="/superadmin/compras"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Compras
-                </Link>
-                <Link
-                  href="/superadmin/ventas-reportes"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors font-semibold text-blue-600"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  📈 Reportes de Ventas
-                </Link>
-                <Link
-                  href="/superadmin/resenas"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Reseñas
-                </Link>
-                <Link
-                  href="/superadmin/configuracion"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Configuración
                 </Link>
               </>
             )}
@@ -495,7 +430,9 @@ export default function Navbar() {
             {isVendedor() && (
               <>
                 <hr className="my-2" />
-                <div className="text-sm font-bold text-gray-600 px-0 py-1">Panel de Ventas</div>
+                <div className="text-sm font-bold text-gray-600 px-0 py-1">
+                  Panel de Ventas
+                </div>
                 <Link
                   href="/ventas"
                   className="block py-2 pl-4 hover:text-[#667eea] transition-colors font-semibold"
@@ -539,8 +476,8 @@ export default function Navbar() {
                 )}
                 <button
                   onClick={() => {
-                    setIsMenuOpen(false)
-                    handleLogout()
+                    setIsMenuOpen(false);
+                    handleLogout();
                   }}
                   className="w-full text-left py-2 text-red-600 hover:text-red-700 transition-colors font-medium"
                 >
@@ -552,5 +489,5 @@ export default function Navbar() {
         )}
       </div>
     </nav>
-  )
+  );
 }
