@@ -57,17 +57,27 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
     console.log("💾 Guardando producto ID:", id)
+    console.log("💾 Disponible antes de enviar:", disponible, "Tipo:", typeof disponible)
     console.log("💾 Datos:", { nombre: nombre.trim(), descripcion: descripcion.trim(), precio: precioDosDecimales, stock: stockNum, categoria_id: categoriaNum, disponible: disponible ? true : false })
+
+    // Convertir disponible a booleano explícitamente para PostgreSQL
+    const disponibleBool = disponible === true || disponible === 1 || disponible === "true" || disponible === "1"
 
     // NOTA: La imagen se actualiza solo a través de /api/admin/productos/[id]/imagen
     const result = await query(
       `UPDATE productos 
        SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, disponible = $6
        WHERE id = $7`,
-      [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponible ? true : false, id],
+      [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponibleBool, id],
     )
 
     console.log("✅ Producto actualizado. Resultado:", result)
+    
+    if (!result || result.rowCount === 0) {
+      console.error("❌ ADVERTENCIA: No se actualizó ninguna fila. ID probablemente no existe:", id)
+    } else {
+      console.log("✅ Se actualizaron", result.rowCount, "fila(s)")
+    }
 
     return NextResponse.json({ message: "Producto actualizado exitosamente", id })
   } catch (error) {

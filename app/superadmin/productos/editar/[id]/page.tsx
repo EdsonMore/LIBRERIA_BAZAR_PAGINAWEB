@@ -35,7 +35,9 @@ export default function EditarProductoPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
-  const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("user");
+  const [cameraFacing, setCameraFacing] = useState<"user" | "environment">(
+    "user"
+  );
   const [imagenPreview, setImagenPreview] = useState<string>("");
   const [producto, setProducto] = useState<Producto>({
     id: 0,
@@ -112,9 +114,19 @@ export default function EditarProductoPage() {
           stock: Number(data.stock ?? 0),
           categoria_id: Number(data.categoria_id ?? 0),
           imagen: data.imagen ?? "",
-          disponible: data.disponible === 1 || data.disponible === true || data.disponible === "true" || data.disponible === "1",
+          disponible:
+            data.disponible === 1 ||
+            data.disponible === true ||
+            data.disponible === "true" ||
+            data.disponible === "1",
         });
-        console.log("✅ Producto cargado, disponible es:", data.disponible === 1 || data.disponible === true || data.disponible === "true" || data.disponible === "1");
+        console.log(
+          "✅ Producto cargado, disponible es:",
+          data.disponible === 1 ||
+            data.disponible === true ||
+            data.disponible === "true" ||
+            data.disponible === "1"
+        );
         if (data.imagen) {
           setImagenPreview(data.imagen);
         }
@@ -129,13 +141,15 @@ export default function EditarProductoPage() {
   const iniciarCamara = async () => {
     try {
       if (!navigator.mediaDevices) {
-        alert("Tu navegador no soporta cámara. Intenta con Chrome, Firefox o Edge")
-        setShowCamera(false)
-        return
+        alert(
+          "Tu navegador no soporta cámara. Intenta con Chrome, Firefox o Edge"
+        );
+        setShowCamera(false);
+        return;
       }
 
-      let stream: MediaStream
-      
+      let stream: MediaStream;
+
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
@@ -144,59 +158,65 @@ export default function EditarProductoPage() {
             height: { ideal: 720 },
           },
           audio: false,
-        })
+        });
       } catch (err) {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: cameraFacing,
           },
           audio: false,
-        })
+        });
       }
 
       streamRef.current = stream;
 
       if (!videoRef.current) {
-        stream.getTracks().forEach(track => track.stop())
-        setShowCamera(false)
-        return
+        stream.getTracks().forEach((track) => track.stop());
+        setShowCamera(false);
+        return;
       }
 
-      videoRef.current.srcObject = stream
-      
+      videoRef.current.srcObject = stream;
+
       await new Promise<void>((resolve) => {
         if (videoRef.current!.readyState >= 2) {
-          resolve()
+          resolve();
         } else {
           videoRef.current!.onloadedmetadata = () => {
-            resolve()
-          }
-          
-          setTimeout(() => {
-            resolve()
-          }, 5000)
-        }
-      })
+            resolve();
+          };
 
-      await videoRef.current.play()
-      
+          setTimeout(() => {
+            resolve();
+          }, 5000);
+        }
+      });
+
+      await videoRef.current.play();
     } catch (error: any) {
-      let mensaje = ""
-      
+      let mensaje = "";
+
       if (error.name === "NotFoundError") {
-        mensaje = "No se encontró una cámara en este dispositivo"
-      } else if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
-        mensaje = "Por favor, permite el acceso a la cámara\n\nHaz clic en el icono de cámara en la barra de dirección y selecciona 'Permitir'"
+        mensaje = "No se encontró una cámara en este dispositivo";
+      } else if (
+        error.name === "NotAllowedError" ||
+        error.name === "PermissionDeniedError"
+      ) {
+        mensaje =
+          "Por favor, permite el acceso a la cámara\n\nHaz clic en el icono de cámara en la barra de dirección y selecciona 'Permitir'";
       } else if (error.name === "NotReadableError") {
-        mensaje = "La cámara está siendo usada por otra aplicación\n\nCierra: Zoom, Meet, WhatsApp, etc."
+        mensaje =
+          "La cámara está siendo usada por otra aplicación\n\nCierra: Zoom, Meet, WhatsApp, etc.";
       } else if (error.name === "AbortError") {
-        mensaje = "Se canceló el acceso a la cámara"
+        mensaje = "Se canceló el acceso a la cámara";
       } else {
-        mensaje = `Error: ${error.message || "No se puede acceder a la cámara"}`
+        mensaje = `Error: ${
+          error.message || "No se puede acceder a la cámara"
+        }`;
       }
-      
-      alert("❌ " + mensaje)
-      setShowCamera(false)
+
+      alert("❌ " + mensaje);
+      setShowCamera(false);
     }
   };
 
@@ -210,7 +230,7 @@ export default function EditarProductoPage() {
         });
         streamRef.current = null;
       }
-      
+
       if (videoRef.current) {
         videoRef.current.pause();
         videoRef.current.srcObject = null;
@@ -225,49 +245,53 @@ export default function EditarProductoPage() {
       try {
         const video = videoRef.current;
         const canvas = canvasRef.current;
-        
+
         // Configurar el canvas con el tamaño del video
         canvas.width = video.videoWidth || 640;
         canvas.height = video.videoHeight || 480;
-        
+
         const context = canvas.getContext("2d", { willReadFrequently: true });
         if (context) {
           // Dibujar la imagen del video en el canvas
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          
+
           // Convertir a blob (no base64) para subir
-          canvas.toBlob(async (blob) => {
-            if (!blob) return;
-            
-            try {
-              setLoading(true);
-              
-              // Crear FormData con el blob
-              const formData = new FormData();
-              formData.append('file', blob, 'camera-capture.jpg');
+          canvas.toBlob(
+            async (blob) => {
+              if (!blob) return;
 
-              // Subir al servidor
-              const res = await fetch('/api/admin/productos/upload', {
-                method: 'POST',
-                body: formData,
-              });
+              try {
+                setLoading(true);
 
-              if (res.ok) {
-                const data = await res.json();
-                setImagenPreview(data.url);
-                setProducto({ ...producto, imagen: data.url });
-                setShowCamera(false);
-              } else {
-                const error = await res.json();
-                alert(error.error || 'Error al subir la foto');
+                // Crear FormData con el blob
+                const formData = new FormData();
+                formData.append("file", blob, "camera-capture.jpg");
+
+                // Subir al servidor
+                const res = await fetch("/api/admin/productos/upload", {
+                  method: "POST",
+                  body: formData,
+                });
+
+                if (res.ok) {
+                  const data = await res.json();
+                  setImagenPreview(data.url);
+                  setProducto({ ...producto, imagen: data.url });
+                  setShowCamera(false);
+                } else {
+                  const error = await res.json();
+                  alert(error.error || "Error al subir la foto");
+                }
+              } catch (error) {
+                console.error("Error al subir foto:", error);
+                alert("Error al subir la foto");
+              } finally {
+                setLoading(false);
               }
-            } catch (error) {
-              console.error("Error al subir foto:", error);
-              alert("Error al subir la foto");
-            } finally {
-              setLoading(false);
-            }
-          }, 'image/jpeg', 0.85);
+            },
+            "image/jpeg",
+            0.85
+          );
         }
       } catch (error) {
         console.error("Error al tomar foto:", error);
@@ -276,19 +300,21 @@ export default function EditarProductoPage() {
     }
   };
 
-  const manejarSubidaArchivo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const manejarSubidaArchivo = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (file && producto) {
       try {
         setLoading(true);
-        
+
         // Crear FormData con el archivo
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
         // Subir al servidor
-        const res = await fetch('/api/admin/productos/upload', {
-          method: 'POST',
+        const res = await fetch("/api/admin/productos/upload", {
+          method: "POST",
           body: formData,
         });
 
@@ -298,7 +324,7 @@ export default function EditarProductoPage() {
           setProducto({ ...producto, imagen: data.url });
         } else {
           const error = await res.json();
-          alert(error.error || 'Error al subir la imagen');
+          alert(error.error || "Error al subir la imagen");
         }
       } catch (error) {
         console.error("Error al procesar imagen:", error);
@@ -331,12 +357,12 @@ export default function EditarProductoPage() {
     if (!producto || !productId) return;
 
     setLoading(true);
-    
+
     detenerCamara();
     setShowCamera(false);
-    
-    await new Promise(resolve => setTimeout(resolve, 50));
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     try {
       // Enviar SOLO datos del producto, SIN la imagen
       const datosActualizar = {
@@ -362,10 +388,10 @@ export default function EditarProductoPage() {
         const responseData = await res.json();
         console.log("✅ Respuesta del servidor:", responseData);
         alert("✅ Producto actualizado correctamente");
-        // NO hacer push inmediato - esperar a que el usuario confirm
+        // Esperar 1 segundo antes de hacer push para asegurar que se escriba en BD
         setTimeout(() => {
           router.push("/superadmin/productos");
-        }, 500);
+        }, 1000);
       } else {
         const error = await res.json();
         console.error("❌ Error del servidor:", error);
@@ -532,141 +558,6 @@ export default function EditarProductoPage() {
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Imagen del Producto
-          </label>
-
-          {imagenPreview && (
-            <div className="mb-4 relative">
-              <img
-                src={imagenPreview}
-                alt="Preview"
-                className="w-full max-h-64 object-cover rounded-md"
-              />
-              <button
-                type="button"
-                onClick={limpiarImagen}
-                className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            <button
-              type="button"
-              onClick={() => {
-                if (showCamera) {
-                  detenerCamara()
-                }
-                setShowCamera(!showCamera)
-              }}
-              className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-3 rounded-md hover:bg-green-700 text-sm"
-            >
-              <Camera className="w-4 h-4" />
-              Cámara
-            </button>
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-3 rounded-md hover:bg-blue-700 text-sm"
-            >
-              <Upload className="w-4 h-4" />
-              Subir
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                if (showCamera) {
-                  detenerCamara()
-                  setShowCamera(false)
-                }
-                document.getElementById("urlImageInput")?.focus()
-              }}
-              className="flex items-center justify-center gap-2 bg-purple-600 text-white py-2 px-3 rounded-md hover:bg-purple-700 text-sm"
-            >
-              <Link className="w-4 h-4" />
-              URL
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={manejarSubidaArchivo}
-              className="hidden"
-            />
-          </div>
-
-          {showCamera && (
-            <div className="mb-4 border-2 border-gray-300 rounded-md overflow-hidden bg-black">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                controls={false}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  maxHeight: "500px",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-                className="w-full aspect-video object-cover bg-black"
-              />
-              <div className="flex gap-2 bg-gray-900 p-2">
-                <button
-                  type="button"
-                  onClick={tomarFoto}
-                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 font-semibold"
-                >
-                  📸 Capturar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Cambiar entre cámara frontal y trasera
-                    setCameraFacing(cameraFacing === "user" ? "environment" : "user")
-                    // Reiniciar cámara con nueva orientación
-                    detenerCamara()
-                    setTimeout(() => iniciarCamara(), 100)
-                  }}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 font-semibold flex items-center justify-center gap-2"
-                >
-                  <RotateCw className="w-4 h-4" />
-                  Voltear
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    detenerCamara()
-                    setShowCamera(false)
-                  }}
-                  className="flex-1 bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 font-semibold"
-                >
-                  ✕ Cerrar
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="urlImageInput" className="block text-sm font-medium text-gray-700 mb-1">
-              O pega la URL de la imagen
-            </label>
-            <input
-              id="urlImageInput"
-              type="url"
-              value={producto.imagen}
-              onChange={(e) => manejarURLImagen(e.target.value)}
-              placeholder="https://ejemplo.com/imagen.jpg"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-        </div>
-
         <canvas ref={canvasRef} width={640} height={480} className="hidden" />
 
         <div className="flex items-center">
@@ -692,8 +583,12 @@ export default function EditarProductoPage() {
 
         {/* SECCIÓN 1: GUARDAR DATOS DEL PRODUCTO */}
         <div className="border-t pt-4 mt-4">
-          <h3 className="font-semibold text-gray-900 mb-3">💾 Guardar datos del producto</h3>
-          <p className="text-sm text-gray-600 mb-4">Nombre, descripción, precio, stock, categoría y disponibilidad</p>
+          <h3 className="font-semibold text-gray-900 mb-3">
+            💾 Guardar datos del producto
+          </h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Nombre, descripción, precio, stock, categoría y disponibilidad
+          </p>
           <div className="flex gap-4">
             <button
               type="submit"
@@ -715,9 +610,13 @@ export default function EditarProductoPage() {
 
       {/* SECCIÓN 2: GUARDAR IMAGEN (FUERA DEL FORM) */}
       <div className="p-6 bg-white rounded-lg shadow mt-6 max-w-2xl mx-auto">
-        <h3 className="font-semibold text-gray-900 mb-3">🖼️ Cambiar imagen del producto</h3>
-        <p className="text-sm text-gray-600 mb-4">La imagen se actualiza de forma independiente</p>
-        
+        <h3 className="font-semibold text-gray-900 mb-3">
+          🖼️ Cambiar imagen del producto
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          La imagen se actualiza de forma independiente
+        </p>
+
         {imagenPreview && (
           <div className="mb-4 relative">
             <img
@@ -740,9 +639,9 @@ export default function EditarProductoPage() {
             type="button"
             onClick={() => {
               if (showCamera) {
-                detenerCamara()
+                detenerCamara();
               }
-              setShowCamera(!showCamera)
+              setShowCamera(!showCamera);
             }}
             className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-3 rounded-md hover:bg-green-700 text-sm"
           >
@@ -761,10 +660,10 @@ export default function EditarProductoPage() {
             type="button"
             onClick={() => {
               if (showCamera) {
-                detenerCamara()
-                setShowCamera(false)
+                detenerCamara();
+                setShowCamera(false);
               }
-              document.getElementById("urlImageInput")?.focus()
+              document.getElementById("urlImageInput")?.focus();
             }}
             className="flex items-center justify-center gap-2 bg-purple-600 text-white py-2 px-3 rounded-md hover:bg-purple-700 text-sm"
           >
@@ -808,9 +707,11 @@ export default function EditarProductoPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setCameraFacing(cameraFacing === "user" ? "environment" : "user")
-                  detenerCamara()
-                  setTimeout(() => iniciarCamara(), 100)
+                  setCameraFacing(
+                    cameraFacing === "user" ? "environment" : "user"
+                  );
+                  detenerCamara();
+                  setTimeout(() => iniciarCamara(), 100);
                 }}
                 className="flex-1 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 font-semibold flex items-center justify-center gap-2"
               >
@@ -820,8 +721,8 @@ export default function EditarProductoPage() {
               <button
                 type="button"
                 onClick={() => {
-                  detenerCamara()
-                  setShowCamera(false)
+                  detenerCamara();
+                  setShowCamera(false);
                 }}
                 className="flex-1 bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 font-semibold"
               >
@@ -832,7 +733,10 @@ export default function EditarProductoPage() {
         )}
 
         <div>
-          <label htmlFor="urlImageInput" className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            htmlFor="urlImageInput"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
             O pega la URL de la imagen
           </label>
           <input
