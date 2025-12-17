@@ -61,6 +61,7 @@ function convertMysqlToPostgres(sql: string): string {
 
 export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] & { insertId?: number | bigint; rowCount?: number })> {
   const client = await pool.connect()
+  let transactionStarted = false
   try {
     const convertedSql = convertMysqlToPostgres(sql)
     console.log("📍 Ejecutando:", convertedSql.substring(0, 100) + "...")
@@ -73,13 +74,17 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] 
     // Para mutaciones, iniciar transacción explícita
     if (isMutation) {
       await client.query('BEGIN')
+      transactionStarted = true
     }
     
     const result = await client.query(convertedSql, params)
     
     // Ejecutar COMMIT para mutaciones
-    if (isMutation) {
+    if (isMutation && transactionStarted) {
       await client.query('COMMIT')
+      transactionStarted = false
+      // Pequeña pausa para asegurar que el COMMIT se procese completamente en Vercel
+      await new Promise(resolve => setTimeout(resolve, 10))
     }
     
     const rows = result.rows as T[]
@@ -95,10 +100,13 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] 
   } catch (error) {
     console.error("❌ Error en query:", error)
     // Intentar ROLLBACK si hay error
-    try {
-      await client.query('ROLLBACK')
-    } catch (rollbackError) {
-      console.error("⚠️ Error en ROLLBACK:", rollbackError)
+    if (transactionStarted) {
+      try {
+        await client.query('ROLLBACK')
+        transactionStarted = false
+      } catch (rollbackError) {
+        console.error("⚠️ Error en ROLLBACK:", rollbackError)
+      }
     }
     throw error
   } finally {

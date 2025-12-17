@@ -12,7 +12,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const user = await getUserFromSession(req)
-    console.log("👤 Usuario autenticado:", user?.email, "Roles:", user?.roles?.map((r: any) => r.nombre))
+    console.log("👤 Usuario autenticado:", (user as any)?.email, "Roles:", user?.roles?.map((r: any) => r.nombre))
     if (!user || !user.roles?.some((r: any) => ["ROLE_ADMIN", "ROLE_SUPER_ADMIN"].includes(r.nombre))) {
       console.error("❌ Usuario NO AUTORIZADO o sin roles")
       return NextResponse.json({ error: "No autorizado" }, { status: 403 })
@@ -73,8 +73,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Producto no encontrado o error en actualización", debug: { id: productoId, rowCount: result?.rowCount } }, { status: 400 })
     }
 
-    // Pequeño delay para garantizar que la BD ha persisted los cambios completamente
-    await new Promise(resolve => setTimeout(resolve, 100))
+    // Esperar 200ms para garantizar que la transacción se haya persistido completamente en la BD
+    // Especialmente importante en Vercel donde las conexiones pueden reciclarse rápidamente
+    await new Promise(resolve => setTimeout(resolve, 200))
 
     return NextResponse.json({ message: "Producto actualizado exitosamente", id })
   } catch (error) {

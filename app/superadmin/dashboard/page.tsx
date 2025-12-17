@@ -92,9 +92,25 @@ async function obtenerMetricas() {
       WHERE estado_pago = 'PAGADO'
     `)
 
+    // Ventas por propietario (los 5 principales)
+    const ventasPorPropietario = await query(`
+      SELECT 
+        v.propietario_id,
+        COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
+        COUNT(v.id) as total_ventas,
+        SUM(v.total) as total_ingresos,
+        AVG(v.total) as promedio_venta
+      FROM ventas v
+      LEFT JOIN usuarios u ON v.propietario_id = u.id
+      WHERE v.estado_pago = 'PAGADO'
+      GROUP BY v.propietario_id, COALESCE(u.nombres, v.propietario_nombre)
+      ORDER BY total_ingresos DESC
+      LIMIT 10
+    `)
+
     const mesActualTotal = parseFloat(mesActual[0]?.total || 0)
     const mesPasadoTotal = parseFloat(mesPasado[0]?.total || 0)
-    const crecimiento = mesPasadoTotal > 0 ? ((mesActualTotal - mesPasadoTotal) / mesPasadoTotal * 100).toFixed(1) : 0
+    const crecimientoValue = mesPasadoTotal > 0 ? ((mesActualTotal - mesPasadoTotal) / mesPasadoTotal * 100) : 0
 
     return {
       totalProductos: parseInt(totalProductos[0]?.count || 0),
@@ -107,7 +123,8 @@ async function obtenerMetricas() {
       ticketPromedio: parseFloat(ticketPromedio[0]?.promedio || 0),
       ventasPorDia,
       topProductos,
-      crecimiento: parseFloat(crecimiento),
+      ventasPorPropietario,
+      crecimiento: Math.round(crecimientoValue * 10) / 10,
       mesActual: mesActualTotal,
       mesPasado: mesPasadoTotal,
     }
@@ -124,6 +141,7 @@ async function obtenerMetricas() {
       ticketPromedio: 0,
       ventasPorDia: [],
       topProductos: [],
+      ventasPorPropietario: [],
       crecimiento: 0,
       mesActual: 0,
       mesPasado: 0,
@@ -250,6 +268,45 @@ export default async function SuperAdminDashboard() {
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-green-600">
                       S/ {parseFloat(producto.ingresos).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Ventas por Propietario */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-4">🏢 Ventas por Propietario</h2>
+        {metricas.ventasPorPropietario.length === 0 ? (
+          <p className="text-gray-600 text-center py-8">Sin datos disponibles</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700">Propietario</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700">Ventas</th>
+                  <th className="px-4 py-3 text-right font-semibold text-gray-700">Total Ingresos</th>
+                  <th className="px-4 py-3 text-right font-semibold text-gray-700">Promedio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {metricas.ventasPorPropietario.map((propietario, idx) => (
+                  <tr key={idx} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-3 font-medium text-gray-900">{propietario.propietario_nombre}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-semibold">
+                        {propietario.total_ventas}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-green-600">
+                      S/ {parseFloat(propietario.total_ingresos).toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">
+                      S/ {parseFloat(propietario.promedio_venta).toFixed(2)}
                     </td>
                   </tr>
                 ))}

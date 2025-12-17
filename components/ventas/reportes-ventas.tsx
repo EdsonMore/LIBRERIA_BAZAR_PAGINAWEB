@@ -61,6 +61,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [ventasExpandidas, setVentasExpandidas] = useState<Set<number>>(new Set())
+  const [mostrarTodosDetalles, setMostrarTodosDetalles] = useState(false)
 
   // Filtros
   const [filtroFechaInicio, setFiltroFechaInicio] = useState(
@@ -505,7 +506,9 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {detallesVentas.map((venta) => (
+                  {detallesVentas
+                    .slice(0, mostrarTodosDetalles ? undefined : 10)
+                    .map((venta) => (
                     <div key={venta.venta_id} className="border rounded-lg overflow-hidden">
                       {/* Header de la venta - Resumen */}
                       <button
@@ -619,6 +622,27 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                       )}
                     </div>
                   ))}
+                  
+                  {/* Botón Ver más/Ver menos para paginación */}
+                  {detallesVentas.length > 10 && (
+                    <div className="mt-6 flex justify-center">
+                      <Button
+                        onClick={() => setMostrarTodosDetalles(!mostrarTodosDetalles)}
+                        variant="outline"
+                        className="w-full md:w-auto"
+                      >
+                        {mostrarTodosDetalles ? (
+                          <>
+                            👁️ Ver menos ({detallesVentas.length - 10} ocultos)
+                          </>
+                        ) : (
+                          <>
+                            ➕ Ver más ({detallesVentas.length - 10} registros más)
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
