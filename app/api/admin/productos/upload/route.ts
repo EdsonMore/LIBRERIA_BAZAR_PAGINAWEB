@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromSession } from '@/lib/auth';
-import { mkdir, writeFile } from 'fs/promises';
-import { join } from 'path';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,38 +27,32 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar tipo: solo imágenes
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Tipo de archivo no permitido. Solo JPEG, PNG o WebP.' },
+        { error: 'Tipo de archivo no permitido. Solo JPEG, PNG, WebP o GIF.' },
         { status: 400 }
       );
     }
 
-    // Crear nombre único
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substring(2, 8);
-    const filename = `${timestamp}-${random}-${file.name}`;
+    // Convertir a base64 (es la mejor opción para Vercel serverless)
+    // Ya no intentamos escribir archivos en el filesystem
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
 
-    // Ruta de guardado
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'productos');
-
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (e) {
-      // Directorio ya existe
+    // Validar que no sea demasiado grande cuando codificado
+    if (dataUrl.length > 1000000) {
+      return NextResponse.json(
+        { error: 'Imagen codificada demasiado grande. Intenta con una imagen más pequeña.' },
+        { status: 400 }
+      );
     }
-
-    const filepath = join(uploadsDir, filename);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(filepath, buffer);
-
-    const url = `/uploads/productos/${filename}`;
 
     return NextResponse.json({
       success: true,
-      url,
-      filename,
+      url: dataUrl,
       size: file.size,
       type: file.type,
     });

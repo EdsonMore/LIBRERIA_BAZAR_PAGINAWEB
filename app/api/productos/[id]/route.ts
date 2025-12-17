@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     // Obtener producto básico
     console.log(`🔍 Buscando producto ID: ${id}`)
     const producto = await queryOne<any>(
-      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id
+      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id, p.disponible
        FROM productos p
        WHERE p.id = ?`,
       [id],
