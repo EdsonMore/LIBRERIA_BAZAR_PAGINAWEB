@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     }
 
     if (busqueda) {
-      sql += " AND (p.nombre LIKE ? OR p.descripcion LIKE ?)"
+      sql += " AND (LOWER(p.nombre) LIKE LOWER(?) OR LOWER(p.descripcion) LIKE LOWER(?))"
       params.push(`%${busqueda}%`, `%${busqueda}%`)
     }
 
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     }
 
     if (busqueda) {
-      countSql += " AND (p.nombre LIKE ? OR p.descripcion LIKE ?)"
+      countSql += " AND (LOWER(p.nombre) LIKE LOWER(?) OR LOWER(p.descripcion) LIKE LOWER(?))"
       countParams.push(`%${busqueda}%`, `%${busqueda}%`)
     }
 
