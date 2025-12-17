@@ -46,7 +46,7 @@ async function obtenerMetricas() {
     const topProductos = await query(`
       SELECT 
         p.nombre,
-        COUNT(dv.id) as cantidad_vendida,
+        SUM(dv.cantidad) as cantidad_vendida,
         COALESCE(SUM(dv.cantidad * dv.precio_unitario), 0) as ingresos
       FROM productos p
       JOIN detalles_venta dv ON p.id = dv.producto_id
