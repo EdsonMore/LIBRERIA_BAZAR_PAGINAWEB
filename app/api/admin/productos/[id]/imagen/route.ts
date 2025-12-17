@@ -31,10 +31,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const imagenUrl = imagen.trim()
 
-    // Validar longitud (para URLs, típicamente < 2000 caracteres)
-    if (imagenUrl.length > 2000) {
+    // Validar longitud: permitir base64 de hasta 1MB (data URLs pueden ser grandes)
+    if (imagenUrl.length > 1000000) {
       return NextResponse.json(
-        { error: "URL de imagen demasiado larga" },
+        { error: "URL de imagen demasiado larga. Intenta con una imagen más pequeña." },
         { status: 400 },
       )
     }

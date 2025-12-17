@@ -12,9 +12,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const user = await getUserFromSession(req)
+    console.log("👤 Usuario autenticado:", user?.email, "Roles:", user?.roles?.map((r: any) => r.nombre))
     if (!user || !user.roles?.some((r: any) => ["ROLE_ADMIN", "ROLE_SUPER_ADMIN"].includes(r.nombre))) {
+      console.error("❌ Usuario NO AUTORIZADO o sin roles")
       return NextResponse.json({ error: "No autorizado" }, { status: 403 })
     }
+    console.log("✅ Usuario autorizado para editar")
 
     let body
     try {
@@ -53,19 +56,20 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // Redondear precio a 2 decimales
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
-    console.log("💾 Guardando con precio:", precioDosDecimales)
+    console.log("💾 Guardando producto ID:", id)
+    console.log("💾 Datos:", { nombre: nombre.trim(), descripcion: descripcion.trim(), precio: precioDosDecimales, stock: stockNum, categoria_id: categoriaNum, disponible: disponible ? true : false })
 
     // NOTA: La imagen se actualiza solo a través de /api/admin/productos/[id]/imagen
-    await query(
+    const result = await query(
       `UPDATE productos 
        SET nombre = $1, descripcion = $2, precio = $3, stock = $4, categoria_id = $5, disponible = $6
        WHERE id = $7`,
       [nombre.trim(), descripcion.trim(), precioDosDecimales, stockNum, categoriaNum, disponible ? true : false, id],
     )
 
-    console.log("✅ Producto actualizado con éxito")
+    console.log("✅ Producto actualizado. Resultado:", result)
 
-    return NextResponse.json({ message: "Producto actualizado exitosamente" })
+    return NextResponse.json({ message: "Producto actualizado exitosamente", id })
   } catch (error) {
     console.error("Error en PUT /api/admin/productos/[id]:", error)
     return NextResponse.json({ error: "Error del servidor. Inténtalo de nuevo." }, { status: 500 })

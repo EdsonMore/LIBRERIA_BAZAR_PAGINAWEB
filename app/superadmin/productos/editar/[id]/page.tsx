@@ -112,8 +112,9 @@ export default function EditarProductoPage() {
           stock: Number(data.stock ?? 0),
           categoria_id: Number(data.categoria_id ?? 0),
           imagen: data.imagen ?? "",
-          disponible: data.disponible === 1 || data.disponible === true || data.disponible === "true",
+          disponible: data.disponible === 1 || data.disponible === true || data.disponible === "true" || data.disponible === "1",
         });
+        console.log("✅ Producto cargado, disponible es:", data.disponible === 1 || data.disponible === true || data.disponible === "true" || data.disponible === "1");
         if (data.imagen) {
           setImagenPreview(data.imagen);
         }
@@ -358,8 +359,13 @@ export default function EditarProductoPage() {
       console.log("📥 Respuesta del servidor:", res.status);
 
       if (res.ok) {
+        const responseData = await res.json();
+        console.log("✅ Respuesta del servidor:", responseData);
         alert("✅ Producto actualizado correctamente");
-        router.push("/superadmin/productos");
+        // NO hacer push inmediato - esperar a que el usuario confirm
+        setTimeout(() => {
+          router.push("/superadmin/productos");
+        }, 500);
       } else {
         const error = await res.json();
         console.error("❌ Error del servidor:", error);
