@@ -6,9 +6,8 @@ import { Wine, Truck, Shield, CreditCard } from "lucide-react"
 
 async function getCategorias() {
   try {
-    // Obtener categorías directamente de la BD (evita Deployment Protection de Vercel)
     const categorias = await query<any>(
-      "SELECT id, nombre FROM categorias WHERE activo = true ORDER BY nombre ASC"
+      "SELECT id, nombre, descripcion FROM categorias WHERE activa = true ORDER BY nombre ASC"
     )
     return categorias || []
   } catch (error) {
@@ -16,6 +15,7 @@ async function getCategorias() {
     return []
   }
 }
+
 
 export default async function HomePage() {
   const categorias = await getCategorias()

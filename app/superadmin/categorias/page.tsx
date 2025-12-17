@@ -101,57 +101,57 @@ export default function SuperAdminCategoriasPage() {
   }
 
   if (loading) {
-    return <div className="p-8">Cargando categorías...</div>
+    return <div className="p-4 md:p-8">Cargando categorías...</div>
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Categorías - SuperAdmin</h1>
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <h1 className="text-xl md:text-2xl font-bold">Gestión de Categorías - SuperAdmin</h1>
         <button
           onClick={() => {
             setEditando(null)
             setShowModal(true)
           }}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="w-full md:w-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm md:text-base"
         >
           Nueva Categoría
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {categorias.map((categoria) => (
-          <div key={categoria.id} className="bg-white rounded-lg shadow p-6">
-            <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-semibold">{categoria.nombre}</h3>
+          <div key={categoria.id} className="bg-white rounded-lg shadow p-4 md:p-6 space-y-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-2">
+              <h3 className="text-lg md:text-xl font-semibold">{categoria.nombre}</h3>
               <span
-                className={`px-2 py-1 text-xs rounded-full ${categoria.activa ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+                className={`px-2 py-1 text-xs rounded-full whitespace-nowrap ${categoria.activa ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
               >
                 {categoria.activa ? "Activa" : "Inactiva"}
               </span>
             </div>
-            <p className="text-gray-600 text-sm mb-4">{categoria.descripcion || "Sin descripción"}</p>
-            <div className="flex justify-between items-center">
+            <p className="text-gray-600 text-sm">{categoria.descripcion || "Sin descripción"}</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-2">
               <span className="text-sm text-gray-500">{categoria.cantidadProductos} productos</span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => {
                     setEditando(categoria)
                     setShowModal(true)
                   }}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
+                  className="text-blue-600 hover:text-blue-800 text-xs md:text-sm font-medium"
                 >
                   Editar
                 </button>
                 <button
                   onClick={() => toggleActiva(categoria.id, categoria.activa)}
-                  className="text-purple-600 hover:text-purple-800 text-sm"
+                  className="text-purple-600 hover:text-purple-800 text-xs md:text-sm font-medium"
                 >
-                  {categoria.activa ? "Desactivar" : "Activar"}
+                  {categoria.activa ? "Desact." : "Activ."}
                 </button>
                 <button
                   onClick={() => handleEliminar(categoria.id)}
-                  className="text-red-600 hover:text-red-800 text-sm"
+                  className="text-red-600 hover:text-red-800 text-xs md:text-sm font-medium"
                 >
                   Eliminar
                 </button>
@@ -162,31 +162,31 @@ export default function SuperAdminCategoriasPage() {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">{editando ? "Editar Categoría" : "Nueva Categoría"}</h2>
-            <form onSubmit={handleGuardar}>
-              <div className="mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 md:p-8 max-w-md w-full">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">{editando ? "Editar Categoría" : "Nueva Categoría"}</h2>
+            <form onSubmit={handleGuardar} className="space-y-4">
+              <div>
                 <label className="block text-sm font-medium mb-2">Nombre</label>
                 <input
                   type="text"
                   name="nombre"
                   defaultValue={editando?.nombre}
                   required
-                  className="w-full px-4 py-2 border rounded"
+                  className="w-full px-4 py-2 border rounded text-sm md:text-base"
                 />
               </div>
-              <div className="mb-4">
+              <div>
                 <label className="block text-sm font-medium mb-2">Descripción</label>
                 <textarea
                   name="descripcion"
                   defaultValue={editando?.descripcion}
-                  className="w-full px-4 py-2 border rounded"
+                  className="w-full px-4 py-2 border rounded text-sm md:text-base"
                   rows={3}
                 />
               </div>
               {editando && (
-                <div className="mb-4 flex items-center">
+                <div className="flex items-center">
                   <input
                     type="checkbox"
                     name="activa"
@@ -199,8 +199,8 @@ export default function SuperAdminCategoriasPage() {
                   </label>
                 </div>
               )}
-              <div className="flex gap-4">
-                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button type="submit" className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm md:text-base">
                   Guardar
                 </button>
                 <button
@@ -209,7 +209,7 @@ export default function SuperAdminCategoriasPage() {
                     setShowModal(false)
                     setEditando(null)
                   }}
-                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm md:text-base"
                 >
                   Cancelar
                 </button>

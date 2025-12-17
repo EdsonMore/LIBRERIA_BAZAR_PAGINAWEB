@@ -193,8 +193,8 @@ export default function SuperAdminComprasPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">Gestión de Compras</h1>
+      <div className="p-4 md:p-8">
+        <h1 className="text-xl md:text-2xl font-bold mb-6">Gestión de Compras</h1>
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
         </div>
@@ -203,16 +203,16 @@ export default function SuperAdminComprasPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8 space-y-6">
       {/* Encabezado y filtros */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-6">Gestión de Compras</h1>
-        <div className="flex gap-2 flex-wrap">
+      <div className="space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold">Gestión de Compras</h1>
+        <div className="flex flex-wrap gap-2">
           {["todos", "PENDIENTE", "CONFIRMADA", "PREPARANDO", "DESPACHADO", "ENVIADA", "ENTREGADA", "CANCELADA"].map((estado) => (
             <button
               key={estado}
               onClick={() => setFiltroEstado(estado)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-all ${filtroEstado === estado
+              className={`px-3 md:px-4 py-2 rounded-lg font-semibold transition-all text-xs md:text-sm ${filtroEstado === estado
                   ? "bg-blue-600 text-white shadow-lg"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
@@ -224,30 +224,29 @@ export default function SuperAdminComprasPage() {
       </div>
 
       {/* Tabla de compras */}
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
+      <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+        <table className="w-full min-w-max text-sm md:text-base">
             <thead className="bg-gray-100 border-b">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Pedido</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Cliente</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Total</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Estado</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Fecha</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Acciones</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700">Pedido</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700">Cliente</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700">Total</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700">Estado</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold text-gray-700">Fecha</th>
+                <th className="px-3 md:px-6 py-3 md:py-4 text-center text-xs md:text-sm font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {compras.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={6} className="px-3 md:px-6 py-8 md:py-12 text-center text-gray-500 text-sm md:text-base">
                     No hay compras para mostrar
                   </td>
                 </tr>
               ) : (
                 compras.map((compra) => (
                   <tr key={compra.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">#{compra.id}</td>
+                    <td className="px-3 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-gray-900">#{compra.id}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">
                       {compra.usuario?.nombres} {compra.usuario?.apellidoPaterno}
                     </td>
@@ -276,7 +275,6 @@ export default function SuperAdminComprasPage() {
               )}
             </tbody>
           </table>
-        </div>
       </div>
 
       {/* Modal de detalles */}

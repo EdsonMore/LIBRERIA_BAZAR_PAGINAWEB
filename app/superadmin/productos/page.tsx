@@ -67,18 +67,18 @@ export default function SuperAdminProductosPage() {
   );
 
   if (loading) {
-    return <div className="p-8">Cargando productos...</div>;
+    return <div className="p-4 md:p-8">Cargando productos...</div>;
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <h1 className="text-xl md:text-2xl font-bold">
           Gestión de Productos - SuperAdmin
         </h1>
         <button
           onClick={() => router.push("/superadmin/productos/crear")}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="w-full md:w-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm md:text-base"
         >
           Nuevo Producto
         </button>
@@ -90,11 +90,11 @@ export default function SuperAdminProductosPage() {
           placeholder="Buscar productos..."
           value={buscar}
           onChange={(e) => setBuscar(e.target.value)}
-          className="px-4 py-2 border rounded w-full max-w-md"
+          className="px-4 py-2 border rounded w-full text-sm md:text-base max-w-md"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {productosFiltrados.map((producto) => (
           <div
             key={producto.id}
@@ -105,27 +105,27 @@ export default function SuperAdminProductosPage() {
               alt={producto.nombre}
               className="w-full h-48 object-cover"
             />
-            <div className="p-4">
-              <h3 className="font-bold text-lg mb-2">{producto.nombre}</h3>
-              <p className="text-sm text-gray-500 mb-2">
+            <div className="p-3 md:p-4">
+              <h3 className="font-bold text-sm md:text-lg mb-2">{producto.nombre}</h3>
+              <p className="text-xs md:text-sm text-gray-500 mb-2">
                 {producto.categoriaNombre}
               </p>
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-xl font-bold text-blue-600">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                <span className="text-lg md:text-xl font-bold text-blue-600">
                   S/ {producto.precio.toFixed(2)}
                 </span>
-                <span className="text-sm text-gray-600">
+                <span className="text-xs md:text-sm text-gray-600">
                   Stock: {producto.stock}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={() =>
                     router.push(
                       "/superadmin/productos/editar/" + String(producto.id)
                     )
                   }
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  className="flex-1 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs md:text-sm"
                 >
                   Editar
                 </button>
@@ -133,7 +133,7 @@ export default function SuperAdminProductosPage() {
                   onClick={() =>
                     toggleDisponibilidad(producto.id, producto.disponible)
                   }
-                  className={`flex-1 px-3 py-2 rounded text-sm ${
+                  className={`flex-1 px-3 py-2 rounded text-xs md:text-sm ${
                     producto.disponible
                       ? "bg-yellow-600 hover:bg-yellow-700"
                       : "bg-green-600 hover:bg-green-700"

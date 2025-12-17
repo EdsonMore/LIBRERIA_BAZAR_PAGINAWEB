@@ -73,54 +73,54 @@ export default function MisBoletasSuperAdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Cargando boletas...</p>
+          <p className="mt-4 text-gray-600 text-sm md:text-base">Cargando boletas...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Mis Boletas (SuperAdmin)</h1>
-          <p className="text-gray-600">Copia del administrador de todas las entregas procesadas</p>
+    <div className="min-h-screen bg-gray-50 py-6 md:py-12 px-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Mis Boletas (SuperAdmin)</h1>
+          <p className="text-sm md:text-base text-gray-600">Copia del administrador de todas las entregas procesadas</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-700">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-700 text-sm md:text-base">{error}</p>
           </div>
         )}
 
         {boletas.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
-            <p className="text-gray-500 mb-4">No tienes boletas de administrador generadas aún</p>
-            <p className="text-sm text-gray-400 mb-6">Se generan automáticamente cuando marcas una compra como entregada</p>
+          <div className="bg-white rounded-lg shadow p-6 md:p-12 text-center">
+            <p className="text-gray-500 mb-4 text-sm md:text-base">No tienes boletas de administrador generadas aún</p>
+            <p className="text-xs md:text-sm text-gray-400 mb-6">Se generan automáticamente cuando marcas una compra como entregada</p>
             <Link
               href="/superadmin/compras"
-              className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm md:text-base"
             >
               Ir a Gestión de Compras
             </Link>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <p className="text-blue-800 text-sm">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4">
+              <p className="text-blue-800 text-xs md:text-sm">
                 📋 Total de boletas de administrador: <strong>{boletas.length}</strong>
               </p>
             </div>
 
             {boletas.map((boleta) => (
-              <div key={boleta.id} className="bg-white rounded-lg shadow hover:shadow-lg transition p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div key={boleta.id} className="bg-white rounded-lg shadow hover:shadow-lg transition p-4 md:p-6">
+                <div className="flex flex-col gap-4 md:gap-0 md:flex-row md:items-center md:justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start md:items-center gap-3 mb-2">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg
                           className="w-6 h-6 text-purple-600"
                           fill="none"
@@ -135,34 +135,34 @@ export default function MisBoletasSuperAdminPage() {
                           />
                         </svg>
                       </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{boleta.numeroBoleta}</h3>
-                        <p className="text-sm text-gray-500">Compra #{boleta.compraId}</p>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{boleta.numeroBoleta}</h3>
+                        <p className="text-xs md:text-sm text-gray-500">Compra #{boleta.compraId}</p>
                         <p className="text-xs text-gray-400">👨‍💼 Copia del administrador</p>
-                        <p className="text-xs text-purple-600 font-medium">
+                        <p className="text-xs text-purple-600 font-medium truncate">
                           Cliente: {boleta.usuario.nombres} {boleta.usuario.apellidoPaterno}
                         </p>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600 ml-13">{formatearFecha(boleta.fechaGeneracion)}</p>
+                    <p className="text-xs md:text-sm text-gray-600 ml-13">{formatearFecha(boleta.fechaGeneracion)}</p>
                   </div>
 
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="flex flex-col items-stretch md:items-end gap-3">
                     <div className="text-right">
-                      <p className="text-sm text-gray-600">Total</p>
-                      <p className="text-2xl font-bold text-gray-900">{formatearMoneda(boleta.resumen.total)}</p>
+                      <p className="text-xs md:text-sm text-gray-600">Total</p>
+                      <p className="text-xl md:text-2xl font-bold text-gray-900">{formatearMoneda(boleta.resumen.total)}</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Link
                         href={`/boletas/${boleta.id}`}
-                        className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                        className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs md:text-sm font-medium text-center"
                       >
                         Ver
                       </Link>
                       <a
                         href={`/api/boletas/${boleta.id}/descargar`}
                         download
-                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+                        className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-xs md:text-sm font-medium text-center"
                       >
                         Descargar PDF
                       </a>

@@ -140,21 +140,21 @@ export default function SuperAdminResenasPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">Gestión de Reseñas - SuperAdmin</h1>
+      <div className="p-4 md:p-8">
+        <h1 className="text-xl md:text-2xl font-bold mb-6">Gestión de Reseñas - SuperAdmin</h1>
         <div>Cargando reseñas...</div>
       </div>
     )
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestión de Reseñas - SuperAdmin</h1>
-        <div className="flex gap-2">
+    <div className="p-4 md:p-8 space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <h1 className="text-xl md:text-2xl font-bold">Gestión de Reseñas - SuperAdmin</h1>
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
           <button
             onClick={() => setFiltroEstado("todas")}
-            className={`px-4 py-2 rounded ${
+            className={`px-3 md:px-4 py-2 rounded text-xs md:text-sm font-medium ${
               filtroEstado === "todas" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
             }`}
           >
@@ -162,7 +162,7 @@ export default function SuperAdminResenasPage() {
           </button>
           <button
             onClick={() => setFiltroEstado("PENDIENTE")}
-            className={`px-4 py-2 rounded ${
+            className={`px-3 md:px-4 py-2 rounded text-xs md:text-sm font-medium ${
               filtroEstado === "PENDIENTE" ? "bg-yellow-600 text-white" : "bg-gray-200 text-gray-700"
             }`}
           >
@@ -170,7 +170,7 @@ export default function SuperAdminResenasPage() {
           </button>
           <button
             onClick={() => setFiltroEstado("APROBADA")}
-            className={`px-4 py-2 rounded ${
+            className={`px-3 md:px-4 py-2 rounded text-xs md:text-sm font-medium ${
               filtroEstado === "APROBADA" ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700"
             }`}
           >
@@ -178,7 +178,7 @@ export default function SuperAdminResenasPage() {
           </button>
           <button
             onClick={() => setFiltroEstado("RECHAZADA")}
-            className={`px-4 py-2 rounded ${
+            className={`px-3 md:px-4 py-2 rounded text-xs md:text-sm font-medium ${
               filtroEstado === "RECHAZADA" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-700"
             }`}
           >
@@ -188,16 +188,16 @@ export default function SuperAdminResenasPage() {
       </div>
 
       {resenas.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+        <div className="bg-white rounded-lg shadow p-6 md:p-8 text-center text-gray-500">
           <p>No hay reseñas registradas</p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="w-full min-w-max text-sm md:text-base">
             <thead className="bg-gray-100 border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Producto</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Usuario</th>
+                <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs md:text-sm font-semibold text-gray-700">Producto</th>
+                <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs md:text-sm font-semibold text-gray-700">Usuario</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Calificación</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Estado</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Fecha</th>

@@ -102,6 +102,18 @@ export default function Navbar() {
   const isSuperAdmin = () => hasRole("ROLE_SUPER_ADMIN")
   const isAdmin = () => hasRole("ROLE_ADMIN")
   const isCliente = () => hasRole("ROLE_CLIENTE")
+  const isVendedor = () => {
+    // Verificar si tiene cualquier rol que contenga "VENDEDOR" o roles de ventas
+    if (!usuario?.roles || !Array.isArray(usuario.roles)) return false
+    return usuario.roles.some((r: any) => {
+      const nombre = typeof r === 'object' ? r.nombre : r
+      return nombre && (
+        nombre.includes("VENDEDOR") || 
+        nombre.includes("VENTA") ||
+        nombre === "encargado de ventas"
+      )
+    })
+  }
 
   return (
     <nav className="navbar sticky top-0 z-50">
@@ -126,32 +138,36 @@ export default function Navbar() {
               Productos
             </Link>
 
-            {/* Mostrar Contacto y Libro de Reclamaciones solo si NO es SuperAdmin */}
-            {!isSuperAdmin() && (
-              <>
-                <Link href="/sobre-nosotros" className={`nav-link ${isActive("/sobre-nosotros") ? "active" : ""}`}>
-                  Sobre Nosotros
-                </Link>
-                {/* Cotizar Lista - Solo si está logueado */}
-                {usuario && (
-                  <Link href="/cotizar-lista" className={`nav-link ${isActive("/cotizar-lista") ? "active" : ""}`}>
-                    📋 Cotizar Lista
-                  </Link>
-                )}
-                <Link href="/contacto" className={`nav-link ${isActive("/contacto") ? "active" : ""}`}>
-                  Contacto
-                </Link>
-                <Link
-                  href="/libro-reclamaciones"
-                  className={`nav-link ${isActive("/libro-reclamaciones") ? "active" : ""}`}
-                >
-                  Libro de Reclamaciones
-                </Link>
-              </>
+            {/* Sobre Nosotros - Solo para público y clientes */}
+            {(!usuario || isCliente()) && (
+              <Link href="/sobre-nosotros" className={`nav-link ${isActive("/sobre-nosotros") ? "active" : ""}`}>
+                Sobre Nosotros
+              </Link>
+            )}
+
+            {/* Contacto - Solo para público y clientes */}
+            {(!usuario || isCliente()) && (
+              <Link href="/contacto" className={`nav-link ${isActive("/contacto") ? "active" : ""}`}>
+                Contacto
+              </Link>
+            )}
+
+            {/* Libro de Reclamaciones - Solo para público y clientes */}
+            {(!usuario || isCliente()) && (
+              <Link href="/libro-reclamaciones" className={`nav-link ${isActive("/libro-reclamaciones") ? "active" : ""}`}>
+                Libro de Reclamaciones
+              </Link>
+            )}
+
+            {/* Cotizar Lista - Solo si es Cliente */}
+            {isCliente() && (
+              <Link href="/cotizar-lista" className={`nav-link ${isActive("/cotizar-lista") ? "active" : ""}`}>
+                📋 Cotizar Lista
+              </Link>
             )}
 
             {/* Panel SuperAdmin (solo para SuperAdmin) */}
-            {isSuperAdmin() && (
+            {(isSuperAdmin() || isAdmin() || hasRole("ROLE_PRODUCTOS")) && (
               <div className="relative group">
                 <button className="nav-link flex items-center space-x-1">
                   <span>📊 SuperAdmin</span>
@@ -200,6 +216,13 @@ export default function Navbar() {
                     Gestión de Compras
                   </Link>
                   <Link
+                    href="/superadmin/ventas-reportes"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Reportes de Ventas
+                  </Link>
+                  <Link
                     href="/superadmin/mis-boletas"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
@@ -224,40 +247,19 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Panel Admin (solo para Admin) */}
-            {isAdmin() && !isSuperAdmin() && (
+            {/* Panel Vendedor (para cualquiera que sea Vendedor) */}
+            {isVendedor() && (
               <div className="relative group">
                 <button className="nav-link flex items-center space-x-1">
-                  <span>⚙️ Admin</span>
+                  <span>💰 Ventas</span>
                 </button>
                 <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-lg py-2 hidden group-hover:block z-50">
                   <Link
-                    href="/admin"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                    href="/ventas"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors font-semibold text-green-600"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/admin/productos"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Productos
-                  </Link>
-                  <Link
-                    href="/admin/categorias"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Categorías
-                  </Link>
-                  <Link
-                    href="/admin/compras"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Gestión de Compras
+                    📝 Registrar Venta
                   </Link>
                 </div>
               </div>
@@ -380,8 +382,8 @@ export default function Navbar() {
               Productos
             </Link>
 
-            {/* Mostrar opciones generales solo si NO es SuperAdmin */}
-            {!isSuperAdmin() && (
+            {/* Mostrar opciones generales - Solo para público y clientes */}
+            {(!usuario || isCliente()) && (
               <>
                 <Link
                   href="/sobre-nosotros"
@@ -407,8 +409,19 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Panel SuperAdmin */}
-            {isSuperAdmin() && (
+            {/* Cotizar Lista - Solo si es Cliente */}
+            {isCliente() && (
+              <Link
+                href="/cotizar-lista"
+                className="block py-2 hover:text-[#667eea] transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                📋 Cotizar Lista
+              </Link>
+            )}
+
+            {/* Panel SuperAdmin (SuperAdmin, Admin o Productos) */}
+            {(isSuperAdmin() || isAdmin() || hasRole("ROLE_PRODUCTOS")) && (
               <>
                 <hr className="my-2" />
                 <div className="text-sm font-bold text-gray-600 px-0 py-1">📊 Panel SuperAdmin</div>
@@ -455,6 +468,13 @@ export default function Navbar() {
                   Gestión de Compras
                 </Link>
                 <Link
+                  href="/superadmin/ventas-reportes"
+                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors font-semibold text-blue-600"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  📈 Reportes de Ventas
+                </Link>
+                <Link
                   href="/superadmin/resenas"
                   className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
                   onClick={() => setIsMenuOpen(false)}
@@ -471,38 +491,17 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Panel Admin */}
-            {isAdmin() && !isSuperAdmin() && (
+            {/* Panel Vendedor */}
+            {isVendedor() && (
               <>
                 <hr className="my-2" />
-                <div className="text-sm font-bold text-gray-600 px-0 py-1">⚙️ Panel Admin</div>
+                <div className="text-sm font-bold text-gray-600 px-0 py-1">Panel de Ventas</div>
                 <Link
-                  href="/admin"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
+                  href="/ventas"
+                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors font-semibold"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/admin/productos"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Productos
-                </Link>
-                <Link
-                  href="/admin/categorias"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Categorías
-                </Link>
-                <Link
-                  href="/admin/compras"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Gestión de Compras
+                  Registrar Venta
                 </Link>
               </>
             )}
