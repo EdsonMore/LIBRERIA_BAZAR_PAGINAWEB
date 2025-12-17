@@ -10,36 +10,39 @@ async function obtenerMetricas() {
     const totalProductos = await query("SELECT COUNT(*) as count FROM productos WHERE disponible = true")
     const totalUsuarios = await query("SELECT COUNT(*) as count FROM usuarios")
     
-    // Ventas totales
+    // Ventas totales PAGADAS (coherencia con deudas)
     const totalVentas = await query(`
       SELECT 
         COUNT(*) as cantidad,
         COALESCE(SUM(total), 0) as monto
       FROM ventas
+      WHERE estado_pago = 'PAGADO'
     `)
     
-    // Ingresos últimos 30 días
+    // Ingresos últimos 30 días (solo pagadas)
     const ingresosUltimos30 = await query(`
       SELECT 
         COALESCE(SUM(total), 0) as total,
         COUNT(*) as cantidad
       FROM ventas
-      WHERE fecha_hora >= NOW() - INTERVAL '30 days'
+      WHERE estado_pago = 'PAGADO'
+      AND fecha_hora >= NOW() - INTERVAL '30 days'
     `)
     
-    // Ventas por día (últimos 7 días)
+    // Ventas por día (últimos 7 días) - solo pagadas
     const ventasPorDia = await query(`
       SELECT 
         DATE(fecha_hora) as dia,
         COUNT(*) as cantidad,
         COALESCE(SUM(total), 0) as total
       FROM ventas
-      WHERE fecha_hora >= NOW() - INTERVAL '7 days'
+      WHERE estado_pago = 'PAGADO'
+      AND fecha_hora >= NOW() - INTERVAL '7 days'
       GROUP BY DATE(fecha_hora)
       ORDER BY dia ASC
     `)
 
-    // Top 5 productos más vendidos
+    // Top 5 productos más vendidos (solo ventas pagadas)
     const topProductos = await query(`
       SELECT 
         p.nombre,
@@ -48,35 +51,46 @@ async function obtenerMetricas() {
       FROM productos p
       JOIN detalles_venta dv ON p.id = dv.producto_id
       JOIN ventas v ON dv.venta_id = v.id
+      WHERE v.estado_pago = 'PAGADO'
       GROUP BY p.id, p.nombre
       ORDER BY cantidad_vendida DESC
       LIMIT 5
     `)
 
-    // Crecimiento mes actual vs mes anterior
+    // Crecimiento mes actual vs mes anterior (solo pagadas)
     const mesActual = await query(`
       SELECT COALESCE(SUM(total), 0) as total
       FROM ventas
-      WHERE EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
+      WHERE estado_pago = 'PAGADO'
+      AND EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
       AND EXTRACT(MONTH FROM fecha_hora) = EXTRACT(MONTH FROM NOW())
     `)
 
     const mesPasado = await query(`
       SELECT COALESCE(SUM(total), 0) as total
       FROM ventas
-      WHERE EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
+      WHERE estado_pago = 'PAGADO'
+      AND EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
       AND EXTRACT(MONTH FROM fecha_hora) = EXTRACT(MONTH FROM NOW() - INTERVAL '1 month')
     `)
 
-    // Ticket promedio (últimos 30 días)
+    // Ticket promedio (últimos 30 días) - solo pagadas
     const ticketPromedio = await query(`
       SELECT COALESCE(AVG(total), 0) as promedio
       FROM ventas
-      WHERE fecha_hora >= NOW() - INTERVAL '30 days'
+      WHERE estado_pago = 'PAGADO'
+      AND fecha_hora >= NOW() - INTERVAL '30 days'
     `)
 
     // Productos sin stock
     const productosSinStock = await query("SELECT COUNT(*) as count FROM productos WHERE disponible = false")
+
+    // Ingresos totales históricos (solo pagadas)
+    const ingresosHistoricos = await query(`
+      SELECT COALESCE(SUM(total), 0) as total
+      FROM ventas
+      WHERE estado_pago = 'PAGADO'
+    `)
 
     const mesActualTotal = parseFloat(mesActual[0]?.total || 0)
     const mesPasadoTotal = parseFloat(mesPasado[0]?.total || 0)
@@ -87,7 +101,7 @@ async function obtenerMetricas() {
       productosSinStock: parseInt(productosSinStock[0]?.count || 0),
       totalUsuarios: parseInt(totalUsuarios[0]?.count || 0),
       totalVentas: parseInt(totalVentas[0]?.cantidad || 0),
-      totalIngresos: parseFloat(totalVentas[0]?.monto || 0),
+      totalIngresos: parseFloat(ingresosHistoricos[0]?.total || 0),
       ingresosUltimos30: parseFloat(ingresosUltimos30[0]?.total || 0),
       ventasUltimos30: parseInt(ingresosUltimos30[0]?.cantidad || 0),
       ticketPromedio: parseFloat(ticketPromedio[0]?.promedio || 0),
