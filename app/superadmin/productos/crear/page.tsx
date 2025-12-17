@@ -175,13 +175,39 @@ export default function CrearProductoPage() {
           // Dibujar la imagen del video en el canvas
           context.drawImage(video, 0, 0, canvas.width, canvas.height)
           
-          // Convertir a JPEG y COMPRIMIR
-          const fotoDataUrl = canvas.toDataURL("image/jpeg", 0.9)
-          const comprimida = await compressImage(fotoDataUrl, 1280, 720, 0.65)
-          
-          setImagenPreview(comprimida)
-          setFormData({ ...formData, imagen: comprimida })
-          setShowCamera(false)
+          // Convertir a blob (no base64) para subir
+          canvas.toBlob(async (blob) => {
+            if (!blob) return
+            
+            try {
+              setLoading(true)
+              
+              // Crear FormData con el blob
+              const formDataUpload = new FormData()
+              formDataUpload.append('file', blob, 'camera-capture.jpg')
+
+              // Subir al servidor
+              const res = await fetch('/api/admin/productos/upload', {
+                method: 'POST',
+                body: formDataUpload,
+              })
+
+              if (res.ok) {
+                const data = await res.json()
+                setImagenPreview(data.url)
+                setFormData({ ...formData, imagen: data.url })
+                setShowCamera(false)
+              } else {
+                const error = await res.json()
+                alert(error.error || 'Error al subir la foto')
+              }
+            } catch (error) {
+              console.error("Error al subir foto:", error)
+              alert("Error al subir la foto")
+            } finally {
+              setLoading(false)
+            }
+          }, 'image/jpeg', 0.85)
         }
       } catch (error) {
         console.error("Error al tomar foto:", error)
@@ -194,13 +220,31 @@ export default function CrearProductoPage() {
     const file = e.target.files?.[0]
     if (file) {
       try {
-        // Comprimir archivo antes de usar
-        const comprimida = await compressImageFile(file, 1280, 720, 0.65)
-        setImagenPreview(comprimida)
-        setFormData({ ...formData, imagen: comprimida })
+        setLoading(true)
+        
+        // Crear FormData con el archivo
+        const formDataUpload = new FormData()
+        formDataUpload.append('file', file)
+
+        // Subir al servidor
+        const res = await fetch('/api/admin/productos/upload', {
+          method: 'POST',
+          body: formDataUpload,
+        })
+
+        if (res.ok) {
+          const data = await res.json()
+          setImagenPreview(data.url)
+          setFormData({ ...formData, imagen: data.url })
+        } else {
+          const error = await res.json()
+          alert(error.error || 'Error al subir la imagen')
+        }
       } catch (error) {
         console.error("Error al procesar imagen:", error)
         alert("Error al procesar la imagen")
+      } finally {
+        setLoading(false)
       }
     }
   }
