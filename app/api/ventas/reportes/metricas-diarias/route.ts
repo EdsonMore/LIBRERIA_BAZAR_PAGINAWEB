@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         DATE(v.fecha_hora) as fecha,
         v.propietario_id,
         COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
-        COUNT(v.id) as ventas_del_dia,
+        COUNT(DISTINCT v.id) as ventas_del_dia,
         SUM(v.total) as ingreso_del_dia,
         AVG(v.total) as promedio_venta_dia,
         SUM(dv.cantidad) as productos_vendidos_dia,
@@ -61,15 +61,19 @@ export async function GET(request: NextRequest) {
         v.propietario_id,
         COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
         COUNT(DISTINCT DATE(v.fecha_hora)) as dias_con_ventas,
-        COUNT(v.id) as total_ventas,
+        COUNT(DISTINCT v.id) as total_ventas,
         SUM(v.total) as total_ingreso,
         AVG(v.total) as promedio_venta,
-        SUM(dv.cantidad) as total_productos_vendidos,
+        COALESCE(SUM(dv.cantidad), 0) as total_productos_vendidos,
         MIN(DATE(v.fecha_hora)) as primer_dia_venta,
         MAX(DATE(v.fecha_hora)) as ultimo_dia_venta
       FROM public.ventas v
       LEFT JOIN public.usuarios u ON v.propietario_id = u.id
-      LEFT JOIN public.detalles_venta dv ON v.id = dv.venta_id
+      LEFT JOIN (
+        SELECT venta_id, SUM(cantidad) as cantidad 
+        FROM public.detalles_venta 
+        GROUP BY venta_id
+      ) dv ON v.id = dv.venta_id
       WHERE v.estado_pago = 'PAGADO'
     `
     const paramsResumen: any[] = []

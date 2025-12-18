@@ -65,7 +65,8 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
   const [error, setError] = useState<string | null>(null)
   const [ventasExpandidas, setVentasExpandidas] = useState<Set<number>>(new Set())
   const [mostrarTodosDetalles, setMostrarTodosDetalles] = useState(false)
-  const [propietarioSeleccionado, setPropietarioSeleccionado] = useState<number | null>(null)
+  const [propietarioSeleccionado, setPropietarioSeleccionado] = useState<string | null>(null)
+  const [eliminandoProducto, setEliminandoProducto] = useState<number | null>(null)
 
   // Filtros
   const [filtroFechaInicio, setFiltroFechaInicio] = useState(
@@ -179,9 +180,6 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
       if (filtroFechaFin) {
         params.append('fechaFin', new Date(filtroFechaFin).toISOString())
       }
-      if (propietarioSeleccionado) {
-        params.append('propietarioId', propietarioSeleccionado.toString())
-      }
 
       const response = await fetch(`/api/ventas/reportes/metricas-diarias?${params.toString()}`)
       if (response.ok) {
@@ -192,6 +190,35 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
       }
     } catch (err) {
       console.error('Error al cargar métricas diarias:', err)
+    }
+  }
+
+  // Eliminar producto de la lista de compra
+  const eliminarProductoBuscado = async (productoId: number, nombreProducto: string) => {
+    if (!window.confirm(`¿Está seguro de que desea eliminar "${nombreProducto}" de la lista de compra?`)) {
+      return
+    }
+
+    try {
+      setEliminandoProducto(productoId)
+      const response = await fetch(`/api/productos-buscados-lista/${productoId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Recargar la lista
+        setListaCompra(listaCompra.filter(p => p.id !== productoId))
+        alert('Producto eliminado exitosamente de la lista de compra')
+      } else {
+        const errorData = await response.json()
+        alert(`Error: ${errorData.error || 'No se pudo eliminar el producto'}`)
+      }
+    } catch (err) {
+      console.error('Error al eliminar producto:', err)
+      alert('Error al eliminar el producto')
+    } finally {
+      setEliminandoProducto(null)
     }
   }
 
@@ -348,8 +375,8 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                         </tr>
                       ) : (
                         resumenPropietario.map((r, idx) => (
-                          <tr key={idx} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => setPropietarioSeleccionado(r.propietario_id)}>
-                            <td className="py-3 px-2 md:px-4 font-medium text-gray-900">{r.propietario_nombre || `Propietario ${r.propietario_id}`}</td>
+                          <tr key={idx} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => setPropietarioSeleccionado(r.propietario_nombre)}>
+                            <td className="py-3 px-2 md:px-4 font-medium text-gray-900">{r.propietario_nombre}</td>
                             <td className="text-center py-3 px-2 md:px-4">
                               <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
                                 {r.dias_con_ventas}
@@ -383,13 +410,13 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                 ) : (
                   <div className="space-y-4">
                     {resumenPropietario.map((propietario) => {
-                      const ventasDelPropietario = metricasDiarias.filter(m => m.propietario_id === propietario.propietario_id)
+                      const ventasDelPropietario = metricasDiarias.filter(m => m.propietario_nombre === propietario.propietario_nombre)
                       
                       return ventasDelPropietario.length > 0 ? (
-                        <div key={propietario.propietario_id} className="border rounded-lg overflow-hidden">
+                        <div key={`${propietario.propietario_nombre}`} className="border rounded-lg overflow-hidden">
                           <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 md:p-4">
                             <h4 className="font-bold text-base md:text-lg text-gray-900">
-                              {propietario.propietario_nombre || `Propietario ${propietario.propietario_id}`}
+                              {propietario.propietario_nombre}
                             </h4>
                             <p className="text-xs text-gray-600">
                               Período: {propietario.primer_dia_venta} al {propietario.ultimo_dia_venta}
@@ -474,7 +501,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                       <tbody>
                         {productosPorPropietario.map((prod, idx) => (
                           <tr key={idx} className="border-b hover:bg-gray-50">
-                            <td className="px-2 md:px-4 py-2 font-medium">{prod.propietario_nombre || `Propietario ${prod.propietario_id}`}</td>
+                            <td className="px-2 md:px-4 py-2 font-medium">{prod.propietario_nombre}</td>
                             <td className="px-2 md:px-4 py-2 text-gray-900">{prod.producto_nombre}</td>
                             <td className="px-2 md:px-4 py-2 text-center">
                               <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
@@ -892,6 +919,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                         <th className="px-3 py-2 text-center font-semibold">Búsquedas</th>
                         <th className="px-3 py-2 text-center font-semibold">Prioridad</th>
                         <th className="px-3 py-2 text-left font-semibold">Última Búsqueda</th>
+                        <th className="px-3 py-2 text-center font-semibold">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -926,6 +954,17 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               })}
+                            </td>
+                            <td className="px-3 py-3 text-center">
+                              <Button
+                                onClick={() => eliminarProductoBuscado(producto.id, producto.nombre)}
+                                disabled={eliminandoProducto === producto.id}
+                                variant="destructive"
+                                size="sm"
+                                className="text-xs h-8"
+                              >
+                                {eliminandoProducto === producto.id ? '⏳' : '🗑️ Eliminar'}
+                              </Button>
                             </td>
                           </tr>
                         )

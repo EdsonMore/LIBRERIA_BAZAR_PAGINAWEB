@@ -49,9 +49,8 @@ async function getVentasPorVendedor(searchParams: URLSearchParams) {
 
   let sql = `
     SELECT 
-      v.vendedor_id,
       u.nombres as vendedor_nombre,
-      COUNT(v.id) as total_ventas,
+      COUNT(DISTINCT v.id) as total_ventas,
       SUM(v.total) as total_ingreso,
       AVG(v.total) as promedio_venta
     FROM public.ventas v
@@ -70,7 +69,7 @@ async function getVentasPorVendedor(searchParams: URLSearchParams) {
     params.push(new Date(fechaFin))
   }
 
-  sql += " GROUP BY v.vendedor_id, u.nombres ORDER BY total_ingreso DESC"
+  sql += " GROUP BY u.nombres ORDER BY total_ingreso DESC"
 
   return await query(sql, params)
 }
@@ -84,9 +83,8 @@ async function getIngresosPorPropietario(searchParams: URLSearchParams) {
 
   let sql = `
     SELECT 
-      v.propietario_id,
       COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
-      COUNT(v.id) as total_ventas,
+      COUNT(DISTINCT v.id) as total_ventas,
       SUM(v.total) as total_ingresos,
       AVG(v.total) as promedio_venta
     FROM public.ventas v
@@ -105,7 +103,7 @@ async function getIngresosPorPropietario(searchParams: URLSearchParams) {
     params.push(new Date(fechaFin))
   }
 
-  sql += " GROUP BY v.propietario_id, u.nombres, v.propietario_nombre ORDER BY total_ingresos DESC"
+  sql += " GROUP BY COALESCE(u.nombres, v.propietario_nombre) ORDER BY total_ingresos DESC"
 
   return await query(sql, params)
 }
