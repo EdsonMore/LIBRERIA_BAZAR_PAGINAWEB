@@ -58,10 +58,14 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
   const [resumenMetodoPago, setResumenMetodoPago] = useState<any[]>([])
   const [listaCompra, setListaCompra] = useState<any[]>([])
   const [detallesVentas, setDetallesVentas] = useState<Venta[]>([])
+  const [metricasDiarias, setMetricasDiarias] = useState<any[]>([])
+  const [resumenPropietario, setResumenPropietario] = useState<any[]>([])
+  const [productosPorPropietario, setProductosPorPropietario] = useState<any[]>([])
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [ventasExpandidas, setVentasExpandidas] = useState<Set<number>>(new Set())
   const [mostrarTodosDetalles, setMostrarTodosDetalles] = useState(false)
+  const [propietarioSeleccionado, setPropietarioSeleccionado] = useState<number | null>(null)
 
   // Filtros
   const [filtroFechaInicio, setFiltroFechaInicio] = useState(
@@ -108,6 +112,9 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
       
       // Cargar detalles de ventas
       cargarDetallesVentas()
+
+      // Cargar métricas diarias
+      cargarMetricasDiarias()
     } catch (err: any) {
       setError(err.message || 'Error al cargar reportes')
     } finally {
@@ -161,8 +168,36 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
     }
   }
 
+  // Cargar métricas diarias por propietario
+  const cargarMetricasDiarias = async () => {
+    try {
+      const params = new URLSearchParams()
+
+      if (filtroFechaInicio) {
+        params.append('fechaInicio', new Date(filtroFechaInicio).toISOString())
+      }
+      if (filtroFechaFin) {
+        params.append('fechaFin', new Date(filtroFechaFin).toISOString())
+      }
+      if (propietarioSeleccionado) {
+        params.append('propietarioId', propietarioSeleccionado.toString())
+      }
+
+      const response = await fetch(`/api/ventas/reportes/metricas-diarias?${params.toString()}`)
+      if (response.ok) {
+        const data = await response.json()
+        setMetricasDiarias(data.metricasPorPropietario || [])
+        setResumenPropietario(data.resumenPropietario || [])
+        setProductosPorPropietario(data.productosPorPropietario || [])
+      }
+    } catch (err) {
+      console.error('Error al cargar métricas diarias:', err)
+    }
+  }
+
   useEffect(() => {
     cargarReportes()
+    cargarMetricasDiarias()
   }, [])
 
   // Formatear moneda
@@ -251,9 +286,12 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
       )}
 
       {/* Tabs con reportes detallados */}
-      <Tabs defaultValue="vendedor" className="space-y-4 w-full">
+      <Tabs defaultValue="metricas-diarias" className="space-y-4 w-full">
         <div className="overflow-x-auto">
           <TabsList className="inline-flex w-full md:w-auto gap-2 bg-gray-100 p-1 rounded-lg flex-wrap md:flex-nowrap">
+            <TabsTrigger value="metricas-diarias" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap bg-purple-100">
+              📊 Métricas Diarias
+            </TabsTrigger>
             <TabsTrigger value="vendedor" className="text-xs md:text-sm px-2 md:px-3 py-1 md:py-2 whitespace-nowrap">
               Vendedor
             </TabsTrigger>
@@ -277,6 +315,189 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
             </TabsTrigger>
           </TabsList>
         </div>
+
+        {/* Métricas Diarias por Propietario */}
+        <TabsContent value="metricas-diarias">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg md:text-xl">📊 Métricas Diarias por Propietario</CardTitle>
+              <CardDescription className="text-xs md:text-sm">Análisis detallado de ventas y productos vendidos por día</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Resumen por Propietario */}
+              <div>
+                <h3 className="text-lg font-bold mb-4 text-gray-900">📌 Resumen Consolidado por Propietario</h3>
+                <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+                  <table className="w-full text-xs md:text-sm">
+                    <thead>
+                      <tr className="border-b bg-gray-100">
+                        <th className="text-left py-2 px-2 md:px-4 font-semibold">Propietario</th>
+                        <th className="text-center py-2 px-2 md:px-4 font-semibold">Días c/ Ventas</th>
+                        <th className="text-center py-2 px-2 md:px-4 font-semibold">Total Ventas</th>
+                        <th className="text-right py-2 px-2 md:px-4 font-semibold">Ingresos</th>
+                        <th className="text-center py-2 px-2 md:px-4 font-semibold">Promedio</th>
+                        <th className="text-center py-2 px-2 md:px-4 font-semibold">Prod. Vendidos</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {resumenPropietario.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="text-center py-4 text-gray-500">
+                            Sin datos disponibles
+                          </td>
+                        </tr>
+                      ) : (
+                        resumenPropietario.map((r, idx) => (
+                          <tr key={idx} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => setPropietarioSeleccionado(r.propietario_id)}>
+                            <td className="py-3 px-2 md:px-4 font-medium text-gray-900">{r.propietario_nombre || `Propietario ${r.propietario_id}`}</td>
+                            <td className="text-center py-3 px-2 md:px-4">
+                              <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                                {r.dias_con_ventas}
+                              </span>
+                            </td>
+                            <td className="text-center py-3 px-2 md:px-4 font-medium">{r.total_ventas}</td>
+                            <td className="text-right py-3 px-2 md:px-4 font-bold text-green-600">
+                              {formatoMoneda(r.total_ingreso || 0)}
+                            </td>
+                            <td className="text-center py-3 px-2 md:px-4">{formatoMoneda(r.promedio_venta || 0)}</td>
+                            <td className="text-center py-3 px-2 md:px-4">
+                              <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
+                                {r.total_productos_vendidos}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Detalle Diario por Propietario */}
+              <div className="pt-6 border-t">
+                <h3 className="text-lg font-bold mb-4 text-gray-900">📅 Detalle Diario</h3>
+                {metricasDiarias.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded">
+                    <p className="text-gray-500">No hay datos de ventas para el período seleccionado</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {resumenPropietario.map((propietario) => {
+                      const ventasDelPropietario = metricasDiarias.filter(m => m.propietario_id === propietario.propietario_id)
+                      
+                      return ventasDelPropietario.length > 0 ? (
+                        <div key={propietario.propietario_id} className="border rounded-lg overflow-hidden">
+                          <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 md:p-4">
+                            <h4 className="font-bold text-base md:text-lg text-gray-900">
+                              {propietario.propietario_nombre || `Propietario ${propietario.propietario_id}`}
+                            </h4>
+                            <p className="text-xs text-gray-600">
+                              Período: {propietario.primer_dia_venta} al {propietario.ultimo_dia_venta}
+                            </p>
+                          </div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-xs md:text-sm">
+                              <thead>
+                                <tr className="bg-gray-100 border-b">
+                                  <th className="px-2 md:px-4 py-2 text-left font-semibold">Fecha</th>
+                                  <th className="px-2 md:px-4 py-2 text-center font-semibold">Ventas</th>
+                                  <th className="px-2 md:px-4 py-2 text-right font-semibold">Ingreso del Día</th>
+                                  <th className="px-2 md:px-4 py-2 text-center font-semibold">Promedio</th>
+                                  <th className="px-2 md:px-4 py-2 text-center font-semibold">Productos Vendidos</th>
+                                  <th className="px-2 md:px-4 py-2 text-center font-semibold">Prod. Diferentes</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ventasDelPropietario.map((metrica, idx) => (
+                                  <tr key={idx} className="border-b hover:bg-gray-50">
+                                    <td className="px-2 md:px-4 py-2 font-medium">
+                                      {new Date(metrica.fecha).toLocaleDateString('es-PE', {
+                                        weekday: 'short',
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: '2-digit'
+                                      })}
+                                    </td>
+                                    <td className="px-2 md:px-4 py-2 text-center">
+                                      <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                                        {metrica.ventas_del_dia}
+                                      </span>
+                                    </td>
+                                    <td className="px-2 md:px-4 py-2 text-right font-bold text-green-600">
+                                      {formatoMoneda(metrica.ingreso_del_dia || 0)}
+                                    </td>
+                                    <td className="px-2 md:px-4 py-2 text-center">
+                                      {formatoMoneda(metrica.promedio_venta_dia || 0)}
+                                    </td>
+                                    <td className="px-2 md:px-4 py-2 text-center">
+                                      <span className="inline-block bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">
+                                        {metrica.productos_vendidos_dia}
+                                      </span>
+                                    </td>
+                                    <td className="px-2 md:px-4 py-2 text-center">
+                                      <span className="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">
+                                        {metrica.cantidad_producto_diferentes}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      ) : null
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Productos vendidos por propietario */}
+              <div className="pt-6 border-t">
+                <h3 className="text-lg font-bold mb-4 text-gray-900">📦 Productos Vendidos por Propietario</h3>
+                {productosPorPropietario.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded">
+                    <p className="text-gray-500">No hay productos vendidos para mostrar</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs md:text-sm">
+                      <thead>
+                        <tr className="bg-gray-100 border-b">
+                          <th className="px-2 md:px-4 py-2 text-left font-semibold">Propietario</th>
+                          <th className="px-2 md:px-4 py-2 text-left font-semibold">Producto</th>
+                          <th className="px-2 md:px-4 py-2 text-center font-semibold">Cantidad</th>
+                          <th className="px-2 md:px-4 py-2 text-center font-semibold">Veces Vendido</th>
+                          <th className="px-2 md:px-4 py-2 text-right font-semibold">Ingreso</th>
+                          <th className="px-2 md:px-4 py-2 text-center font-semibold">P. Promedio</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {productosPorPropietario.map((prod, idx) => (
+                          <tr key={idx} className="border-b hover:bg-gray-50">
+                            <td className="px-2 md:px-4 py-2 font-medium">{prod.propietario_nombre || `Propietario ${prod.propietario_id}`}</td>
+                            <td className="px-2 md:px-4 py-2 text-gray-900">{prod.producto_nombre}</td>
+                            <td className="px-2 md:px-4 py-2 text-center">
+                              <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
+                                {prod.cantidad_vendida}
+                              </span>
+                            </td>
+                            <td className="px-2 md:px-4 py-2 text-center">{prod.veces_vendido}</td>
+                            <td className="px-2 md:px-4 py-2 text-right font-bold text-green-600">
+                              {formatoMoneda(prod.ingreso_producto || 0)}
+                            </td>
+                            <td className="px-2 md:px-4 py-2 text-center">
+                              {formatoMoneda(prod.precio_promedio || 0)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Ventas por Vendedor */}
         <TabsContent value="vendedor">
