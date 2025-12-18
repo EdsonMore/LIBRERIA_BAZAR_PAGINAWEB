@@ -528,7 +528,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                             </div>
                             <div className="hidden md:block">
                               <p className="text-gray-600 text-xs">Fecha</p>
-                              <p className="font-semibold">{new Date(venta.fecha_hora).toLocaleDateString('es-PE')}</p>
+                              <p className="font-semibold">{new Date(venta.fecha_hora).toLocaleDateString('es-PE')} {new Date(venta.fecha_hora).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</p>
                             </div>
                             <div>
                               <p className="text-gray-600 text-xs">Método</p>

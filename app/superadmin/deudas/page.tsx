@@ -727,7 +727,7 @@ export default function DeudasPage() {
                         <div className="space-y-1 text-xs">
                           <p><strong>Nombre:</strong> {detallesDeuda?.propietario_nombre || 'N/A'}</p>
                           <p><strong>Vendedor:</strong> {detallesDeuda?.vendedor_nombre || 'N/A'}</p>
-                          <p><strong>Fecha Venta:</strong> {detallesDeuda?.fecha_hora ? new Date(detallesDeuda.fecha_hora).toLocaleDateString('es-PE') : 'N/A'}</p>
+                          <p><strong>Fecha Venta:</strong> {detallesDeuda?.fecha_hora ? `${new Date(detallesDeuda.fecha_hora).toLocaleDateString('es-PE')} ${new Date(detallesDeuda.fecha_hora).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'N/A'}</p>
                         </div>
                       </div>
                     </div>

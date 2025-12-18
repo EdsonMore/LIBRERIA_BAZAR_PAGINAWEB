@@ -87,7 +87,7 @@ async function obtenerMetricas() {
       FROM ventas
     `)
 
-    // Ventas por propietario (agrupados por nombre normalizado)
+    // Ventas por propietario (agrupados por nombre normalizado - solo pagadas)
     const ventasPorPropietario = await query(`
       SELECT 
         propietario_nombre,
@@ -101,6 +101,7 @@ async function obtenerMetricas() {
         FROM ventas v
         LEFT JOIN usuarios u ON v.propietario_id = u.id
         WHERE COALESCE(u.nombres, v.propietario_nombre) IS NOT NULL
+        AND v.estado_pago = 'PAGADO'
       ) AS ventas_normalizadas
       GROUP BY propietario_nombre
       ORDER BY total_ingresos DESC
