@@ -68,13 +68,21 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
   const [propietarioSeleccionado, setPropietarioSeleccionado] = useState<string | null>(null)
   const [eliminandoProducto, setEliminandoProducto] = useState<number | null>(null)
 
-  // Filtros
-  const [filtroFechaInicio, setFiltroFechaInicio] = useState(
-    fechaInicio ? fechaInicio.toISOString().split('T')[0] : ''
-  )
-  const [filtroFechaFin, setFiltroFechaFin] = useState(
-    fechaFin ? fechaFin.toISOString().split('T')[0] : ''
-  )
+  // Filtros - Por defecto últimos 7 días
+  const getDefaultFechaInicio = () => {
+    if (fechaInicio) return fechaInicio.toISOString().split('T')[0]
+    const hace7Dias = new Date()
+    hace7Dias.setDate(hace7Dias.getDate() - 7)
+    return hace7Dias.toISOString().split('T')[0]
+  }
+
+  const getDefaultFechaFin = () => {
+    if (fechaFin) return fechaFin.toISOString().split('T')[0]
+    return new Date().toISOString().split('T')[0]
+  }
+
+  const [filtroFechaInicio, setFiltroFechaInicio] = useState(getDefaultFechaInicio())
+  const [filtroFechaFin, setFiltroFechaFin] = useState(getDefaultFechaFin())
 
   // Cargar reportes
   const cargarReportes = async () => {
