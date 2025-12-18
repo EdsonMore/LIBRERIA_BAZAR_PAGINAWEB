@@ -308,9 +308,16 @@ export default function EditarProductoPage() {
       try {
         setLoading(true);
 
-        // Crear FormData con el archivo
+        // Comprimir la imagen antes de subir
+        const compressedDataUrl = await compressImageFile(file, 1280, 720, 0.75)
+        
+        // Convertir DataURL comprimida a Blob
+        const response = await fetch(compressedDataUrl)
+        const blob = await response.blob()
+
+        // Crear FormData con el archivo comprimido
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", blob, file.name);
 
         // Subir al servidor
         const res = await fetch("/api/admin/productos/upload", {
