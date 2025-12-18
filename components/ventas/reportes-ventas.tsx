@@ -413,7 +413,22 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                       const propietarioData = resumenPropietario.find(r => r.propietario_nombre === propietarioNombre)
                       const ventasDelPropietario = metricasDiarias.filter(m => m.propietario_nombre === propietarioNombre)
                       
-                      return ventasDelPropietario.length > 0 && propietarioData ? (
+                      // Agrupar por fecha única, evitando duplicados
+                      const fechasUnicas = Array.from(new Set(ventasDelPropietario.map(v => v.fecha))).sort().reverse()
+                      const ventasAgrupadas = fechasUnicas.map(fecha => {
+                        const ventasFecha = ventasDelPropietario.filter(v => v.fecha === fecha)
+                        // Sumar métricas de todas las ventas del mismo día
+                        return {
+                          fecha,
+                          ventas_del_dia: ventasFecha.reduce((sum, v) => sum + (v.ventas_del_dia || 0), 0),
+                          ingreso_del_dia: ventasFecha.reduce((sum, v) => sum + (v.ingreso_del_dia || 0), 0),
+                          promedio_venta_dia: ventasFecha.length > 0 ? ventasFecha.reduce((sum, v) => sum + (v.promedio_venta_dia || 0), 0) / ventasFecha.length : 0,
+                          productos_vendidos_dia: ventasFecha.reduce((sum, v) => sum + (v.productos_vendidos_dia || 0), 0),
+                          cantidad_producto_diferentes: Math.max(...ventasFecha.map(v => v.cantidad_producto_diferentes || 0))
+                        }
+                      })
+                      
+                      return ventasAgrupadas.length > 0 && propietarioData ? (
                         <div key={propietarioNombre} className="border rounded-lg overflow-hidden">
                           <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 md:p-4">
                             <h4 className="font-bold text-base md:text-lg text-gray-900">
@@ -436,7 +451,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                                 </tr>
                               </thead>
                               <tbody>
-                                {ventasDelPropietario.map((metrica, idx) => (
+                                {ventasAgrupadas.map((metrica, idx) => (
                                   <tr key={idx} className="border-b hover:bg-gray-50">
                                     <td className="px-2 md:px-4 py-2 font-medium">
                                       {new Date(metrica.fecha).toLocaleDateString('es-PE', {

@@ -83,7 +83,7 @@ async function getIngresosPorPropietario(searchParams: URLSearchParams) {
 
   let sql = `
     SELECT 
-      COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
+      INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
       COUNT(DISTINCT v.id) as total_ventas,
       SUM(v.total) as total_ingresos,
       AVG(v.total) as promedio_venta
@@ -103,7 +103,7 @@ async function getIngresosPorPropietario(searchParams: URLSearchParams) {
     params.push(new Date(fechaFin))
   }
 
-  sql += " GROUP BY COALESCE(u.nombres, v.propietario_nombre) ORDER BY total_ingresos DESC"
+  sql += " GROUP BY INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) ORDER BY total_ingresos DESC"
 
   return await query(sql, params)
 }

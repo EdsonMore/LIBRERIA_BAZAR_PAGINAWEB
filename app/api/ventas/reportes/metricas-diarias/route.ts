@@ -27,7 +27,11 @@ export async function GET(request: NextRequest) {
         COUNT(DISTINCT dv.producto_id) as cantidad_producto_diferentes
       FROM public.ventas v
       LEFT JOIN public.usuarios u ON v.propietario_id = u.id
-      LEFT JOIN public.detalles_venta dv ON v.id = dv.venta_id
+      LEFT JOIN (
+        SELECT venta_id, SUM(cantidad) as cantidad, COUNT(DISTINCT producto_id) as producto_id
+        FROM public.detalles_venta
+        GROUP BY venta_id
+      ) dv ON v.id = dv.venta_id
       WHERE v.estado_pago = 'PAGADO'
     `
     const params: any[] = []
