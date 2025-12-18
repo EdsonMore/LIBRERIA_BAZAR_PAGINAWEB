@@ -92,7 +92,7 @@ async function obtenerMetricas() {
       WHERE estado_pago = 'PAGADO'
     `)
 
-    // Ventas por propietario (los 5 principales)
+    // Ventas por propietario (los 10 principales, agrupados correctamente)
     const ventasPorPropietario = await query(`
       SELECT 
         v.propietario_id,
@@ -103,7 +103,7 @@ async function obtenerMetricas() {
       FROM ventas v
       LEFT JOIN usuarios u ON v.propietario_id = u.id
       WHERE v.estado_pago = 'PAGADO'
-      GROUP BY v.propietario_id, COALESCE(u.nombres, v.propietario_nombre)
+      GROUP BY v.propietario_id, u.nombres, v.propietario_nombre
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)

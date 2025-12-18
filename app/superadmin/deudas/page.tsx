@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Search, Filter, Plus, X } from 'lucide-react'
+import { Search, Filter, Plus, X, FileText, MessageCircle } from 'lucide-react'
 
 export default function DeudasPage() {
   const [pestaña, setPestaña] = useState<'pendientes' | 'historial'>('pendientes')
@@ -100,6 +100,167 @@ export default function DeudasPage() {
   const abrirModalCancelacion = (deuda: any) => {
     setDeudaSeleccionada(deuda)
     setModalCancelacion(true)
+  }
+
+  // Agrupar deudas por cliente para exportación
+  const agruparPorCliente = (deudas: any[]) => {
+    const agrupadas: { [key: string]: any[] } = {}
+    
+    deudas.forEach(deuda => {
+      const cliente = deuda.cliente_nombre || 'Cliente sin nombre'
+      if (!agrupadas[cliente]) {
+        agrupadas[cliente] = []
+      }
+      agrupadas[cliente].push(deuda)
+    })
+    
+    return agrupadas
+  }
+
+  // Exportar a PDF
+  const exportarAPDF = () => {
+    try {
+      const deudasAgrupadas = agruparPorCliente(deudas)
+      let contenidoHTML = `
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .cliente-section { margin-bottom: 30px; page-break-inside: avoid; }
+              .cliente-nombre { font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+              th { background-color: #f0f0f0; padding: 8px; text-align: left; border: 1px solid #ddd; font-weight: bold; }
+              td { padding: 8px; border: 1px solid #ddd; }
+              .total-row { background-color: #ffffcc; font-weight: bold; }
+              .encabezado { text-align: center; margin-bottom: 20px; }
+              .encabezado h1 { margin: 0; }
+              .resumen { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; }
+            </style>
+          </head>
+          <body>
+            <div class="encabezado">
+              <h1>📋 Reporte de Deudas Agrupadas por Cliente</h1>
+              <p>Generado: ${new Date().toLocaleDateString('es-PE')} ${new Date().toLocaleTimeString('es-PE')}</p>
+            </div>
+      `
+
+      let totalGeneral = 0
+      let totalPagado = 0
+      let totalPendiente = 0
+
+      Object.entries(deudasAgrupadas).forEach(([cliente, deudas]) => {
+        contenidoHTML += `
+          <div class="cliente-section">
+            <div class="cliente-nombre">👤 ${cliente}</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th>Pagado</th>
+                  <th>Pendiente</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+        `
+
+        let subtotalCliente = 0
+        let subtotalPagado = 0
+        let subtotalPendiente = 0
+
+        deudas.forEach((deuda: any) => {
+          const total = Number(deuda.total)
+          const pagado = Number(deuda.monto_pagado)
+          const pendiente = Number(deuda.saldo_pendiente || total - pagado)
+
+          subtotalCliente += total
+          subtotalPagado += pagado
+          subtotalPendiente += pendiente
+          totalGeneral += total
+          totalPagado += pagado
+          totalPendiente += pendiente
+
+          contenidoHTML += `
+            <tr>
+              <td>${new Date(deuda.fecha_hora).toLocaleDateString('es-PE')}</td>
+              <td>S/. ${total.toFixed(2)}</td>
+              <td>S/. ${pagado.toFixed(2)}</td>
+              <td>S/. ${pendiente.toFixed(2)}</td>
+              <td>${deuda.estado_pago}</td>
+            </tr>
+          `
+        })
+
+        contenidoHTML += `
+                <tr class="total-row">
+                  <td colspan="1"><strong>Subtotal</strong></td>
+                  <td><strong>S/. ${subtotalCliente.toFixed(2)}</strong></td>
+                  <td><strong>S/. ${subtotalPagado.toFixed(2)}</strong></td>
+                  <td><strong>S/. ${subtotalPendiente.toFixed(2)}</strong></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `
+      })
+
+      contenidoHTML += `
+            <div class="resumen">
+              <h3>📊 Resumen General</h3>
+              <p><strong>Total Deudas:</strong> S/. ${totalGeneral.toFixed(2)}</p>
+              <p><strong>Total Pagado:</strong> S/. ${totalPagado.toFixed(2)}</p>
+              <p><strong>Total Pendiente:</strong> S/. ${totalPendiente.toFixed(2)}</p>
+            </div>
+          </body>
+        </html>
+      `
+
+      const ventana = window.open('', '', 'width=900,height=600')
+      ventana?.document.write(contenidoHTML)
+      ventana?.document.close()
+      ventana?.print()
+    } catch (error) {
+      console.error('Error al exportar a PDF:', error)
+      alert('Error al exportar a PDF')
+    }
+  }
+
+  // Exportar a WhatsApp
+  const exportarAWhatsApp = () => {
+    try {
+      const deudasAgrupadas = agruparPorCliente(deudas)
+      let mensaje = `*📋 Reporte de Deudas Agrupadas*\n`
+      mensaje += `Generado: ${new Date().toLocaleDateString('es-PE')}\n\n`
+
+      Object.entries(deudasAgrupadas).forEach(([cliente, deudas]) => {
+        mensaje += `*👤 ${cliente}*\n`
+        
+        let subtotalCliente = 0
+        let subtotalPendiente = 0
+
+        deudas.forEach((deuda: any) => {
+          const total = Number(deuda.total)
+          const pendiente = Number(deuda.saldo_pendiente || total - Number(deuda.monto_pagado))
+          
+          subtotalCliente += total
+          subtotalPendiente += pendiente
+          
+          mensaje += `📅 ${new Date(deuda.fecha_hora).toLocaleDateString('es-PE')}: S/. ${total.toFixed(2)} - Estado: ${deuda.estado_pago}\n`
+        })
+
+        mensaje += `*Subtotal:* S/. ${subtotalCliente.toFixed(2)}\n`
+        mensaje += `*Pendiente:* S/. ${subtotalPendiente.toFixed(2)}\n\n`
+      })
+
+      const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensaje)}`
+      window.open(urlWhatsApp, '_blank')
+    } catch (error) {
+      console.error('Error al exportar a WhatsApp:', error)
+      alert('Error al exportar a WhatsApp')
+    }
   }
 
   const registrarPago = async () => {
@@ -206,8 +367,33 @@ export default function DeudasPage() {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">💳 Gestión de Deudas</h1>
-        <p className="text-gray-600 mb-8">Administra pagos y deudas de ventas</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">💳 Gestión de Deudas</h1>
+            <p className="text-gray-600">Administra pagos y deudas de ventas</p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <Button
+              onClick={exportarAPDF}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <FileText className="w-4 h-4" />
+              Exportar PDF
+            </Button>
+            <Button
+              onClick={exportarAWhatsApp}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2 text-green-600"
+            >
+              <MessageCircle className="w-4 h-4" />
+              WhatsApp
+            </Button>
+          </div>
+        </div>
 
         {/* Pestañas */}
         <div className="flex gap-2 mb-8 border-b">

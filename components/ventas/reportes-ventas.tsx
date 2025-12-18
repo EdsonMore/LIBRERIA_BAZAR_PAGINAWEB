@@ -508,6 +508,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                 <div className="space-y-3">
                   {detallesVentas
                     .slice(0, mostrarTodosDetalles ? undefined : 10)
+                    .reverse()
                     .map((venta) => (
                     <div key={venta.venta_id} className="border rounded-lg overflow-hidden">
                       {/* Header de la venta - Resumen */}

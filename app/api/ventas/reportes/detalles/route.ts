@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         -- Detalles de cada producto en la venta
         dv.id as detalle_id,
         p.id as producto_id,
-        p.nombre as producto_nombre,
+        COALESCE(p.nombre, dv.nombre_producto) as producto_nombre,
         dv.cantidad,
         dv.precio_unitario,
         dv.subtotal,
