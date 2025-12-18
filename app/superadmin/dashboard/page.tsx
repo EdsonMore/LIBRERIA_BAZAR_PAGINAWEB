@@ -87,17 +87,16 @@ async function obtenerMetricas() {
       FROM ventas
     `)
 
-    // Ventas por propietario (los 10 principales, agrupados correctamente)
+    // Ventas por propietario (agrupados por nombre)
     const ventasPorPropietario = await query(`
       SELECT 
-        v.propietario_id,
         COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
         COUNT(v.id) as total_ventas,
         SUM(v.total) as total_ingresos,
         AVG(v.total) as promedio_venta
       FROM ventas v
       LEFT JOIN usuarios u ON v.propietario_id = u.id
-      GROUP BY v.propietario_id, u.nombres, v.propietario_nombre
+      GROUP BY COALESCE(u.nombres, v.propietario_nombre)
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)
