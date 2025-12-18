@@ -118,9 +118,27 @@ export default function DeudasPage() {
   }
 
   // Exportar a PDF
-  const exportarAPDF = () => {
+  const exportarAPDF = async () => {
     try {
-      const deudasAgrupadas = agruparPorCliente(deudas)
+      setLoading(true)
+      
+      // Cargar detalles de todas las deudas para obtener productos
+      const deudasConDetalles = await Promise.all(
+        deudas.map(async (deuda) => {
+          try {
+            const response = await fetch(`/api/deudas/${deuda.venta_id}/detalles`)
+            if (response.ok) {
+              const data = await response.json()
+              return { ...deuda, productos: data.venta.productos }
+            }
+          } catch (error) {
+            console.error(`Error cargando productos para venta ${deuda.venta_id}:`, error)
+          }
+          return deuda
+        })
+      )
+
+      const deudasAgrupadas = agruparPorCliente(deudasConDetalles)
       let contenidoHTML = `
         <html>
           <head>
@@ -129,13 +147,15 @@ export default function DeudasPage() {
               body { font-family: Arial, sans-serif; margin: 20px; }
               .cliente-section { margin-bottom: 30px; page-break-inside: avoid; }
               .cliente-nombre { font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 5px; }
-              table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11px; }
               th { background-color: #f0f0f0; padding: 8px; text-align: left; border: 1px solid #ddd; font-weight: bold; }
               td { padding: 8px; border: 1px solid #ddd; }
               .total-row { background-color: #ffffcc; font-weight: bold; }
               .encabezado { text-align: center; margin-bottom: 20px; }
               .encabezado h1 { margin: 0; }
               .resumen { margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #007bff; }
+              .productos-venta { background-color: #f5f5f5; padding: 8px; margin: 5px 0; border-radius: 3px; font-size: 10px; }
+              .producto-item { margin: 3px 0; }
             </style>
           </head>
           <body>
@@ -156,7 +176,8 @@ export default function DeudasPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Fecha</th>
+                  <th>Fecha/Hora</th>
+                  <th>Productos</th>
                   <th>Total</th>
                   <th>Pagado</th>
                   <th>Pendiente</th>
@@ -182,9 +203,20 @@ export default function DeudasPage() {
           totalPagado += pagado
           totalPendiente += pendiente
 
+          // Generar lista de productos
+          let productosHTML = ''
+          if (deuda.productos && deuda.productos.length > 0) {
+            productosHTML = deuda.productos
+              .map((prod: any) => `• ${prod.producto_nombre} (${prod.cantidad}x ${prod.precio_unitario})`)
+              .join('<br>')
+          } else {
+            productosHTML = '<em>Sin productos registrados</em>'
+          }
+
           contenidoHTML += `
             <tr>
-              <td>${new Date(deuda.fecha_hora).toLocaleDateString('es-PE')}</td>
+              <td>${new Date(deuda.fecha_hora).toLocaleDateString('es-PE')} ${new Date(deuda.fecha_hora).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
+              <td><div class="productos-venta">${productosHTML}</div></td>
               <td>S/. ${total.toFixed(2)}</td>
               <td>S/. ${pagado.toFixed(2)}</td>
               <td>S/. ${pendiente.toFixed(2)}</td>
@@ -195,7 +227,7 @@ export default function DeudasPage() {
 
         contenidoHTML += `
                 <tr class="total-row">
-                  <td colspan="1"><strong>Subtotal</strong></td>
+                  <td colspan="2"><strong>Subtotal</strong></td>
                   <td><strong>S/. ${subtotalCliente.toFixed(2)}</strong></td>
                   <td><strong>S/. ${subtotalPagado.toFixed(2)}</strong></td>
                   <td><strong>S/. ${subtotalPendiente.toFixed(2)}</strong></td>
@@ -225,6 +257,8 @@ export default function DeudasPage() {
     } catch (error) {
       console.error('Error al exportar a PDF:', error)
       alert('Error al exportar a PDF')
+    } finally {
+      setLoading(false)
     }
   }
 
