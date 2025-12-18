@@ -87,7 +87,7 @@ async function obtenerMetricas() {
       FROM ventas
     `)
 
-    // Ventas por propietario (agrupados por nombre)
+    // Ventas por propietario (agrupados por nombre, incluyendo manuales)
     const ventasPorPropietario = await query(`
       SELECT 
         COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
@@ -97,6 +97,7 @@ async function obtenerMetricas() {
       FROM ventas v
       LEFT JOIN usuarios u ON v.propietario_id = u.id
       GROUP BY COALESCE(u.nombres, v.propietario_nombre)
+      HAVING COALESCE(u.nombres, v.propietario_nombre) IS NOT NULL
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)

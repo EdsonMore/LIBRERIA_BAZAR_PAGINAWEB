@@ -506,10 +506,10 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {detallesVentas
-                    .reverse()
-                    .slice(0, mostrarTodosDetalles ? undefined : 10)
-                    .map((venta) => (
+                  {(mostrarTodosDetalles
+                    ? [...detallesVentas].reverse()
+                    : [...detallesVentas].slice(-10).reverse()
+                  ).map((venta) => (
                     <div key={venta.venta_id} className="border rounded-lg overflow-hidden">
                       {/* Header de la venta - Resumen */}
                       <button
