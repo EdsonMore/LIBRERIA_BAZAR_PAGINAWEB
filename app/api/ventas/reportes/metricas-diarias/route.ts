@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Métricas por propietario y día
     let sqlMetricasPorPropietario = `
       SELECT 
-        DATE(v.fecha_hora) as fecha,
+        DATE(v.fecha_hora AT TIME ZONE 'America/Lima') as fecha,
         INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
         COUNT(DISTINCT v.id) as ventas_del_dia,
         SUM(v.total) as ingreso_del_dia,
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     sqlMetricasPorPropietario += `
-      GROUP BY DATE(v.fecha_hora), INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre)))
+      GROUP BY DATE(v.fecha_hora AT TIME ZONE 'America/Lima'), INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre)))
       ORDER BY fecha DESC, propietario_nombre ASC
     `
 
@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
     let sqlResumenPropietario = `
       SELECT 
         INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
-        COUNT(DISTINCT DATE(v.fecha_hora)) as dias_con_ventas,
+        COUNT(DISTINCT DATE(v.fecha_hora AT TIME ZONE 'America/Lima')) as dias_con_ventas,
         COUNT(DISTINCT v.id) as total_ventas,
         SUM(v.total) as total_ingreso,
         AVG(v.total) as promedio_venta,
         COALESCE(SUM(dv.cantidad), 0) as total_productos_vendidos,
-        MIN(DATE(v.fecha_hora)) as primer_dia_venta,
-        MAX(DATE(v.fecha_hora)) as ultimo_dia_venta
+        MIN(DATE(v.fecha_hora AT TIME ZONE 'America/Lima')) as primer_dia_venta,
+        MAX(DATE(v.fecha_hora AT TIME ZONE 'America/Lima')) as ultimo_dia_venta
       FROM public.ventas v
       LEFT JOIN public.usuarios u ON v.propietario_id = u.id
       LEFT JOIN (
