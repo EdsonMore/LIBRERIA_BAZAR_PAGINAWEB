@@ -67,7 +67,7 @@ export function ProductosNavidad() {
     return (
       <section className="py-16 bg-white border-t border-b border-gray-200">
         <div className="container mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12 text-[#1B6B3D]">
+          <h2 className="text-4xl font-bold text-center mb-12 text-[#C8D800]">
             🎄 Especial Navidad
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
@@ -115,7 +115,7 @@ export function ProductosNavidad() {
   return (
     <section className="py-16 bg-white border-t border-b border-gray-200">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl font-bold text-center mb-4 text-[#1B6B3D]">
+        <h2 className="text-4xl font-bold text-center mb-4 text-[#C8D800]">
           🎄 Especial Navidad
         </h2>
         <p className="text-center text-gray-600 mb-12 text-lg">
@@ -147,7 +147,7 @@ export function ProductosNavidad() {
                       </div>
                     )}
                     {producto.stock < 5 && (
-                      <div className="absolute top-2 right-2 bg-[#E80B7B] text-white px-2 py-1 rounded text-xs font-bold">
+                      <div className="absolute top-2 right-2 bg-[#E91E63] text-white px-2 py-1 rounded text-xs font-bold">
                         ¡Pocos!
                       </div>
                     )}
@@ -156,7 +156,7 @@ export function ProductosNavidad() {
                   {/* Info */}
                   <div className="p-3 flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="text-xs text-[#1B6B3D] font-semibold mb-1">
+                      <p className="text-xs text-[#C8D800] font-semibold mb-1">
                         {producto.categoria_nombre}
                       </p>
                       <h3 className="font-bold text-sm line-clamp-2 text-gray-800 group-hover:text-[#1B6B3D]">

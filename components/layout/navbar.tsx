@@ -244,7 +244,7 @@ export default function Navbar() {
             {isCliente() && (
               <Link
                 href="/carrito"
-                className="relative hover:text-[#667eea] transition-colors"
+                className="relative hover:text-[#E91E63] transition-colors"
                 title="Ver carrito"
               >
                 <ShoppingCart className="w-6 h-6" />
@@ -260,7 +260,7 @@ export default function Navbar() {
             {usuario && (
               <Link
                 href="/notificaciones"
-                className="relative hover:text-[#667eea] transition-colors"
+                className="relative hover:text-[#E91E63] transition-colors"
                 title="Notificaciones"
               >
                 <Bell className="w-6 h-6" />
@@ -277,7 +277,7 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 hover:text-[#667eea] transition-colors"
+                  className="flex items-center space-x-2 hover:text-[#E91E63] transition-colors"
                 >
                   <User className="w-6 h-6" />
                   <span className="hidden md:inline text-sm font-medium">
@@ -358,14 +358,14 @@ export default function Navbar() {
           <div className="md:hidden pb-4 space-y-2 border-t border-gray-200">
             <Link
               href="/"
-              className="block py-2 hover:text-[#667eea] transition-colors"
+              className="block py-2 hover:text-[#E91E63] transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Inicio
             </Link>
             <Link
               href="/productos"
-              className="block py-2 hover:text-[#667eea] transition-colors"
+              className="block py-2 hover:text-[#E91E63] transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Productos
@@ -376,21 +376,21 @@ export default function Navbar() {
               <>
                 <Link
                   href="/sobre-nosotros"
-                  className="block py-2 hover:text-[#667eea] transition-colors"
+                  className="block py-2 hover:text-[#E91E63] transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Sobre Nosotros
                 </Link>
                 <Link
                   href="/contacto"
-                  className="block py-2 hover:text-[#667eea] transition-colors"
+                  className="block py-2 hover:text-[#E91E63] transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Contacto
                 </Link>
                 <Link
                   href="/libro-reclamaciones"
-                  className="block py-2 hover:text-[#667eea] transition-colors"
+                  className="block py-2 hover:text-[#E91E63] transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Libro de Reclamaciones
@@ -402,7 +402,7 @@ export default function Navbar() {
             {isCliente() && (
               <Link
                 href="/cotizar-lista"
-                className="block py-2 hover:text-[#667eea] transition-colors"
+                className="block py-2 hover:text-[#E91E63] transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 📋 Cotizar Lista
@@ -418,7 +418,7 @@ export default function Navbar() {
                 </div>
                 <Link
                   href="/superadmin"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors"
+                  className="block py-2 pl-4 hover:text-[#E91E63] transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Dashboard
@@ -435,7 +435,7 @@ export default function Navbar() {
                 </div>
                 <Link
                   href="/ventas"
-                  className="block py-2 pl-4 hover:text-[#667eea] transition-colors font-semibold"
+                  className="block py-2 pl-4 hover:text-[#E91E63] transition-colors font-semibold"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Registrar Venta
@@ -450,7 +450,7 @@ export default function Navbar() {
                 {!isSuperAdmin() && (
                   <Link
                     href="/perfil"
-                    className="block py-2 hover:text-[#667eea] transition-colors"
+                    className="block py-2 hover:text-[#E91E63] transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     👤 Mi Perfil
@@ -460,14 +460,14 @@ export default function Navbar() {
                   <>
                     <Link
                       href="/mis-compras"
-                      className="block py-2 hover:text-[#667eea] transition-colors"
+                      className="block py-2 hover:text-[#E91E63] transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       🛍️ Mis Compras
                     </Link>
                     <Link
                       href="/mis-resenas"
-                      className="block py-2 hover:text-[#667eea] transition-colors"
+                      className="block py-2 hover:text-[#E91E63] transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       ⭐ Mis Reseñas

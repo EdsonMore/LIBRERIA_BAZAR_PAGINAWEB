@@ -123,7 +123,7 @@ export default function ContactoPage() {
       <Navbar />
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white py-16">
+        <section className="bg-gradient-to-br from-[#C8D800] to-[#E91E63] text-white py-16">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-5xl font-bold mb-4">Contáctanos</h1>
             <p className="text-xl text-blue-100">
@@ -153,7 +153,7 @@ export default function ContactoPage() {
                           value={formData.nombre}
                           onChange={handleChange}
                           placeholder="Tu nombre"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -166,7 +166,7 @@ export default function ContactoPage() {
                           value={formData.correo}
                           onChange={handleChange}
                           placeholder="tu@email.com"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -182,7 +182,7 @@ export default function ContactoPage() {
                           value={formData.telefono}
                           onChange={handleChange}
                           placeholder="+51 999 888 777"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -193,7 +193,7 @@ export default function ContactoPage() {
                           name="asunto"
                           value={formData.asunto}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         >
                           {asuntos.map(asunto => (
                             <option key={asunto} value={asunto}>{asunto}</option>
@@ -212,14 +212,14 @@ export default function ContactoPage() {
                         onChange={handleChange}
                         placeholder="Cuéntanos en qué podemos ayudarte..."
                         rows={6}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-[#667eea] text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                      className="w-full bg-[#E91E63] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#C8D800] hover:text-[#2B2E4A] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                     >
                       <Send className="w-5 h-5" />
                       {loading ? "Enviando..." : "Enviar Mensaje"}
@@ -234,7 +234,7 @@ export default function ContactoPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <div className="flex items-start gap-4">
                     <div className="bg-blue-100 p-3 rounded-full">
-                      <MapPin className="w-6 h-6 text-[#667eea]" />
+                      <MapPin className="w-6 h-6 text-[#C8D800]" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 mb-1">Dirección</h3>
@@ -252,7 +252,7 @@ export default function ContactoPage() {
                     <div>
                       <h3 className="font-bold text-gray-900 mb-1">Teléfono</h3>
                       <p className="text-gray-600">
-                        <a href="tel:+51999888777" className="text-[#667eea] hover:underline">
+                        <a href="tel:+51999888777" className="text-[#E91E63] hover:underline">
                           +51 999 888 777
                         </a>
                       </p>
@@ -269,7 +269,7 @@ export default function ContactoPage() {
                     <div>
                       <h3 className="font-bold text-gray-900 mb-1">Correo</h3>
                       <p className="text-gray-600">
-                        <a href="mailto:info@tiendabazar.com" className="text-[#667eea] hover:underline">
+                        <a href="mailto:info@tiendabazar.com" className="text-[#E91E63] hover:underline">
                           info@tiendabazar.com
                         </a>
                       </p>
@@ -280,8 +280,8 @@ export default function ContactoPage() {
                 {/* Horarios */}
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <div className="flex items-start gap-4">
-                    <div className="bg-purple-100 p-3 rounded-full">
-                      <Clock className="w-6 h-6 text-purple-600" />
+                    <div className="bg-yellow-50 p-3 rounded-full">
+                      <Clock className="w-6 h-6 text-yellow-600" />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900 mb-1">Horarios</h3>
@@ -311,3 +311,4 @@ export default function ContactoPage() {
     </>
   )
 }
+

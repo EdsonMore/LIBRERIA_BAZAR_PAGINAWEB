@@ -132,7 +132,7 @@ export default function PerfilPage() {
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
         </div>
         <Footer />
       </>
@@ -150,7 +150,7 @@ export default function PerfilPage() {
           <div className="bg-white rounded-2xl shadow-lg p-8">
             {/* Header con avatar */}
             <div className="flex items-center gap-6 mb-8 pb-8 border-b">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#667eea] to-[#764ba2] flex items-center justify-center text-white text-4xl font-bold">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-[#C8D800] to-[#E91E63] flex items-center justify-center text-white text-4xl font-bold">
                 {usuario?.nombres?.charAt(0) || usuario?.user?.charAt(0) || "U"}
               </div>
               <div>
@@ -180,7 +180,7 @@ export default function PerfilPage() {
                   <input
                     type="text"
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.nombres}
                     onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
                   />
@@ -191,7 +191,7 @@ export default function PerfilPage() {
                   <input
                     type="text"
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.apellidoPaterno}
                     onChange={(e) => setFormData({ ...formData, apellidoPaterno: e.target.value })}
                   />
@@ -201,7 +201,7 @@ export default function PerfilPage() {
                   <label className="block text-sm font-medium mb-2">Apellido Materno</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.apellidoMaterno}
                     onChange={(e) => setFormData({ ...formData, apellidoMaterno: e.target.value })}
                   />
@@ -215,7 +215,7 @@ export default function PerfilPage() {
                   <input
                     type="email"
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.correo}
                     onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
                   />
@@ -228,7 +228,7 @@ export default function PerfilPage() {
                   </label>
                   <input
                     type="tel"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.numero}
                     onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
                   />
@@ -237,7 +237,7 @@ export default function PerfilPage() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Género</label>
                   <select
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.genero}
                     onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
                   >
@@ -255,7 +255,7 @@ export default function PerfilPage() {
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.direccion1}
                     onChange={(e) => setFormData({ ...formData, direccion1: e.target.value })}
                   />
@@ -265,7 +265,7 @@ export default function PerfilPage() {
                   <label className="block text-sm font-medium mb-2">Dirección Secundaria</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     value={formData.direccion2}
                     onChange={(e) => setFormData({ ...formData, direccion2: e.target.value })}
                   />
@@ -351,7 +351,7 @@ export default function PerfilPage() {
                     value={newUser}
                     onChange={(e) => setNewUser(e.target.value)}
                     placeholder="Ingrese su nuevo usuario"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     disabled={changingUser}
                   />
                 </div>
@@ -391,5 +391,8 @@ export default function PerfilPage() {
     </>
   )
 }
+
+
+
 
 

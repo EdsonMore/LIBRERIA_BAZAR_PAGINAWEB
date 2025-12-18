@@ -81,13 +81,13 @@ export default function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#667eea] via-[#764ba2] to-[#f093fb] py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br  py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-md w-full space-y-8 bg-white rounded-2xl shadow-2xl p-10 relative">
         <div>
           <h2
             className="text-center text-4xl font-bold"
             style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "linear-gradient(135deg, #C8D800 0%, #E91E63 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -113,7 +113,7 @@ export default function LoginContent() {
                 name="user"
                 type="text"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Ingrese su usuario"
                 value={formData.user}
                 onChange={(e) => setFormData({ ...formData, user: e.target.value })}
@@ -129,7 +129,7 @@ export default function LoginContent() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Ingrese su contraseña"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -143,7 +143,7 @@ export default function LoginContent() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-[#667eea] focus:ring-[#667eea] border-gray-300 rounded"
+                className="h-4 w-4 text-[#C8D800] focus:ring-[#C8D800] border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                 Recordarme
@@ -153,7 +153,7 @@ export default function LoginContent() {
             <div className="text-sm">
               <Link
                 href="/auth/recuperar"
-                className="font-medium text-[#667eea] hover:text-[#764ba2] transition-colors"
+                className="font-medium text-[#E91E63] hover:text-[#C8D800] transition-colors"
               >
                 ¿Olvidó su contraseña?
               </Link>
@@ -173,7 +173,7 @@ export default function LoginContent() {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               ¿No tiene una cuenta?{" "}
-              <Link href="/auth/registro" className="font-medium text-[#667eea] hover:text-[#764ba2] transition-colors">
+              <Link href="/auth/registro" className="font-medium text-[#E91E63] hover:text-[#C8D800] transition-colors">
                 Regístrese aquí
               </Link>
             </p>
@@ -184,7 +184,7 @@ export default function LoginContent() {
         <div className="absolute top-6 left-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-[#667eea] font-medium rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-[#C8D800] font-medium rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200"
             title="Volver al inicio"
           >
             <Home size={20} />

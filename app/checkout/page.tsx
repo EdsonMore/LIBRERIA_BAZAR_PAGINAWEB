@@ -229,7 +229,7 @@ export default function CheckoutPage() {
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
         </div>
         <Footer />
       </>
@@ -274,7 +274,7 @@ export default function CheckoutPage() {
                     value={formData.nombres}
                     onChange={handleInputChange}
                     placeholder="Ej: Juan"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   />
                 </div>
 
@@ -286,7 +286,7 @@ export default function CheckoutPage() {
                     value={formData.apellido}
                     onChange={handleInputChange}
                     placeholder="Ej: Pérez"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   />
                 </div>
 
@@ -298,7 +298,7 @@ export default function CheckoutPage() {
                     value={formData.correo}
                     onChange={handleInputChange}
                     placeholder="Ej: juan@example.com"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   />
                 </div>
 
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                     value={formData.telefono}
                     onChange={handleInputChange}
                     placeholder="Ej: 987654321"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   />
                 </div>
 
@@ -322,7 +322,7 @@ export default function CheckoutPage() {
                     value={formData.dni}
                     onChange={handleInputChange}
                     placeholder="Ej: 12345678"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   />
                 </div>
               </div>
@@ -334,7 +334,7 @@ export default function CheckoutPage() {
                   value={formData.direccion}
                   onChange={handleInputChange}
                   placeholder="Calle, número, apartamento, ciudad..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   rows={3}
                 />
               </div>
@@ -346,14 +346,14 @@ export default function CheckoutPage() {
 
               <div className="space-y-3">
                 {/* Contra Entrega */}
-                <label className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#667eea] transition-colors" style={{ borderColor: metodoPago === "contra_entrega" ? "#667eea" : "#e5e7eb" }}>
+                <label className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#C8D800] transition-colors" style={{ borderColor: metodoPago === "contra_entrega" ? "#E91E63" : "#e5e7eb" }}>
                   <input
                     type="radio"
                     name="metodoPago"
                     value="contra_entrega"
                     checked={metodoPago === "contra_entrega"}
                     onChange={(e) => setMetodoPago(e.target.value as "contra_entrega" | "yape" | "plin")}
-                    className="mt-1 mr-4 w-4 h-4 accent-[#667eea]"
+                    className="mt-1 mr-4 w-4 h-4 accent-[#E91E63]"
                   />
                   <div>
                     <h3 className="font-bold text-lg">Contra Entrega (Efectivo)</h3>
@@ -362,14 +362,14 @@ export default function CheckoutPage() {
                 </label>
 
                 {/* Yape */}
-                <label className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#667eea] transition-colors" style={{ borderColor: metodoPago === "yape" ? "#667eea" : "#e5e7eb" }}>
+                <label className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#C8D800] transition-colors" style={{ borderColor: metodoPago === "yape" ? "#E91E63" : "#e5e7eb" }}>
                   <input
                     type="radio"
                     name="metodoPago"
                     value="yape"
                     checked={metodoPago === "yape"}
                     onChange={(e) => setMetodoPago(e.target.value as "contra_entrega" | "yape" | "plin")}
-                    className="mt-1 mr-4 w-4 h-4 accent-[#667eea]"
+                    className="mt-1 mr-4 w-4 h-4 accent-[#E91E63]"
                   />
                   <div>
                     <h3 className="font-bold text-lg">Yape</h3>
@@ -378,14 +378,14 @@ export default function CheckoutPage() {
                 </label>
 
                 {/* Plin */}
-                <label className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#667eea] transition-colors" style={{ borderColor: metodoPago === "plin" ? "#667eea" : "#e5e7eb" }}>
+                <label className="flex items-start p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#C8D800] transition-colors" style={{ borderColor: metodoPago === "plin" ? "#E91E63" : "#e5e7eb" }}>
                   <input
                     type="radio"
                     name="metodoPago"
                     value="plin"
                     checked={metodoPago === "plin"}
                     onChange={(e) => setMetodoPago(e.target.value as "contra_entrega" | "yape" | "plin")}
-                    className="mt-1 mr-4 w-4 h-4 accent-[#667eea]"
+                    className="mt-1 mr-4 w-4 h-4 accent-[#E91E63]"
                   />
                   <div>
                     <h3 className="font-bold text-lg">Plín</h3>
@@ -427,7 +427,7 @@ export default function CheckoutPage() {
                 )}
                 <div className="border-t pt-3 flex justify-between text-xl font-bold">
                   <span>Total:</span>
-                  <span className="text-[#667eea]">S/ {calcularTotal().toFixed(2)}</span>
+                  <span className="text-[#E91E63]">S/ {calcularTotal().toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -438,7 +438,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-24">
               <h2 className="text-2xl font-bold mb-6">Resumen</h2>
 
-              <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-lg p-6 text-white mb-6">
+              <div className="bg-gradient-to-br from-[#C8D800] to-[#E91E63] rounded-lg p-6 text-white mb-6">
                 <p className="text-sm opacity-90 mb-2">Total a pagar:</p>
                 <p className="text-4xl font-bold">S/ {calcularTotal().toFixed(2)}</p>
               </div>
@@ -461,7 +461,7 @@ export default function CheckoutPage() {
                 )}
               </button>
 
-              <button onClick={() => router.push("/carrito")} disabled={procesando} className="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-[#667eea] hover:text-[#667eea] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <button onClick={() => router.push("/carrito")} disabled={procesando} className="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-[#C8D800] hover:text-[#E91E63] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                 Volver al Carrito
               </button>
             </div>
@@ -503,15 +503,15 @@ export default function CheckoutPage() {
 
               {metodoPago === "contra_entrega" && (
                 <div>
-                  <p className="text-sm font-semibold text-[#667eea] mb-2">Contra Entrega (Efectivo)</p>
+                  <p className="text-sm font-semibold text-[#E91E63] mb-2">Contra Entrega (Efectivo)</p>
                   <p className="text-sm text-gray-600">Pagarás en efectivo cuando recibas tu pedido. Ten el monto exacto disponible.</p>
                 </div>
               )}
 
               {metodoPago === "yape" && (
                 <div className="flex flex-col items-center">
-                  <p className="text-sm font-semibold text-[#667eea] mb-4">Escanea el QR con tu app Yape</p>
-                  <div className="bg-white p-4 rounded-lg border-2 border-[#667eea]">
+                  <p className="text-sm font-semibold text-[#E91E63] mb-4">Escanea el QR con tu app Yape</p>
+                  <div className="bg-white p-4 rounded-lg border-2 border-[#C8D800]">
                     <img src="/images/qr/yape.png" alt="Yape QR" className="h-48 w-48 object-contain" />
                   </div>
                   <p className="text-xs text-gray-600 mt-3 text-center">Abre tu aplicación Yape y escanea este código para realizar el pago</p>
@@ -523,7 +523,7 @@ export default function CheckoutPage() {
                       type="file"
                       accept="image/*"
                       onChange={handleComprobanteChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                     />
                     {previewComprobante && (
                       <div className="mt-2">
@@ -537,8 +537,8 @@ export default function CheckoutPage() {
 
               {metodoPago === "plin" && (
                 <div className="flex flex-col items-center">
-                  <p className="text-sm font-semibold text-[#667eea] mb-4">Escanea el QR con tu app Plín</p>
-                  <div className="bg-white p-4 rounded-lg border-2 border-[#667eea]">
+                  <p className="text-sm font-semibold text-[#E91E63] mb-4">Escanea el QR con tu app Plín</p>
+                  <div className="bg-white p-4 rounded-lg border-2 border-[#C8D800]">
                     <img src="/images/qr/plin.png" alt="Plín QR" className="h-48 w-48 object-contain" />
                   </div>
                   <p className="text-xs text-gray-600 mt-3 text-center">Abre tu aplicación Plín y escanea este código para realizar el pago</p>
@@ -550,7 +550,7 @@ export default function CheckoutPage() {
                       type="file"
                       accept="image/*"
                       onChange={handleComprobanteChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                     />
                     {previewComprobante && (
                       <div className="mt-2">
@@ -564,7 +564,7 @@ export default function CheckoutPage() {
             </div>
 
             {/* Total */}
-            <div className="bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-lg p-4 text-white mb-4">
+            <div className="bg-gradient-to-br from-[#C8D800] to-[#E91E63] rounded-lg p-4 text-white mb-4">
               <p className="text-sm opacity-90 mb-2">Total a pagar:</p>
               <p className="text-3xl font-bold">S/ {calcularTotal().toFixed(2)}</p>
             </div>

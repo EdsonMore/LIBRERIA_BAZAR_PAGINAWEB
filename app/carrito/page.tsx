@@ -70,17 +70,17 @@ export default function CarritoPage() {
   }
 
   const calcularSubtotal = () => {
-    return items.reduce((sum, item) => sum + item.producto.precio * item.cantidad, 0)
+    return items.reduce((sum, item) => sum + (Number(item.producto.precio) || 0) * (Number(item.cantidad) || 0), 0)
   }
 
   const calcularIGV = () => {
     if (!config.aplicarIGV) return 0
-    return calcularSubtotal() * (config.porcentajeIGV / 100)
+    return calcularSubtotal() * ((Number(config.porcentajeIGV) || 0) / 100)
   }
 
   const calcularEnvio = () => {
     if (!config.aplicarEnvio) return 0
-    return config.costoEnvio
+    return Number(config.costoEnvio) || 0
   }
 
   const calcularTotal = () => {
@@ -96,7 +96,7 @@ export default function CarritoPage() {
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
         </div>
         <Footer />
       </>
@@ -132,7 +132,7 @@ export default function CarritoPage() {
                   <div className="flex-1">
                     <h3 className="text-lg font-bold">{item.producto.nombre}</h3>
                     <p className="text-gray-600">{item.producto.categoria_nombre}</p>
-                    <p className="text-2xl font-bold text-[#667eea] mt-2">S/ {item.producto.precio.toFixed(2)}</p>
+                    <p className="text-2xl font-bold text-[#E91E63] mt-2">S/ {item.producto.precio.toFixed(2)}</p>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
@@ -184,7 +184,7 @@ export default function CarritoPage() {
                   )}
                   <div className="border-t pt-3 flex justify-between text-xl font-bold">
                     <span>Total:</span>
-                    <span className="text-[#667eea]">S/ {calcularTotal().toFixed(2)}</span>
+                    <span className="text-[#E91E63]">S/ {calcularTotal().toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -194,7 +194,7 @@ export default function CarritoPage() {
 
                 <button
                   onClick={() => router.push("/productos")}
-                  className="w-full mt-3 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:border-[#667eea] hover:text-[#667eea] transition-all"
+                  className="w-full mt-3 px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:border-[#E91E63] hover:text-[#E91E63] transition-all"
                 >
                   Seguir Comprando
                 </button>

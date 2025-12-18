@@ -74,7 +74,7 @@ export default function MisComprasPage() {
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
         </div>
         <Footer />
       </>
@@ -133,7 +133,7 @@ export default function MisComprasPage() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-[#667eea]">S/ {(Number(detalle.subtotal) || 0).toFixed(2)}</p>
+                        <p className="font-bold text-[#E91E63]">S/ {(Number(detalle.subtotal) || 0).toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -160,7 +160,7 @@ export default function MisComprasPage() {
                     )}
                     <div className="flex justify-between text-lg font-bold border-t pt-2">
                       <span>Total:</span>
-                      <span className="text-[#667eea]">S/ {(Number(compra.total) || 0).toFixed(2)}</span>
+                      <span className="text-[#E91E63]">S/ {(Number(compra.total) || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -184,7 +184,7 @@ export default function MisComprasPage() {
                 <div className="flex gap-3 flex-wrap">
                   <Link
                     href={`/mis-compras/${compra.id}`}
-                    className="flex-1 min-w-[150px] px-4 py-2 border-2 border-[#667eea] text-[#667eea] rounded-full hover:bg-[#667eea] hover:text-white transition-all text-center flex items-center justify-center gap-2"
+                    className="flex-1 min-w-[150px] px-4 py-2 border-2 border-[#E91E63] text-[#E91E63] rounded-full hover:bg-[#E91E63] hover:text-white transition-all text-center flex items-center justify-center gap-2"
                   >
                     <Eye className="w-4 h-4" />
                     Ver Detalles
@@ -200,7 +200,7 @@ export default function MisComprasPage() {
                       </Link>
                       <Link
                         href={`/mis-compras-resena?compraId=${compra.id}`}
-                        className="flex-1 min-w-[150px] px-4 py-2 bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white rounded-full hover:shadow-lg transition-all text-center flex items-center justify-center gap-2"
+                        className="flex-1 min-w-[150px] px-4 py-2 bg-gradient-to-r from-[#C8D800] to-[#E91E63] text-white rounded-full hover:shadow-lg transition-all text-center flex items-center justify-center gap-2"
                       >
                         <Star className="w-4 h-4" />
                         Dejar Reseña
@@ -218,3 +218,4 @@ export default function MisComprasPage() {
     </>
   )
 }
+

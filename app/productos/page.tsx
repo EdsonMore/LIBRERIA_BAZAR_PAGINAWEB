@@ -83,7 +83,7 @@ export default function ProductosPage() {
               <input
                 type="text"
                 placeholder="Buscar productos..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                 value={filtros.busqueda}
                 onChange={(e) => setFiltros({ ...filtros, busqueda: e.target.value, page: 1 })}
               />
@@ -93,7 +93,7 @@ export default function ProductosPage() {
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <select
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent appearance-none"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent appearance-none"
                 value={filtros.categoria}
                 onChange={(e) => setFiltros({ ...filtros, categoria: e.target.value, page: 1 })}
               >
@@ -119,7 +119,7 @@ export default function ProductosPage() {
         {/* Grid de productos */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
             <p className="mt-4 text-gray-600">Cargando productos...</p>
           </div>
         ) : productos.length === 0 ? (
@@ -141,13 +141,13 @@ export default function ProductosPage() {
                   <div className="p-3 sm:p-4">
                     <span className="badge bg-primary text-xs">{producto.categoria_nombre}</span>
                     <Link href={`/producto/${producto.id}`} className="block">
-                      <h3 className="text-sm sm:text-lg font-bold mt-2 hover:text-[#667eea] transition-colors line-clamp-2">
+                      <h3 className="text-sm sm:text-lg font-bold mt-2 hover:text-[#C8D800] transition-colors line-clamp-2">
                         {producto.nombre}
                       </h3>
                     </Link>
                     <p className="card-text text-xs sm:text-sm mt-1 sm:mt-2 line-clamp-2">{producto.descripcion}</p>
                     <div className="mt-2 sm:mt-4 flex items-center justify-between">
-                      <span className="text-lg sm:text-2xl font-bold text-[#667eea]">S/ {parseFloat(producto.precio).toFixed(2)}</span>
+                      <span className="text-lg sm:text-2xl font-bold text-[#E91E63]">S/ {parseFloat(producto.precio).toFixed(2)}</span>
                       {producto.stock > 0 ? (
                         <span className="badge bg-success text-xs">Disp.</span>
                       ) : (

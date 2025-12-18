@@ -129,13 +129,13 @@ export default function RegistroPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#667eea] via-[#764ba2] to-[#f093fb] py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-2xl w-full space-y-8 bg-white rounded-2xl shadow-2xl p-10 relative">
         <div>
           <h2
             className="text-center text-4xl font-bold"
             style={{
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "linear-gradient(135deg, #C8D800 0%, #E91E63 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -162,7 +162,7 @@ export default function RegistroPage() {
                   name="user"
                   type="text"
                   required
-                  className={`appearance-none relative block w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all ${
+                  className={`appearance-none relative block w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all ${
                     userError ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="Usuario"
@@ -182,7 +182,7 @@ export default function RegistroPage() {
                 name="correo"
                 type="email"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="correo@ejemplo.com"
                 value={formData.correo}
                 onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
@@ -199,7 +199,7 @@ export default function RegistroPage() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="appearance-none relative block w-full px-4 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                  className="appearance-none relative block w-full px-4 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                   placeholder="Ingrese su contraseña"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -224,7 +224,7 @@ export default function RegistroPage() {
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   required
-                  className="appearance-none relative block w-full px-4 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                  className="appearance-none relative block w-full px-4 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                   placeholder="Confirme su contraseña"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -248,7 +248,7 @@ export default function RegistroPage() {
                 name="nombres"
                 type="text"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Sus nombres"
                 value={formData.nombres}
                 onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
@@ -264,7 +264,7 @@ export default function RegistroPage() {
                 name="apellidoPaterno"
                 type="text"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Apellido paterno"
                 value={formData.apellidoPaterno}
                 onChange={(e) => setFormData({ ...formData, apellidoPaterno: e.target.value })}
@@ -279,7 +279,7 @@ export default function RegistroPage() {
                 id="apellidoMaterno"
                 name="apellidoMaterno"
                 type="text"
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Apellido materno"
                 value={formData.apellidoMaterno}
                 onChange={(e) => setFormData({ ...formData, apellidoMaterno: e.target.value })}
@@ -294,7 +294,7 @@ export default function RegistroPage() {
                 id="tipoDoc"
                 name="tipoDoc"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 value={formData.tipoDoc}
                 onChange={(e) => setFormData({ ...formData, tipoDoc: e.target.value })}
               >
@@ -313,7 +313,7 @@ export default function RegistroPage() {
                 name="dni"
                 type="text"
                 required
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Número de documento"
                 value={formData.dni}
                 onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
@@ -328,7 +328,7 @@ export default function RegistroPage() {
                 id="numero"
                 name="numero"
                 type="tel"
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 placeholder="Número de teléfono"
                 value={formData.numero}
                 onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
@@ -342,7 +342,7 @@ export default function RegistroPage() {
               <select
                 id="genero"
                 name="genero"
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] focus:border-transparent transition-all"
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] focus:border-transparent transition-all"
                 value={formData.genero}
                 onChange={(e) => setFormData({ ...formData, genero: e.target.value })}
               >
@@ -367,7 +367,7 @@ export default function RegistroPage() {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               ¿Ya tiene una cuenta?{" "}
-              <Link href="/auth/login" className="font-medium text-[#667eea] hover:text-[#764ba2] transition-colors">
+              <Link href="/auth/login" className="font-medium text-[#E91E63] hover:text-[#C8D800] transition-colors">
                 Inicie sesión aquí
               </Link>
             </p>
@@ -378,7 +378,7 @@ export default function RegistroPage() {
         <div className="absolute top-6 left-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-[#667eea] font-medium rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-[#C8D800] font-medium rounded-full shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200"
             title="Volver al inicio"
           >
             <Home size={20} />
@@ -389,3 +389,4 @@ export default function RegistroPage() {
     </div>
   )
 }
+

@@ -91,7 +91,7 @@ export default function DetalleComprPage() {
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
         </div>
         <Footer />
       </>
@@ -120,7 +120,7 @@ export default function DetalleComprPage() {
         {/* Botón Volver */}
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-[#667eea] hover:text-[#764ba2] mb-8 font-semibold"
+          className="flex items-center gap-2 text-[#E91E63] hover:text-[#C8D800] mb-8 font-semibold"
         >
           <ArrowLeft className="w-5 h-5" />
           Volver
@@ -149,14 +149,14 @@ export default function DetalleComprPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
             <div className="space-y-4">
               <div className="flex gap-3">
-                <MapPin className="w-5 h-5 text-[#667eea] flex-shrink-0 mt-1" />
+                <MapPin className="w-5 h-5 text-[#C8D800] flex-shrink-0 mt-1" />
                 <div>
                   <p className="font-semibold text-gray-700">Dirección de entrega</p>
                   <p className="text-gray-600">{compra.direccionEntrega}</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <CreditCard className="w-5 h-5 text-[#667eea] flex-shrink-0 mt-1" />
+                <CreditCard className="w-5 h-5 text-[#C8D800] flex-shrink-0 mt-1" />
                 <div>
                   <p className="font-semibold text-gray-700">Método de pago</p>
                   <p className="text-gray-600 capitalize">{compra.metodoPago?.replace("_", " ")}</p>
@@ -171,7 +171,7 @@ export default function DetalleComprPage() {
                     <img
                       src={comprobante.archivo_url}
                       alt="Comprobante de pago"
-                      className="max-w-sm max-h-64 rounded-lg border-2 border-[#667eea] cursor-pointer"
+                      className="max-w-sm max-h-64 rounded-lg border-2 border-[#C8D800] cursor-pointer"
                       onClick={() => window.open(comprobante.archivo_url, "_blank")}
                     />
                     <p className="text-xs text-gray-500 mt-2">Haz clic para ver en tamaño completo</p>
@@ -182,7 +182,7 @@ export default function DetalleComprPage() {
             <div className="space-y-4">
               {compra.numeroSeguimiento && (
                 <div className="flex gap-3">
-                  <Package className="w-5 h-5 text-[#667eea] flex-shrink-0 mt-1" />
+                  <Package className="w-5 h-5 text-[#C8D800] flex-shrink-0 mt-1" />
                   <div>
                     <p className="font-semibold text-gray-700">Número de seguimiento</p>
                     <p className="text-gray-600">{compra.numeroSeguimiento}</p>
@@ -224,7 +224,7 @@ export default function DetalleComprPage() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-[#667eea] text-lg">
+                    <p className="font-bold text-[#E91E63] text-lg">
                       S/ {(Number(detalle.subtotal) || 0).toFixed(2)}
                     </p>
                   </div>
@@ -254,7 +254,7 @@ export default function DetalleComprPage() {
                 <span>S/ {(Number(compra.costoEnvio) || 0).toFixed(2)}</span>
               </div>
             )}
-            <div className="border-t pt-3 flex justify-between text-lg font-bold text-[#667eea]">
+            <div className="border-t pt-3 flex justify-between text-lg font-bold text-[#E91E63]">
               <span>Total:</span>
               <span>S/ {(Number(compra.total) || 0).toFixed(2)}</span>
             </div>

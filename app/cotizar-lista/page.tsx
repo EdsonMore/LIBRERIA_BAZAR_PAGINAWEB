@@ -226,7 +226,7 @@ export default function CotizarListaPage() {
               onClick={() => setTab("crear")}
               className={`pb-4 px-4 font-semibold transition-colors ${
                 tab === "crear"
-                  ? "border-b-2 border-[#667eea] text-[#667eea]"
+                  ? "border-b-2 border-[#C8D800] text-[#E91E63]"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -236,7 +236,7 @@ export default function CotizarListaPage() {
               onClick={() => setTab("historial")}
               className={`pb-4 px-4 font-semibold transition-colors ${
                 tab === "historial"
-                  ? "border-b-2 border-[#667eea] text-[#667eea]"
+                  ? "border-b-2 border-[#C8D800] text-[#E91E63]"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -265,7 +265,7 @@ export default function CotizarListaPage() {
                       placeholder="Ej: Útiles 5° B, Grado 3°, etc."
                       value={titulo}
                       onChange={(e) => setTitulo(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                     />
                   </div>
 
@@ -280,7 +280,7 @@ export default function CotizarListaPage() {
                       value={descripcion}
                       onChange={(e) => setDescripcion(e.target.value)}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                     />
                   </div>
 
@@ -293,7 +293,7 @@ export default function CotizarListaPage() {
                       <div className="text-center">
                         <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
                         <p className="text-sm text-gray-600 mb-2">
-                          <label htmlFor="archivo" className="font-semibold text-[#667eea] cursor-pointer hover:underline">
+                          <label htmlFor="archivo" className="font-semibold text-[#E91E63] cursor-pointer hover:underline">
                             Selecciona un archivo
                           </label>
                           {" o arrastra y suelta"}
@@ -323,7 +323,7 @@ export default function CotizarListaPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex-1 bg-[#667eea] text-white font-semibold py-3 rounded-lg hover:bg-[#764ba2] disabled:opacity-50 transition-colors"
+                      className="flex-1 bg-[#E91E63] text-white font-semibold py-3 rounded-lg hover:bg-[#C8D800] disabled:opacity-50 transition-colors"
                     >
                       {loading ? "Enviando..." : "Enviar para Cotización"}
                     </button>
@@ -353,7 +353,7 @@ export default function CotizarListaPage() {
                   <p className="text-gray-600 mb-4">Aún no has enviado ninguna lista para cotizar.</p>
                   <button
                     onClick={() => setTab("crear")}
-                    className="inline-block bg-[#667eea] text-white font-semibold py-2 px-6 rounded-lg hover:bg-[#764ba2]"
+                    className="inline-block bg-[#E91E63] text-white font-semibold py-2 px-6 rounded-lg hover:bg-[#C8D800]"
                   >
                     Crear primera cotización
                   </button>
@@ -376,7 +376,7 @@ export default function CotizarListaPage() {
                               {cot.cantidad_items} productos
                             </span>
                             {cot.total_final && (
-                              <span className="font-semibold text-[#667eea]">
+                              <span className="font-semibold text-[#E91E63]">
                                 Total: S/. {(Number(cot.total_final) || 0).toFixed(2)}
                               </span>
                             )}
@@ -388,7 +388,7 @@ export default function CotizarListaPage() {
                             <Link
                               href={cot.pdf_url}
                               target="_blank"
-                              className="block mt-3 text-[#667eea] hover:underline text-sm font-semibold"
+                              className="block mt-3 text-[#E91E63] hover:underline text-sm font-semibold"
                             >
                               📥 Descargar PDF
                             </Link>

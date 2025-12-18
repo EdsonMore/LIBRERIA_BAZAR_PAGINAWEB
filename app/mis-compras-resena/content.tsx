@@ -141,7 +141,7 @@ export default function MisComprasResenaContent() {
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-16 text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#667eea] border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#C8D800] border-t-transparent"></div>
         </div>
         <Footer />
       </>
@@ -227,7 +227,7 @@ export default function MisComprasResenaContent() {
         {/* Productos de la Compra */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {compra.detalles?.map((detalle: any) => (
-            <div key={detalle.id} className="bg-white rounded-lg shadow-md p-6 border-2 border-gray-200 hover:border-[#667eea] transition-colors">
+            <div key={detalle.id} className="bg-white rounded-lg shadow-md p-6 border-2 border-gray-200 hover:border-[#C8D800] transition-colors">
               {/* Encabezado del Producto */}
               <div className="mb-4 pb-4 border-b">
                 {/* Imagen del Producto */}
@@ -293,7 +293,7 @@ export default function MisComprasResenaContent() {
                       })
                     }
                     placeholder="Cuéntanos tu experiencia con este producto..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea] text-sm"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800] text-sm"
                     rows={4}
                   />
                   <p className="text-xs text-gray-500 mt-1">Mínimo 10 caracteres</p>
@@ -323,7 +323,7 @@ export default function MisComprasResenaContent() {
         <div className="mt-8">
           <button
             onClick={() => router.push("/mis-compras")}
-            className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-[#667eea] hover:text-[#667eea] transition-all"
+            className="px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-[#C8D800] hover:text-[#E91E63] transition-all"
           >
             Volver a Mis Compras
           </button>
@@ -334,3 +334,5 @@ export default function MisComprasResenaContent() {
     </>
   )
 }
+
+

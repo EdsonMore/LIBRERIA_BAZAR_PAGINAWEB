@@ -259,7 +259,7 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
       <div className="mb-6">
-        <Link href="/productos" className="text-[#667eea] hover:underline flex items-center gap-2">
+        <Link href="/productos" className="text-[#E91E63] hover:underline flex items-center gap-2">
           <ChevronLeft className="w-4 h-4" />
           Volver a Productos
         </Link>
@@ -296,7 +296,7 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
 
             {/* Precio */}
             <div className="mb-6">
-              <span className="text-5xl font-bold text-[#667eea]">S/ {Number(producto.precio).toFixed(2)}</span>
+              <span className="text-5xl font-bold text-[#E91E63]">S/ {Number(producto.precio).toFixed(2)}</span>
             </div>
 
             {/* Stock */}
@@ -369,7 +369,7 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
             {!formularioAbierto ? (
               <button
                 onClick={() => setFormularioAbierto(true)}
-                className="w-full px-6 py-3 bg-[#667eea] text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                className="w-full px-6 py-3 bg-[#E91E63] text-white rounded-lg hover:bg-[#C8D800] hover:text-[#2B2E4A] transition-colors font-semibold"
               >
                 ✍️ Dejar una Reseña
               </button>
@@ -408,7 +408,7 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
                     placeholder="Comparte tu experiencia con este producto..."
                     maxLength={500}
                     rows={4}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#667eea]"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8D800]"
                   />
                   <p className="text-xs text-gray-500 mt-1">{nuevaResena.comentario.length}/500</p>
                 </div>
@@ -438,7 +438,7 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
         ) : (
           <div className="mb-8 p-6 bg-yellow-50 border-l-4 border-yellow-400 rounded">
             <p className="text-gray-700">
-              <Link href="/auth/login" className="text-[#667eea] hover:underline font-semibold">
+              <Link href="/auth/login" className="text-[#E91E63] hover:underline font-semibold">
                 Inicia sesión
               </Link>
               {" "}para dejar una reseña y compartir tu experiencia.
@@ -492,8 +492,8 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
                   className="w-full h-48 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="font-bold text-lg hover:text-[#667eea] transition-colors">{prod.nombre}</h3>
-                  <p className="text-2xl font-bold text-[#667eea] mt-2">S/ {Number(prod.precio).toFixed(2)}</p>
+                  <h3 className="font-bold text-lg hover:text-[#C8D800] transition-colors">{prod.nombre}</h3>
+                  <p className="text-2xl font-bold text-[#E91E63] mt-2">S/ {Number(prod.precio).toFixed(2)}</p>
                 </div>
               </Link>
             ))}

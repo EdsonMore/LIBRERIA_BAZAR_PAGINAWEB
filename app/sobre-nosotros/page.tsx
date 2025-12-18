@@ -142,7 +142,7 @@ export default function SobreNosotros() {
           </section>
 
           {/* Estadísticas */}
-          <section className="bg-gradient-to-r from-[#667eea] to-[#764ba2] rounded-lg p-12 text-white mb-16">
+          <section className="bg-gradient-to-r from-[#C8D800] to-[#E91E63] rounded-lg p-12 text-white mb-16">
             <div className="grid md:grid-cols-4 gap-8 text-center">
               <div>
                 <div className="text-4xl font-bold mb-2">14+</div>
@@ -175,13 +175,13 @@ export default function SobreNosotros() {
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
                 href="/productos"
-                className="bg-[#667eea] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#5568d3] transition-colors"
+                className="bg-[#E91E63] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#C8D800] hover:text-[#2B2E4A] transition-colors"
               >
                 Ver Productos
               </Link>
               <Link
                 href="/contacto"
-                className="border-2 border-[#667eea] text-[#667eea] px-8 py-3 rounded-lg font-semibold hover:bg-[#667eea] hover:text-white transition-colors"
+                className="border-2 border-[#E91E63] text-[#E91E63] px-8 py-3 rounded-lg font-semibold hover:bg-[#E91E63] hover:text-white transition-colors"
               >
                 Contactanos
               </Link>

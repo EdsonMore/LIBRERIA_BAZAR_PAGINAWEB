@@ -176,7 +176,7 @@ export default function LibroReclamacionesPage() {
       <Navbar />
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white py-16">
+        <section className="bg-gradient-to-br from-[#C8D800] to-[#E91E63] text-white py-16">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-5xl font-bold mb-4">Libro de Reclamaciones</h1>
             <p className="text-xl text-blue-100">
@@ -204,8 +204,8 @@ export default function LibroReclamacionesPage() {
                 <p className="text-gray-600">Datos 100% seguros</p>
               </div>
               <div className="text-center">
-                <div className="inline-block bg-purple-100 p-4 rounded-full mb-4">
-                  <AlertCircle className="w-8 h-8 text-purple-600" />
+                <div className="inline-block bg-yellow-50 p-4 rounded-full mb-4">
+                  <AlertCircle className="w-8 h-8 text-yellow-600" />
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2">Soporte</h3>
                 <p className="text-gray-600">+51 999 888 777</p>
@@ -231,7 +231,7 @@ export default function LibroReclamacionesPage() {
                           name="nombre"
                           value={formData.nombre}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -241,7 +241,7 @@ export default function LibroReclamacionesPage() {
                           name="apellidos"
                           value={formData.apellidos}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -251,7 +251,7 @@ export default function LibroReclamacionesPage() {
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                       <div>
@@ -261,7 +261,7 @@ export default function LibroReclamacionesPage() {
                           name="telefono"
                           value={formData.telefono}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -277,7 +277,7 @@ export default function LibroReclamacionesPage() {
                           name="tipoDocumento"
                           value={formData.tipoDocumento}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         >
                           {tiposDocumento.map(tipo => (
                             <option key={tipo} value={tipo}>{tipo}</option>
@@ -291,7 +291,7 @@ export default function LibroReclamacionesPage() {
                           name="numeroDocumento"
                           value={formData.numeroDocumento}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -305,7 +305,7 @@ export default function LibroReclamacionesPage() {
                       name="direccion"
                       value={formData.direccion}
                       onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     />
                   </div>
 
@@ -319,7 +319,7 @@ export default function LibroReclamacionesPage() {
                           name="tipoSolicitud"
                           value={formData.tipoSolicitud}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         >
                           {tiposSolicitud.map(tipo => (
                             <option key={tipo} value={tipo}>{tipo}</option>
@@ -333,7 +333,7 @@ export default function LibroReclamacionesPage() {
                           name="fechaIncidente"
                           value={formData.fechaIncidente}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                         />
                       </div>
                     </div>
@@ -348,7 +348,7 @@ export default function LibroReclamacionesPage() {
                       onChange={handleChange}
                       placeholder="Describa detalladamente su reclamo, queja o sugerencia..."
                       rows={6}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#667eea] focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C8D800] focus:border-transparent"
                     />
                   </div>
 
@@ -359,7 +359,7 @@ export default function LibroReclamacionesPage() {
                       name="terminos"
                       checked={formData.terminos}
                       onChange={handleChange}
-                      className="mt-1 w-5 h-5 text-[#667eea] rounded focus:ring-2 focus:ring-[#667eea]"
+                      className="mt-1 w-5 h-5 text-[#C8D800] rounded focus:ring-2 focus:ring-[#C8D800]"
                     />
                     <label className="text-sm text-gray-700">
                       Acepto los términos y condiciones y autorizo el tratamiento de mis datos personales
@@ -370,7 +370,7 @@ export default function LibroReclamacionesPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#667eea] text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                    className="w-full bg-[#E91E63] text-white font-bold py-3 px-6 rounded-lg hover:bg-[#C8D800] hover:text-[#2B2E4A] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                   >
                     <Send className="w-5 h-5" />
                     {loading ? "Enviando..." : "Enviar Reclamación"}

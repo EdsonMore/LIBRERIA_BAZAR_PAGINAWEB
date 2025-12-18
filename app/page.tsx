@@ -26,19 +26,19 @@ export default async function HomePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="hero-section bg-gradient-to-r from-[#1B6B3D] to-[#00A699] text-white py-24">
+      <section className="hero-section bg-gradient-to-r from-[#C8D800] to-[#A4CC00] text-[#2B2E4A] py-24">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6">Bienvenido a Tienda Bazar</h1>
-          <p className="text-xl md:text-2xl mb-8 text-gray-100 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl mb-8 text-[#2B2E4A] max-w-2xl mx-auto opacity-90">
             Descubre nuestra amplia selección de productos de calidad a los mejores precios
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/productos" className="px-8 py-4 bg-[#E80B7B] hover:bg-[#d4076b] text-white font-bold rounded-lg transition-colors duration-300">
+            <Link href="/productos" className="px-8 py-4 bg-[#E91E63] hover:bg-[#c2185b] text-white font-bold rounded-lg transition-colors duration-300">
               🛍️ Ver Productos
             </Link>
             <Link
               href="/contacto"
-              className="px-8 py-4 bg-white text-[#1B6B3D] font-bold rounded-lg hover:bg-gray-100 transition-colors duration-300"
+              className="px-8 py-4 bg-white text-[#C8D800] font-bold rounded-lg hover:bg-gray-100 transition-colors duration-300"
             >
               📞 Contáctanos
             </Link>
@@ -51,15 +51,15 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#1B6B3D] flex items-center justify-center">
-                <Wine className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#C8D800] flex items-center justify-center">
+                <Wine className="w-8 h-8 text-[#2B2E4A]" />
               </div>
               <h3 className="text-lg font-bold mb-2 text-[#1a1a1a]">Productos Premium</h3>
               <p className="text-gray-600">Selección exclusiva de las mejores marcas</p>
             </div>
 
             <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#00A699] flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#14a085] flex items-center justify-center">
                 <Truck className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2 text-[#1a1a1a]">Envío Rápido</h3>
@@ -67,15 +67,15 @@ export default async function HomePage() {
             </div>
 
             <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#1B6B3D] flex items-center justify-center">
-                <Shield className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#C8D800] flex items-center justify-center">
+                <Shield className="w-8 h-8 text-[#2B2E4A]" />
               </div>
               <h3 className="text-lg font-bold mb-2 text-[#1a1a1a]">Compra Segura</h3>
               <p className="text-gray-600">Transacciones 100% seguras</p>
             </div>
 
             <div className="text-center p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-shadow">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#E80B7B] flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#E91E63] flex items-center justify-center">
                 <CreditCard className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-bold mb-2 text-[#1a1a1a]">Pagos Flexibles</h3>
@@ -126,13 +126,13 @@ export default async function HomePage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-r from-[#1B6B3D] to-[#00A699] text-white">
+      <section className="py-20 bg-gradient-to-r from-[#C8D800] to-[#A4CC00] text-[#2B2E4A]">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-4">¿Listo para disfrutar?</h2>
-          <p className="text-xl mb-8 text-gray-100">Explora nuestra colección y encuentra exactamente lo que necesitas</p>
+          <p className="text-xl mb-8 text-[#2B2E4A] opacity-90">Explora nuestra colección y encuentra exactamente lo que necesitas</p>
           <Link
             href="/productos"
-            className="inline-block px-10 py-4 bg-[#E80B7B] hover:bg-[#d4076b] text-white font-bold rounded-lg transition-colors duration-300"
+            className="inline-block px-10 py-4 bg-[#E91E63] hover:bg-[#c2185b] text-white font-bold rounded-lg transition-colors duration-300"
           >
             🛍️ Ver Todos los Productos
           </Link>

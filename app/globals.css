@@ -10,39 +10,39 @@
   --card-foreground: #1a1a1a;
   --popover: #ffffff;
   --popover-foreground: #1a1a1a;
-  --primary: #1B6B3D;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #1a1a1a;
-  --muted: #e8e8e8;
+  --primary: #C8D800;
+  --primary-foreground: #1a1a1a;
+  --secondary: #f9faf0;
+  --secondary-foreground: #2B2E4A;
+  --muted: #f0f1e8;
   --muted-foreground: #666666;
-  --accent: #E80B7B;
+  --accent: #E91E63;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e5e5e5;
-  --input: #f9f9f9;
-  --ring: #1B6B3D;
-  --chart-1: #1B6B3D;
-  --chart-2: #E80B7B;
-  --chart-3: #4B5563;
+  --border: #e8e9df;
+  --input: #fafbf8;
+  --ring: #C8D800;
+  --chart-1: #C8D800;
+  --chart-2: #E91E63;
+  --chart-3: #2B2E4A;
   --chart-4: #00A699;
-  --chart-5: #FF6B6B;
+  --chart-5: #FF6B9D;
   --radius: 8px;
   --sidebar: #ffffff;
   --sidebar-foreground: #1a1a1a;
-  --sidebar-primary: #1B6B3D;
+  --sidebar-primary: #2B2E4A;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #E80B7B;
+  --sidebar-accent: #E91E63;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #1B6B3D;
+  --sidebar-border: #e8e9df;
+  --sidebar-ring: #C8D800;
 
-  --primary-gradient: linear-gradient(135deg, #1B6B3D 0%, #00A699 100%);
-  --success-gradient: linear-gradient(135deg, #1B6B3D 0%, #00A699 100%);
-  --danger-gradient: linear-gradient(135deg, #E80B7B 0%, #FF6B6B 100%);
+  --primary-gradient: linear-gradient(135deg, #C8D800 0%, #A4CC00 100%);
+  --success-gradient: linear-gradient(135deg, #C8D800 0%, #A4CC00 100%);
+  --danger-gradient: linear-gradient(135deg, #E91E63 0%, #FF6B9D 100%);
   --warning-gradient: linear-gradient(135deg, #FFA500 0%, #FF8C42 100%);
-  --info-gradient: linear-gradient(135deg, #1B6B3D 0%, #4B5563 100%);
+  --info-gradient: linear-gradient(135deg, #2B2E4A 0%, #404456 100%);
 }
 
 .dark {
@@ -149,7 +149,7 @@
 
 .navbar-brand {
   @apply font-bold text-3xl tracking-wide;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #C8D800 0%, #A4CC00 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -166,45 +166,45 @@
 
 .nav-link:hover,
 .nav-link.active {
-  @apply text-[#667eea];
-  border-bottom: 2px solid #667eea;
+  @apply text-[#C8D800];
+  border-bottom: 2px solid #C8D800;
 }
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background: linear-gradient(135deg, #C8D800 0%, #A4CC00 50%, #E91E63 100%);
   @apply py-20 relative overflow-hidden;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  box-shadow: 0 10px 30px rgba(200, 216, 0, 0.2);
 }
 
 .hero-section::before {
   content: "";
   @apply absolute top-0 right-0 w-96 h-96 rounded-full;
-  background: rgba(240, 147, 251, 0.1);
+  background: rgba(233, 30, 99, 0.1);
   filter: blur(50px);
 }
 
 .hero-section h1 {
-  @apply text-6xl font-bold text-white relative z-10;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  @apply text-6xl font-bold text-[#2B2E4A] relative z-10;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .hero-section .lead {
-  @apply text-xl text-[#e8d5f5] relative z-10;
+  @apply text-xl text-[#2B2E4A] relative z-10;
 }
 
 /* Buttons */
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  @apply border-none rounded-full px-8 py-3 font-semibold text-white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #C8D800 0%, #A4CC00 100%);
+  @apply border-none rounded-full px-8 py-3 font-semibold text-[#2B2E4A];
+  box-shadow: 0 4px 15px rgba(200, 216, 0, 0.3);
   transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 6px 20px rgba(200, 216, 0, 0.4);
+  background: linear-gradient(135deg, #A4CC00 0%, #C8D800 100%);
 }
 
 .btn-success {
@@ -238,8 +238,8 @@
 
 .product-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
-  @apply border-[#667eea];
+  box-shadow: 0 12px 30px rgba(200, 216, 0, 0.2);
+  @apply border-[#C8D800];
 }
 
 .product-card img {
@@ -277,8 +277,8 @@
 }
 
 .badge.bg-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  @apply text-white;
+  background: linear-gradient(135deg, #C8D800 0%, #A4CC00 100%);
+  @apply text-[#2B2E4A];
 }
 
 .badge.bg-secondary {
@@ -293,7 +293,7 @@
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #C8D800 0%, #A4CC00 100%);
   @apply border-none rounded-t-2xl;
 }
 
@@ -308,7 +308,7 @@
 
 .compra-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 8px 20px rgba(200, 216, 0, 0.15);
 }
 
 /* Card Text */

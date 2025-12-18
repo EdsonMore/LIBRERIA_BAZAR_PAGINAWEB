@@ -43,7 +43,7 @@ export function generarPDFCotizacion(data: CotizacionData): jsPDF {
   let yPosition = 15;
 
   // Color principal de la marca
-  const colorPrimario = [102, 126, 234]; // #667eea
+  const colorPrimario = [200, 216, 0]; // #C8D800 (Falabella lime)
 
   // ENCABEZADO
   doc.setFillColor(colorPrimario[0] as number, colorPrimario[1] as number, colorPrimario[2] as number);
