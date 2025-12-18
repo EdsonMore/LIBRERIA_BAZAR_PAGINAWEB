@@ -97,7 +97,7 @@ async function obtenerMetricas() {
         AVG(v.total) as promedio_venta
       FROM ventas v
       LEFT JOIN usuarios u ON v.propietario_id = u.id
-      GROUP BY v.propietario_id, COALESCE(u.nombres, v.propietario_nombre)
+      GROUP BY v.propietario_id
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)
