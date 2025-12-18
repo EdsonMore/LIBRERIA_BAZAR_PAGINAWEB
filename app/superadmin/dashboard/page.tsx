@@ -90,14 +90,19 @@ async function obtenerMetricas() {
     // Ventas por propietario (agrupados por nombre normalizado)
     const ventasPorPropietario = await query(`
       SELECT 
-        INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
-        COUNT(v.id) as total_ventas,
-        SUM(v.total) as total_ingresos,
-        AVG(v.total) as promedio_venta
-      FROM ventas v
-      LEFT JOIN usuarios u ON v.propietario_id = u.id
-      WHERE COALESCE(u.nombres, v.propietario_nombre) IS NOT NULL
-      GROUP BY LOWER(TRIM(COALESCE(u.nombres, v.propietario_nombre)))
+        propietario_nombre,
+        COUNT(*) as total_ventas,
+        SUM(total) as total_ingresos,
+        AVG(total) as promedio_venta
+      FROM (
+        SELECT 
+          INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
+          v.total
+        FROM ventas v
+        LEFT JOIN usuarios u ON v.propietario_id = u.id
+        WHERE COALESCE(u.nombres, v.propietario_nombre) IS NOT NULL
+      ) AS ventas_normalizadas
+      GROUP BY propietario_nombre
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)
