@@ -375,7 +375,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                         </tr>
                       ) : (
                         resumenPropietario.map((r, idx) => (
-                          <tr key={idx} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => setPropietarioSeleccionado(r.propietario_nombre)}>
+                          <tr key={idx} className="border-b hover:bg-gray-50">
                             <td className="py-3 px-2 md:px-4 font-medium text-gray-900">{r.propietario_nombre}</td>
                             <td className="text-center py-3 px-2 md:px-4">
                               <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">
@@ -409,17 +409,18 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {resumenPropietario.map((propietario) => {
-                      const ventasDelPropietario = metricasDiarias.filter(m => m.propietario_nombre === propietario.propietario_nombre)
+                    {Array.from(new Set(metricasDiarias.map(m => m.propietario_nombre))).map((propietarioNombre) => {
+                      const propietarioData = resumenPropietario.find(r => r.propietario_nombre === propietarioNombre)
+                      const ventasDelPropietario = metricasDiarias.filter(m => m.propietario_nombre === propietarioNombre)
                       
-                      return ventasDelPropietario.length > 0 ? (
-                        <div key={`${propietario.propietario_nombre}`} className="border rounded-lg overflow-hidden">
+                      return ventasDelPropietario.length > 0 && propietarioData ? (
+                        <div key={propietarioNombre} className="border rounded-lg overflow-hidden">
                           <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-3 md:p-4">
                             <h4 className="font-bold text-base md:text-lg text-gray-900">
-                              {propietario.propietario_nombre}
+                              {propietarioNombre}
                             </h4>
                             <p className="text-xs text-gray-600">
-                              Período: {propietario.primer_dia_venta} al {propietario.ultimo_dia_venta}
+                              Período: {propietarioData.primer_dia_venta} al {propietarioData.ultimo_dia_venta}
                             </p>
                           </div>
                           <div className="overflow-x-auto">

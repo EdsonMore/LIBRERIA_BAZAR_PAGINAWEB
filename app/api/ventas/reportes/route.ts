@@ -49,7 +49,7 @@ async function getVentasPorVendedor(searchParams: URLSearchParams) {
 
   let sql = `
     SELECT 
-      u.nombres as vendedor_nombre,
+      INITCAP(TRIM(COALESCE(u.nombres, 'Vendedor'))) as vendedor_nombre,
       COUNT(DISTINCT v.id) as total_ventas,
       SUM(v.total) as total_ingreso,
       AVG(v.total) as promedio_venta
@@ -69,7 +69,7 @@ async function getVentasPorVendedor(searchParams: URLSearchParams) {
     params.push(new Date(fechaFin))
   }
 
-  sql += " GROUP BY u.nombres ORDER BY total_ingreso DESC"
+  sql += " GROUP BY INITCAP(TRIM(COALESCE(u.nombres, 'Vendedor'))) ORDER BY total_ingreso DESC"
 
   return await query(sql, params)
 }

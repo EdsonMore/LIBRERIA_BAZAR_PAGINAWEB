@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
     let sqlMetricasPorPropietario = `
       SELECT 
         DATE(v.fecha_hora) as fecha,
-        v.propietario_id,
-        COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
+        INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
         COUNT(DISTINCT v.id) as ventas_del_dia,
         SUM(v.total) as ingreso_del_dia,
         AVG(v.total) as promedio_venta_dia,
@@ -49,7 +48,7 @@ export async function GET(request: NextRequest) {
     }
 
     sqlMetricasPorPropietario += `
-      GROUP BY DATE(v.fecha_hora), v.propietario_id, u.nombres, v.propietario_nombre
+      GROUP BY DATE(v.fecha_hora), INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre)))
       ORDER BY fecha DESC, propietario_nombre ASC
     `
 
@@ -58,8 +57,7 @@ export async function GET(request: NextRequest) {
     // Resumen consolidado por propietario
     let sqlResumenPropietario = `
       SELECT 
-        v.propietario_id,
-        COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
+        INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
         COUNT(DISTINCT DATE(v.fecha_hora)) as dias_con_ventas,
         COUNT(DISTINCT v.id) as total_ventas,
         SUM(v.total) as total_ingreso,
@@ -94,7 +92,7 @@ export async function GET(request: NextRequest) {
     }
 
     sqlResumenPropietario += `
-      GROUP BY v.propietario_id, u.nombres, v.propietario_nombre
+      GROUP BY INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre)))
       ORDER BY total_ingreso DESC
     `
 
@@ -103,8 +101,7 @@ export async function GET(request: NextRequest) {
     // Productos vendidos por propietario (desglose)
     let sqlProductosPorPropietario = `
       SELECT 
-        v.propietario_id,
-        COALESCE(u.nombres, v.propietario_nombre) as propietario_nombre,
+        INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))) as propietario_nombre,
         p.id as producto_id,
         p.nombre as producto_nombre,
         SUM(dv.cantidad) as cantidad_vendida,
@@ -135,7 +132,7 @@ export async function GET(request: NextRequest) {
     }
 
     sqlProductosPorPropietario += `
-      GROUP BY v.propietario_id, u.nombres, v.propietario_nombre, p.id, p.nombre
+      GROUP BY INITCAP(TRIM(COALESCE(u.nombres, v.propietario_nombre))), p.id, p.nombre
       ORDER BY propietario_nombre ASC, cantidad_vendida DESC
     `
 
