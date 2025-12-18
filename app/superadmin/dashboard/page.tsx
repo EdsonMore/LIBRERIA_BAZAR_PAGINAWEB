@@ -42,7 +42,7 @@ async function obtenerMetricas() {
       ORDER BY dia ASC
     `)
 
-    // Top 5 productos más vendidos (solo ventas pagadas)
+    // Top 5 productos más vendidos
     const topProductos = await query(`
       SELECT 
         p.nombre,
@@ -51,45 +51,40 @@ async function obtenerMetricas() {
       FROM productos p
       JOIN detalles_venta dv ON p.id = dv.producto_id
       JOIN ventas v ON dv.venta_id = v.id
-      WHERE v.estado_pago = 'PAGADO'
       GROUP BY p.id, p.nombre
       ORDER BY cantidad_vendida DESC
       LIMIT 5
     `)
 
-    // Crecimiento mes actual vs mes anterior (solo pagadas)
+    // Crecimiento mes actual vs mes anterior
     const mesActual = await query(`
       SELECT COALESCE(SUM(total), 0) as total
       FROM ventas
-      WHERE estado_pago = 'PAGADO'
-      AND EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
+      WHERE EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
       AND EXTRACT(MONTH FROM fecha_hora) = EXTRACT(MONTH FROM NOW())
     `)
 
     const mesPasado = await query(`
       SELECT COALESCE(SUM(total), 0) as total
       FROM ventas
-      WHERE estado_pago = 'PAGADO'
-      AND EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
+      WHERE EXTRACT(YEAR FROM fecha_hora) = EXTRACT(YEAR FROM NOW())
       AND EXTRACT(MONTH FROM fecha_hora) = EXTRACT(MONTH FROM NOW() - INTERVAL '1 month')
     `)
 
-    // Ticket promedio (últimos 30 días) - solo pagadas
+    // Ticket promedio (últimos 30 días)
     const ticketPromedio = await query(`
       SELECT COALESCE(AVG(total), 0) as promedio
       FROM ventas
-      WHERE estado_pago = 'PAGADO'
-      AND fecha_hora >= NOW() - INTERVAL '30 days'
+      WHERE fecha_hora >= NOW() - INTERVAL '30 days'
     `)
 
     // Productos sin stock
     const productosSinStock = await query("SELECT COUNT(*) as count FROM productos WHERE disponible = false")
 
-    // Ingresos totales históricos (solo pagadas)
+    // Ingresos totales históricos
     const ingresosHistoricos = await query(`
       SELECT COALESCE(SUM(total), 0) as total
       FROM ventas
-      WHERE estado_pago = 'PAGADO'
     `)
 
     // Ventas por propietario (los 10 principales, agrupados correctamente)
@@ -102,8 +97,7 @@ async function obtenerMetricas() {
         AVG(v.total) as promedio_venta
       FROM ventas v
       LEFT JOIN usuarios u ON v.propietario_id = u.id
-      WHERE v.estado_pago = 'PAGADO'
-      GROUP BY v.propietario_id
+      GROUP BY v.propietario_id, COALESCE(u.nombres, v.propietario_nombre)
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)
