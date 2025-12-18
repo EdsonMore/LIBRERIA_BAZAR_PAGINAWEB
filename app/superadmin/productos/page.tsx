@@ -10,6 +10,7 @@ interface Producto {
   stock: number;
   disponible: boolean;
   categoriaNombre: string;
+  categoria_id: number;
   imagen: string;
 }
 
