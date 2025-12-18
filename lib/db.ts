@@ -61,31 +61,13 @@ function convertMysqlToPostgres(sql: string): string {
 
 export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] & { insertId?: number | bigint; rowCount?: number })> {
   const client = await pool.connect()
-  let transactionStarted = false
   try {
     const convertedSql = convertMysqlToPostgres(sql)
     console.log("📍 Ejecutando:", convertedSql.substring(0, 100) + "...")
     
-    // Verificar si es una mutación (UPDATE, DELETE, INSERT)
-    const isMutation = convertedSql.toUpperCase().includes('UPDATE') || 
-                       convertedSql.toUpperCase().includes('DELETE') || 
-                       convertedSql.toUpperCase().includes('INSERT')
-    
-    // Para mutaciones, iniciar transacción explícita
-    if (isMutation) {
-      await client.query('BEGIN')
-      transactionStarted = true
-    }
-    
+    // En lugar de transacciones explícitas, usar modo autocommit (por defecto en pg)
+    // Las transacciones explícitas pueden fallar en serverless de Vercel
     const result = await client.query(convertedSql, params)
-    
-    // Ejecutar COMMIT para mutaciones
-    if (isMutation && transactionStarted) {
-      await client.query('COMMIT')
-      transactionStarted = false
-      // Pequeña pausa para asegurar que el COMMIT se procese completamente en Vercel
-      await new Promise(resolve => setTimeout(resolve, 10))
-    }
     
     const rows = result.rows as T[]
     
@@ -99,15 +81,6 @@ export async function query<T = any>(sql: string, params?: any[]): Promise<(T[] 
     return rows
   } catch (error) {
     console.error("❌ Error en query:", error)
-    // Intentar ROLLBACK si hay error
-    if (transactionStarted) {
-      try {
-        await client.query('ROLLBACK')
-        transactionStarted = false
-      } catch (rollbackError) {
-        console.error("⚠️ Error en ROLLBACK:", rollbackError)
-      }
-    }
     throw error
   } finally {
     try {

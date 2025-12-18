@@ -73,9 +73,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Producto no encontrado o error en actualización", debug: { id: productoId, rowCount: result?.rowCount } }, { status: 400 })
     }
 
-    // Esperar 200ms para garantizar que la transacción se haya persistido completamente en la BD
-    // Especialmente importante en Vercel donde las conexiones pueden reciclarse rápidamente
-    await new Promise(resolve => setTimeout(resolve, 200))
+    console.log("✅ Producto actualizado con éxito. Esperando a que se persista en la BD...")
+    
+    // Esperar 500ms para garantizar que la actualización se haya persistido completamente
+    // Esto es crucial en Vercel donde las conexiones y funciones son efímeras
+    await new Promise(resolve => setTimeout(resolve, 500))
 
     return NextResponse.json({ message: "Producto actualizado exitosamente", id })
   } catch (error) {

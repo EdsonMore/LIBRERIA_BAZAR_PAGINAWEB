@@ -10,6 +10,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "ID de producto inválido" }, { status: 400 })
     }
 
+    // En Vercel, esperar un poco para asegurar que lecturas recientes obtienen datos frescos
+    // después de actualizaciones
+    await new Promise(resolve => setTimeout(resolve, 50))
+
     // Obtener producto básico
     console.log(`🔍 Buscando producto ID: ${id}`)
     const producto = await queryOne<any>(
@@ -92,7 +96,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
         },
       }
     )
