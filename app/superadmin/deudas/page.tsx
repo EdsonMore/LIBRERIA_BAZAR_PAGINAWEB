@@ -263,11 +263,29 @@ export default function DeudasPage() {
   }
 
   // Exportar a WhatsApp
-  const exportarAWhatsApp = () => {
+  const exportarAWhatsApp = async () => {
     try {
-      const deudasAgrupadas = agruparPorCliente(deudas)
+      setLoading(true)
+      
+      // Cargar detalles de todas las deudas para obtener productos
+      const deudasConDetalles = await Promise.all(
+        deudas.map(async (deuda) => {
+          try {
+            const response = await fetch(`/api/deudas/${deuda.venta_id}/detalles`)
+            if (response.ok) {
+              const data = await response.json()
+              return { ...deuda, productos: data.venta.productos }
+            }
+          } catch (error) {
+            console.error(`Error cargando productos para venta ${deuda.venta_id}:`, error)
+          }
+          return deuda
+        })
+      )
+
+      const deudasAgrupadas = agruparPorCliente(deudasConDetalles)
       let mensaje = `*📋 Reporte de Deudas Agrupadas*\n`
-      mensaje += `Generado: ${new Date().toLocaleDateString('es-PE')}\n\n`
+      mensaje += `Generado: ${new Date().toLocaleDateString('es-PE')} ${new Date().toLocaleTimeString('es-PE')}\n\n`
 
       Object.entries(deudasAgrupadas).forEach(([cliente, deudas]) => {
         mensaje += `*👤 ${cliente}*\n`
@@ -282,10 +300,22 @@ export default function DeudasPage() {
           subtotalCliente += total
           subtotalPendiente += pendiente
           
-          mensaje += `📅 ${new Date(deuda.fecha_hora).toLocaleDateString('es-PE')}: S/. ${total.toFixed(2)} - Estado: ${deuda.estado_pago}\n`
+          const fechaHora = new Date(deuda.fecha_hora).toLocaleDateString('es-PE') + ' ' + 
+                           new Date(deuda.fecha_hora).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+          
+          mensaje += `📅 ${fechaHora}\n`
+          
+          // Agregar productos
+          if (deuda.productos && deuda.productos.length > 0) {
+            deuda.productos.forEach((prod: any) => {
+              mensaje += `  • ${prod.producto_nombre} (${prod.cantidad}x S/. ${Number(prod.precio_unitario).toFixed(2)})\n`
+            })
+          }
+          
+          mensaje += `  💰 Total: S/. ${total.toFixed(2)} | Estado: ${deuda.estado_pago}\n\n`
         })
 
-        mensaje += `*Subtotal:* S/. ${subtotalCliente.toFixed(2)}\n`
+        mensaje += `*Subtotal ${cliente}:* S/. ${subtotalCliente.toFixed(2)}\n`
         mensaje += `*Pendiente:* S/. ${subtotalPendiente.toFixed(2)}\n\n`
       })
 
@@ -294,6 +324,8 @@ export default function DeudasPage() {
     } catch (error) {
       console.error('Error al exportar a WhatsApp:', error)
       alert('Error al exportar a WhatsApp')
+    } finally {
+      setLoading(false)
     }
   }
 
