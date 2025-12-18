@@ -103,7 +103,7 @@ async function obtenerMetricas() {
       FROM ventas v
       LEFT JOIN usuarios u ON v.propietario_id = u.id
       WHERE v.estado_pago = 'PAGADO'
-      GROUP BY v.propietario_id, u.nombres, v.propietario_nombre
+      GROUP BY v.propietario_id
       ORDER BY total_ingresos DESC
       LIMIT 10
     `)
