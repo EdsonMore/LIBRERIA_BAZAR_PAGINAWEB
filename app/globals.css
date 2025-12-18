@@ -172,7 +172,7 @@
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(135deg, #C8D800 0%, #A4CC00 50%, #E91E63 100%);
+  background: #dcec06;
   @apply py-20 relative overflow-hidden;
   box-shadow: 0 10px 30px rgba(200, 216, 0, 0.2);
 }
