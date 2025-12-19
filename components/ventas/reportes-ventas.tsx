@@ -175,10 +175,10 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
       const params = new URLSearchParams()
 
       if (filtroFechaInicio) {
-        params.append('fechaInicio', filtroFechaInicio)
+        params.append('fechaInicio', new Date(filtroFechaInicio).toISOString())
       }
       if (filtroFechaFin) {
-        params.append('fechaFin', filtroFechaFin)
+        params.append('fechaFin', new Date(filtroFechaFin).toISOString())
       }
 
       const response = await fetch(`/api/ventas/reportes/metricas-diarias?${params.toString()}`)
