@@ -37,13 +37,15 @@ export async function GET(request: NextRequest) {
     const params: any[] = []
 
     if (fechaInicio) {
-      sqlMetricasPorPropietario += " AND v.fecha_hora >= ?"
-      params.push(new Date(fechaInicio))
+      // Convertir fecha a inicio del día en America/Lima
+      sqlMetricasPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?"
+      params.push(fechaInicio)
     }
 
     if (fechaFin) {
-      sqlMetricasPorPropietario += " AND v.fecha_hora <= ?"
-      params.push(new Date(fechaFin))
+      // Convertir fecha a fin del día en America/Lima
+      sqlMetricasPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?"
+      params.push(fechaFin)
     }
 
     if (propietarioId) {
@@ -81,13 +83,13 @@ export async function GET(request: NextRequest) {
     const paramsResumen: any[] = []
 
     if (fechaInicio) {
-      sqlResumenPropietario += " AND v.fecha_hora >= ?"
-      paramsResumen.push(new Date(fechaInicio))
+      sqlResumenPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?"
+      paramsResumen.push(fechaInicio)
     }
 
     if (fechaFin) {
-      sqlResumenPropietario += " AND v.fecha_hora <= ?"
-      paramsResumen.push(new Date(fechaFin))
+      sqlResumenPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?"
+      paramsResumen.push(fechaFin)
     }
 
     if (propietarioId) {
@@ -121,13 +123,13 @@ export async function GET(request: NextRequest) {
     const paramsProductos: any[] = []
 
     if (fechaInicio) {
-      sqlProductosPorPropietario += " AND v.fecha_hora >= ?"
-      paramsProductos.push(new Date(fechaInicio))
+      sqlProductosPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?"
+      paramsProductos.push(fechaInicio)
     }
 
     if (fechaFin) {
-      sqlProductosPorPropietario += " AND v.fecha_hora <= ?"
-      paramsProductos.push(new Date(fechaFin))
+      sqlProductosPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?"
+      paramsProductos.push(fechaFin)
     }
 
     if (propietarioId) {
