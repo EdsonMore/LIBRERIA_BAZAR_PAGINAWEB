@@ -38,13 +38,13 @@ export async function GET(request: NextRequest) {
 
     if (fechaInicio) {
       // Convertir fecha a inicio del día en America/Lima
-      sqlMetricasPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?"
+      sqlMetricasPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?::date"
       params.push(fechaInicio)
     }
 
     if (fechaFin) {
       // Convertir fecha a fin del día en America/Lima
-      sqlMetricasPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?"
+      sqlMetricasPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?::date"
       params.push(fechaFin)
     }
 
@@ -83,12 +83,12 @@ export async function GET(request: NextRequest) {
     const paramsResumen: any[] = []
 
     if (fechaInicio) {
-      sqlResumenPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?"
+      sqlResumenPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?::date"
       paramsResumen.push(fechaInicio)
     }
 
     if (fechaFin) {
-      sqlResumenPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?"
+      sqlResumenPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?::date"
       paramsResumen.push(fechaFin)
     }
 
@@ -123,12 +123,12 @@ export async function GET(request: NextRequest) {
     const paramsProductos: any[] = []
 
     if (fechaInicio) {
-      sqlProductosPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?"
+      sqlProductosPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') >= ?::date"
       paramsProductos.push(fechaInicio)
     }
 
     if (fechaFin) {
-      sqlProductosPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?"
+      sqlProductosPorPropietario += " AND DATE(v.fecha_hora AT TIME ZONE 'America/Lima') <= ?::date"
       paramsProductos.push(fechaFin)
     }
 
