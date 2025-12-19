@@ -454,7 +454,7 @@ export function ReportesVentas({ fechaInicio, fechaFin }: ReportesProps) {
                                 {ventasAgrupadas.map((metrica, idx) => (
                                   <tr key={idx} className="border-b hover:bg-gray-50">
                                     <td className="px-2 md:px-4 py-2 font-medium">
-                                      {new Date(metrica.fecha).toLocaleDateString('es-PE', {
+                                      {new Date(metrica.fecha.split('T')[0] + 'T00:00:00').toLocaleDateString('es-PE', {
                                         weekday: 'short',
                                         year: 'numeric',
                                         month: 'short',
