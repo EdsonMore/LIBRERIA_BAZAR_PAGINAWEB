@@ -84,7 +84,7 @@ export function FormularioVenta({
     const cargarProductos = async () => {
       try {
         setCargandoProductos(true)
-        const response = await fetch('/api/productos?limit=1000')
+        const response = await fetch('/api/productos?limit=1000&campos=basico')
         const data = await response.json()
         setProductos(data.productos || [])
       } catch (err) {

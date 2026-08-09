@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, User, Menu, X, Bell } from "lucide-react";
 import InstalarAppButton from "@/components/instalar-app-button";
+import { BuscarPorCodigo } from "@/components/ui/buscar-por-codigo";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -243,6 +244,9 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {/* Instalar app (PWA) */}
             <InstalarAppButton />
+
+            {/* Buscar por código de barras (todos los roles y público) */}
+            <BuscarPorCodigo />
 
             {/* Carrito (solo para clientes) */}
             {isCliente() && (

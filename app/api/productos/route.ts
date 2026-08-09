@@ -6,12 +6,18 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const categoriaId = searchParams.get("categoria")
     const busqueda = searchParams.get("q")
+    const campos = searchParams.get("campos") // "basico" = solo id, nombre, precio, stock
     const page = Number.parseInt(searchParams.get("page") || "1")
     const limit = Number.parseInt(searchParams.get("limit") || "12")
     const offset = (page - 1) * limit
 
+    const columnas =
+      campos === "basico"
+        ? "p.id, p.nombre, p.precio, p.stock, p.disponible::boolean as disponible, p.codigo_barras as codigo_barras"
+        : "p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.disponible::boolean as disponible, p.codigo_barras as codigo_barras"
+
     let sql = `
-      SELECT p.*, c.nombre as categoria_nombre, c.id as categoria_id
+      SELECT ${columnas}, c.nombre as categoria_nombre, c.id as categoria_id
       FROM productos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
       WHERE p.disponible = true
@@ -24,8 +30,8 @@ export async function GET(request: Request) {
     }
 
     if (busqueda) {
-      sql += " AND (LOWER(p.nombre) LIKE LOWER(?) OR LOWER(p.descripcion) LIKE LOWER(?))"
-      params.push(`%${busqueda}%`, `%${busqueda}%`)
+      sql += " AND (p.nombre ILIKE ? OR p.descripcion ILIKE ? OR p.codigo_barras ILIKE ?)"
+      params.push(`%${busqueda}%`, `%${busqueda}%`, `%${busqueda}%`)
     }
 
     sql += " ORDER BY p.nombre LIMIT ? OFFSET ?"
@@ -33,7 +39,7 @@ export async function GET(request: Request) {
 
     const productos = await query<any[]>(sql, params)
 
-    // Obtener total para paginaciÃ³n
+    // Obtener total para paginación
     let countSql = "SELECT COUNT(*) as total FROM productos p WHERE p.disponible = true"
     const countParams: any[] = []
 
@@ -43,8 +49,8 @@ export async function GET(request: Request) {
     }
 
     if (busqueda) {
-      countSql += " AND (LOWER(p.nombre) LIKE LOWER(?) OR LOWER(p.descripcion) LIKE LOWER(?))"
-      countParams.push(`%${busqueda}%`, `%${busqueda}%`)
+      countSql += " AND (p.nombre ILIKE ? OR p.descripcion ILIKE ? OR p.codigo_barras ILIKE ?)"
+      countParams.push(`%${busqueda}%`, `%${busqueda}%`, `%${busqueda}%`)
     }
 
     const [countResult] = await query<any[]>(countSql, countParams)
@@ -64,4 +70,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Error al obtener productos" }, { status: 500 })
   }
 }
-
