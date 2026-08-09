@@ -376,6 +376,14 @@ export default function EditarProductoPage() {
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     try {
+      // Validar código de barras
+      const codigoBarras = (producto.codigoBarras ?? "").trim();
+      if (codigoBarras.length > 60) {
+        alert("El código de barras no puede superar los 60 caracteres");
+        setLoading(false);
+        return;
+      }
+
       // Enviar SOLO datos del producto, SIN la imagen
       const datosActualizar = {
         nombre: producto.nombre,
@@ -383,7 +391,7 @@ export default function EditarProductoPage() {
         precio: Number(producto.precio),
         stock: Number(producto.stock),
         categoria_id: producto.categoria_id,
-        codigo_barras: producto.codigoBarras ?? "",
+        codigo_barras: codigoBarras || null,
         disponible: producto.disponible,
       };
 

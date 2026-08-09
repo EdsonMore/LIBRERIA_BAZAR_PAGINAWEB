@@ -48,6 +48,13 @@ export default function CrearProductoPage() {
     setLoading(true)
 
     try {
+      const codigo = (formData.codigo_barras || "").trim()
+      if (codigo.length > 60) {
+        alert("El código de barras no puede superar los 60 caracteres")
+        setLoading(false)
+        return
+      }
+
       const res = await fetch("/api/admin/productos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,6 +63,7 @@ export default function CrearProductoPage() {
           precio: Number.parseFloat(formData.precio),
           stock: Number.parseInt(formData.stock),
           categoria_id: Number.parseInt(formData.categoria_id),
+          codigo_barras: codigo || null,
         }),
       })
 
