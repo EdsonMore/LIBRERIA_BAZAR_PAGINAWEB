@@ -6,6 +6,7 @@ import { ScanLine } from "lucide-react"
 import { EscanerCodigo } from "@/components/ui/escaner-codigo"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { normalizarCodigoBarras } from "@/lib/codigo-barras"
 
 interface BuscarPorCodigoProps {
   /** Si es true, se muestra como botón (navbar/tienda). Si es false, solo el diálogo interno. */
@@ -13,33 +14,41 @@ interface BuscarPorCodigoProps {
   onOpen?: () => void
 }
 
+interface ResultadoBusqueda {
+  tipo: "encontrado" | "no-encontrado" | "error"
+  codigo: string
+}
+
 export function BuscarPorCodigo({ asButton = true }: BuscarPorCodigoProps) {
   const router = useRouter()
   const [abierto, setAbierto] = useState(false)
   const [buscando, setBuscando] = useState(false)
-  const [noEncontrado, setNoEncontrado] = useState<string | null>(null)
+  const [resultado, setResultado] = useState<ResultadoBusqueda | null>(null)
 
   const manejarCodigo = async (codigo: string) => {
-    const limpio = codigo.trim()
+    const limpio = normalizarCodigoBarras(codigo)
     if (!limpio) return
 
     setBuscando(true)
-    setNoEncontrado(null)
+    setResultado(null)
     try {
       const res = await fetch(`/api/productos/codigo/${encodeURIComponent(limpio)}`, {
         headers: { "Cache-Control": "no-cache" },
       })
       const data = await res.json()
 
-      if (data?.producto?.id) {
+      if (res.ok && data?.producto?.id) {
         // Cerrar y navegar al detalle del producto
         setAbierto(false)
         router.push(`/producto/${data.producto.id}`)
+      } else if (res.ok) {
+        setResultado({ tipo: "no-encontrado", codigo: limpio })
       } else {
-        setNoEncontrado(limpio)
+        // Error real del servidor (BD caída, columna faltante, etc.) → NO es "no encontrado"
+        setResultado({ tipo: "error", codigo: limpio })
       }
     } catch (err) {
-      setNoEncontrado(limpio)
+      setResultado({ tipo: "error", codigo: limpio })
     } finally {
       setBuscando(false)
     }
@@ -47,7 +56,7 @@ export function BuscarPorCodigo({ asButton = true }: BuscarPorCodigoProps) {
 
   const cerrar = () => {
     setAbierto(false)
-    setNoEncontrado(null)
+    setResultado(null)
   }
 
   return (
@@ -55,7 +64,7 @@ export function BuscarPorCodigo({ asButton = true }: BuscarPorCodigoProps) {
       {asButton && (
         <button
           onClick={() => {
-            setNoEncontrado(null)
+            setResultado(null)
             setAbierto(true)
           }}
           title="Buscar por código de barras"
@@ -74,22 +83,32 @@ export function BuscarPorCodigo({ asButton = true }: BuscarPorCodigoProps) {
         titulo="Buscar producto por código de barras"
       />
 
-      {/* Diálogo de "no encontrado" */}
-      <Dialog open={!!noEncontrado} onOpenChange={(o) => !o && setNoEncontrado(null)}>
+      {/* Diálogo de resultado */}
+      <Dialog open={!!resultado} onOpenChange={(o) => !o && setResultado(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Producto no encontrado</DialogTitle>
-            <DialogDescription>
-              No se encontró ningún producto con el código{" "}
-              <span className="font-semibold">{noEncontrado || "---"}</span>.
-            </DialogDescription>
+            <DialogTitle>
+              {resultado?.tipo === "error" ? "Error al buscar" : "Producto no encontrado"}
+            </DialogTitle>
+            {resultado?.tipo === "error" ? (
+              <DialogDescription>
+                Hubo un problema de conexión con la base de datos al buscar el código{" "}
+                <span className="font-semibold">{resultado.codigo}</span>. Vuelve a intentarlo en unos
+                segundos.
+              </DialogDescription>
+            ) : (
+              <DialogDescription>
+                No se encontró ningún producto con el código{" "}
+                <span className="font-semibold">{resultado?.codigo || "---"}</span>.
+              </DialogDescription>
+            )}
           </DialogHeader>
           <div className="flex flex-col gap-3">
             {buscando && <p className="text-sm text-gray-500">Buscando...</p>}
-            <Button type="button" onClick={() => { setNoEncontrado(null); setAbierto(true) }}>
+            <Button type="button" onClick={() => { setResultado(null); setAbierto(true) }}>
               <ScanLine className="w-4 h-4 mr-1" /> Escanear otro
             </Button>
-            <Button type="button" variant="ghost" onClick={() => setNoEncontrado(null)}>
+            <Button type="button" variant="ghost" onClick={() => setResultado(null)}>
               Cerrar
             </Button>
           </div>

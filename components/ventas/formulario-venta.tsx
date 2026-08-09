@@ -200,7 +200,7 @@ export function FormularioVenta({
     try {
       const response = await fetch(`/api/productos/codigo/${encodeURIComponent(codigoLimpio)}`)
       if (!response.ok) {
-        setError('Error al buscar el producto por código')
+        setError('Error al buscar el producto por código. Inténtalo de nuevo.')
         return
       }
       const data = await response.json()

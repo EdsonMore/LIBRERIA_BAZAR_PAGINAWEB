@@ -69,6 +69,10 @@ export function CrearProductoRapido({
       setError("El código de barras es obligatorio")
       return
     }
+    if (codigo.trim().length > 60) {
+      setError("El código de barras no puede superar los 60 caracteres")
+      return
+    }
 
     try {
       setCargando(true)

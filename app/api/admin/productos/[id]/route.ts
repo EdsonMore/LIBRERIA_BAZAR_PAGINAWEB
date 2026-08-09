@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { getUserFromSession } from "@/lib/auth"
+import { normalizarCodigoBarras, errorCodigoBarras } from "@/lib/codigo-barras"
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -58,11 +59,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Convertir disponible a booleano explícitamente para PostgreSQL
     const disponibleBool = disponible === true || disponible === 1 || disponible === "true" || disponible === "1"
-    const codigoLimpio = (codigo_barras || "").toString().trim() || null
+    const codigoLimpio = normalizarCodigoBarras(codigo_barras) || null
     const productoId = Number(id)
 
     if (codigoLimpio) {
-      const existe = await query(`SELECT id FROM productos WHERE codigo_barras = $1 AND id != $2 LIMIT 1`, [codigoLimpio, productoId])
+      const errorCodigo = errorCodigoBarras(codigoLimpio)
+      if (errorCodigo) {
+        return NextResponse.json({ error: errorCodigo }, { status: 400 })
+      }
+      const existe = await query(
+        `SELECT id FROM productos WHERE BTRIM(COALESCE(codigo_barras, '')) = BTRIM($1) AND id != $2 LIMIT 1`,
+        [codigoLimpio, productoId],
+      )
       if (existe.length > 0) {
         return NextResponse.json({ error: `El código de barras ${codigoLimpio} ya está asignado a otro producto` }, { status: 409 })
       }

@@ -105,6 +105,13 @@ export default function EditarProductoPage() {
     // Redondear precio a 2 decimales
     const precioDosDecimales = Math.round(precioNum * 100) / 100
 
+    // Validar código de barras
+    const codigoBarras = (producto.codigoBarras || "").trim()
+    if (codigoBarras.length > 60) {
+      alert("El código de barras no puede superar los 60 caracteres")
+      return
+    }
+
     setLoading(true)
     try {
       // IMPORTANTE: Enviar SOLO los 7 campos necesarios, nada más
@@ -116,7 +123,7 @@ export default function EditarProductoPage() {
         stock: stockNum,
         categoria_id: Number(producto.categoria_id),
         imagen: producto.imagen || "",
-        codigo_barras: producto.codigoBarras || "",
+        codigo_barras: codigoBarras || null,
         disponible: Boolean(producto.disponible),
       }
 

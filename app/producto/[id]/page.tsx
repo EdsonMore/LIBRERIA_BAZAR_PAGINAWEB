@@ -10,7 +10,8 @@ async function getProducto(id: string) {
 
     // Obtener producto básico
     const producto = await queryOne<any>(
-      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id
+      `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen, p.categoria_id,
+              p.codigo_barras as "codigoBarras"
        FROM productos p
        WHERE p.id = $1`,
       [id],
@@ -66,6 +67,7 @@ async function getProducto(id: string) {
       stock: producto.stock,
       imagen: producto.imagen,
       categoria_id: producto.categoria_id,
+      codigoBarras: producto.codigoBarras || "",
       categoria_nombre: categoria?.nombre || "Sin categoría",
       relacionados: relacionados || [],
       resenas: resenas || [],

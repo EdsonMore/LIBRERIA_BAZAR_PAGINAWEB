@@ -294,6 +294,15 @@ export default function ProductoDetalle({ producto, relacionados, resenas: resen
 
             <p className="text-gray-600 text-lg mb-6">{producto.descripcion}</p>
 
+            {/* Código de barras (solo si existe) */}
+            {producto.codigoBarras && (
+              <div className="mb-6 flex items-center gap-2">
+                <span className="badge bg-gray-100 text-gray-700">
+                  Código: <span className="font-mono font-semibold tracking-widest">{producto.codigoBarras}</span>
+                </span>
+              </div>
+            )}
+
             {/* Precio */}
             <div className="mb-6">
               <span className="text-5xl font-bold text-[#E91E63]">S/ {Number(producto.precio).toFixed(2)}</span>

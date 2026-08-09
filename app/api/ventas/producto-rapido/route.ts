@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { getUsuarioFromSession } from "@/lib/auth"
+import { normalizarCodigoBarras, errorCodigoBarras } from "@/lib/codigo-barras"
 
 /**
  * POST /api/ventas/producto-rapido
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     const nombre = (body.nombre || "").toString().trim()
     const precio = parseFloat(body.precio)
     const stock = parseInt(body.stock ?? "0", 10)
-    const codigoBarras = (body.codigo_barras || "").toString().trim()
+    const codigoBarras = normalizarCodigoBarras(body.codigo_barras)
     const descripcion = (body.descripcion || "").toString().trim() || null
 
     if (!nombre) {
@@ -40,9 +41,16 @@ export async function POST(request: NextRequest) {
     if (!codigoBarras) {
       return NextResponse.json({ error: "El código de barras es requerido" }, { status: 400 })
     }
+    const errorCodigo = errorCodigoBarras(codigoBarras)
+    if (errorCodigo) {
+      return NextResponse.json({ error: errorCodigo }, { status: 400 })
+    }
 
-    // Verificar que el código no exista
-    const existente = await query(`SELECT id FROM productos WHERE codigo_barras = $1 LIMIT 1`, [codigoBarras])
+    // Verificar que el código no exista (comparación normalizada y tolerante a espacios)
+    const existente = await query(
+      `SELECT id FROM productos WHERE BTRIM(COALESCE(codigo_barras, '')) = BTRIM($1) LIMIT 1`,
+      [codigoBarras],
+    )
     if (existente.length > 0) {
       return NextResponse.json(
         { error: `El código de barras ${codigoBarras} ya está asignado a otro producto` },

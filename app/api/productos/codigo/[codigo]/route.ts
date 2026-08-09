@@ -1,15 +1,19 @@
 import { NextResponse } from "next/server"
 import { queryOne } from "@/lib/db"
+import { normalizarCodigoBarras } from "@/lib/codigo-barras"
 
 export async function GET(request: Request, { params }: { params: Promise<{ codigo: string }> }) {
   try {
     const { codigo } = await params
-    const codigoLimpio = (codigo || "").trim()
+    const codigoLimpio = normalizarCodigoBarras(codigo)
 
     if (!codigoLimpio) {
       return NextResponse.json({ error: "Código de barras requerido" }, { status: 400 })
     }
 
+    // Búsqueda sin filtrar por "disponible": un producto desmarcado sigue siendo
+    // identificable por su código (la tienda muestra "Agotado" y ventas lo agrega igual).
+    // BTRIM tolera espacios residuales al guardar el código.
     const producto = await queryOne<any>(
       `SELECT p.id, p.nombre, p.descripcion, p.precio, p.stock, p.imagen,
               p.categoria_id, p.disponible::boolean as disponible,
@@ -17,7 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ codi
               c.nombre as categoria_nombre
        FROM productos p
        LEFT JOIN categorias c ON p.categoria_id = c.id
-       WHERE p.codigo_barras = $1 AND p.disponible = true
+       WHERE BTRIM(COALESCE(p.codigo_barras, '')) = BTRIM($1)
        LIMIT 1`,
       [codigoLimpio],
     )

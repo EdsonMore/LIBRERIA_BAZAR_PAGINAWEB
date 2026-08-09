@@ -283,13 +283,20 @@ export default function CrearProductoPage() {
 
     try {
       // Enviar SOLO datos del producto, SIN la imagen
+      const codigo = (formData.codigo_barras || "").trim()
+      if (codigo.length > 60) {
+        alert("El código de barras no puede superar los 60 caracteres")
+        setLoading(false)
+        return
+      }
+
       const datosCrear = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
         precio: Number.parseFloat(formData.precio),
         stock: Number.parseInt(formData.stock),
         categoria_id: Number.parseInt(formData.categoria_id),
-        codigo_barras: formData.codigo_barras,
+        codigo_barras: codigo || null,
         disponible: formData.disponible,
       }
 

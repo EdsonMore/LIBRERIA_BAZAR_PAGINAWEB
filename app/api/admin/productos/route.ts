@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 import { getUsuarioFromSession } from "@/lib/auth"
+import { normalizarCodigoBarras, errorCodigoBarras } from "@/lib/codigo-barras"
 
 export async function GET(req: NextRequest) {
   try {
@@ -37,10 +38,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Datos incompletos" }, { status: 400 })
     }
 
-    const codigoLimpio = (codigo_barras || "").toString().trim() || null
+    const codigoLimpio = normalizarCodigoBarras(codigo_barras) || null
 
     if (codigoLimpio) {
-      const existe = await query(`SELECT id FROM productos WHERE codigo_barras = $1 LIMIT 1`, [codigoLimpio])
+      const errorCodigo = errorCodigoBarras(codigoLimpio)
+      if (errorCodigo) {
+        return NextResponse.json({ error: errorCodigo }, { status: 400 })
+      }
+      const existe = await query(
+        `SELECT id FROM productos WHERE BTRIM(COALESCE(codigo_barras, '')) = BTRIM($1) LIMIT 1`,
+        [codigoLimpio],
+      )
       if (existe.length > 0) {
         return NextResponse.json({ error: `El código de barras ${codigoLimpio} ya está asignado a otro producto` }, { status: 409 })
       }
