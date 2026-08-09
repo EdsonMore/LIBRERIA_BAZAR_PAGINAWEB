@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, User, Menu, X, Bell } from "lucide-react";
+import InstalarAppButton from "@/components/instalar-app-button";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -240,6 +241,9 @@ export default function Navbar() {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
+            {/* Instalar app (PWA) */}
+            <InstalarAppButton />
+
             {/* Carrito (solo para clientes) */}
             {isCliente() && (
               <Link

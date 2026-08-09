@@ -59,6 +59,7 @@ export interface Producto {
   disponible: boolean
   imagen?: string
   descripcion?: string
+  codigoBarras?: string
 }
 
 export interface ItemCarrito {

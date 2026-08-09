@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Camera, Upload, X, Link, RotateCw } from "lucide-react";
 import { useImageCompression } from "@/hooks/use-image-compression";
+import { EscanerCodigo } from "@/components/ui/escaner-codigo";
 
 interface Categoria {
   id: number;
@@ -20,6 +21,7 @@ interface Producto {
   stock: number;
   categoria_id: number;
   imagen: string;
+  codigoBarras: string;
   disponible: boolean;
 }
 
@@ -39,6 +41,7 @@ export default function EditarProductoPage() {
     "user"
   );
   const [imagenPreview, setImagenPreview] = useState<string>("");
+  const [escanerAbierto, setEscanerAbierto] = useState(false);
   const [producto, setProducto] = useState<Producto>({
     id: 0,
     nombre: "",
@@ -47,6 +50,7 @@ export default function EditarProductoPage() {
     stock: 0,
     categoria_id: 0,
     imagen: "",
+    codigoBarras: "",
     disponible: true,
   });
   const [productId, setProductId] = useState<string | null>(null);
@@ -114,6 +118,7 @@ export default function EditarProductoPage() {
           stock: Number(data.stock ?? 0),
           categoria_id: Number(data.categoria_id ?? 0),
           imagen: data.imagen ?? "",
+          codigoBarras: data.codigoBarras ?? "",
           disponible:
             data.disponible === 1 ||
             data.disponible === true ||
@@ -378,6 +383,7 @@ export default function EditarProductoPage() {
         precio: Number(producto.precio),
         stock: Number(producto.stock),
         categoria_id: producto.categoria_id,
+        codigo_barras: producto.codigoBarras ?? "",
         disponible: producto.disponible,
       };
 
@@ -586,6 +592,30 @@ export default function EditarProductoPage() {
           </label>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Código de Barras
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={producto?.codigoBarras ?? ""}
+              onChange={(e) =>
+                setProducto({ ...producto, codigoBarras: e.target.value })
+              }
+              placeholder="Ej: 7754001234567"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={() => setEscanerAbierto(true)}
+              className="px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700"
+            >
+              📷 Escanear
+            </button>
+          </div>
+        </div>
+
         <canvas ref={canvasRef} width={640} height={480} className="hidden" />
 
         {/* SECCIÓN 1: GUARDAR DATOS DEL PRODUCTO */}
@@ -774,6 +804,15 @@ export default function EditarProductoPage() {
           </button>
         </div>
       </div>
+
+      <EscanerCodigo
+        open={escanerAbierto}
+        onOpenChange={setEscanerAbierto}
+        onCodigoLeido={(codigo) =>
+          setProducto((prev) => ({ ...prev, codigoBarras: codigo }))
+        }
+        titulo="Escanear código de barras"
+      />
     </div>
   );
 }

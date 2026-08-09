@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Camera, Upload, X, Link, RotateCw } from "lucide-react"
 import { useImageCompression } from "@/hooks/use-image-compression"
+import { EscanerCodigo } from "@/components/ui/escaner-codigo"
 
 interface Categoria {
   id: number
@@ -25,6 +26,7 @@ export default function CrearProductoPage() {
   const [showCamera, setShowCamera] = useState(false)
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("user") // "user" = frontal, "environment" = trasera
   const [imagenPreview, setImagenPreview] = useState<string>("")
+  const [escanerAbierto, setEscanerAbierto] = useState(false)
   const [formData, setFormData] = useState({
     nombre: "",
     descripcion: "",
@@ -32,6 +34,7 @@ export default function CrearProductoPage() {
     stock: "",
     categoria_id: "",
     imagen: "",
+    codigo_barras: "",
     disponible: true,
   })
 
@@ -286,6 +289,7 @@ export default function CrearProductoPage() {
         precio: Number.parseFloat(formData.precio),
         stock: Number.parseInt(formData.stock),
         categoria_id: Number.parseInt(formData.categoria_id),
+        codigo_barras: formData.codigo_barras,
         disponible: formData.disponible,
       }
 
@@ -512,6 +516,27 @@ export default function CrearProductoPage() {
 
         <canvas ref={canvasRef} width={640} height={480} className="hidden" />
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Código de Barras (Opcional)</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={formData.codigo_barras}
+              onChange={(e) => setFormData({ ...formData, codigo_barras: e.target.value })}
+              placeholder="Ej: 7754001234567"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={() => setEscanerAbierto(true)}
+              className="px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700"
+            >
+              📷 Escanear
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-gray-500">Puedes escribir el código con un lector USB o escanearlo con la cámara.</p>
+        </div>
+
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -542,6 +567,15 @@ export default function CrearProductoPage() {
           </button>
         </div>
       </form>
+
+      <EscanerCodigo
+        open={escanerAbierto}
+        onOpenChange={setEscanerAbierto}
+        onCodigoLeido={(codigo) => {
+          setFormData((prev) => ({ ...prev, codigo_barras: codigo }))
+        }}
+        titulo="Escanear código de barras"
+      />
     </div>
   )
 }
