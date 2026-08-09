@@ -27,17 +27,43 @@ export function EscanerCodigo({
   const [error, setError] = useState<string | null>(null)
   const [manual, setManual] = useState(false)
   const [codigoManual, setCodigoManual] = useState("")
-  const [buffer, setBuffer] = useState("")
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const bufferTimer = useRef<NodeJS.Timeout | null>(null)
   const lastScan = useRef(0)
+  const buffer = useRef("")
 
-  // Capturar lecturas de escáner físico USB (escriben dígitos como teclado rápido)
+  const limpiarBuffer = () => {
+    buffer.current = ""
+    if (bufferTimer.current) clearTimeout(bufferTimer.current)
+  }
+
+  // Detener cámara siempre que el componente se desmonte (evita cámara encendida en segundo plano)
   useEffect(() => {
-    if (!open || !manual) return
+    return () => {
+      limpiarBuffer()
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        try {
+          scannerRef.current.stop()
+          scannerRef.current.clear?.()
+        } catch (err) {
+          // ignorar
+        }
+      }
+    }
+  }, [])
+
+  // Capturar lecturas de escáner físico USB (escriben dígitos como teclado rápido).
+  // Funciona en modo cámara sin necesidad de cambiar a entrada manual.
+  useEffect(() => {
+    if (!open || manual) return
     const handle = (e: KeyboardEvent) => {
+      // Evitar capturar teclas cuando hay un input enfocado (escribiendo manualmente)
+      const activo = document.activeElement as HTMLElement | null
+      if (activo && (activo.tagName === "INPUT" || activo.tagName === "TEXTAREA" || activo.tagName === "SELECT")) {
+        return
+      }
       if (e.key === "Enter") {
-        const codigo = buffer.trim()
+        const codigo = buffer.current.trim()
         if (codigo) {
           limpiarBuffer()
           onCodigoLeido(codigo)
@@ -45,55 +71,68 @@ export function EscanerCodigo({
         return
       }
       if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        setBuffer((prev) => prev + e.key)
+        buffer.current += e.key
         if (bufferTimer.current) clearTimeout(bufferTimer.current)
-        bufferTimer.current = setTimeout(() => limpiarBuffer(), 100)
+        bufferTimer.current = setTimeout(() => limpiarBuffer(), 150)
       }
     }
     window.addEventListener("keydown", handle)
     return () => {
       window.removeEventListener("keydown", handle)
-      if (bufferTimer.current) clearTimeout(bufferTimer.current)
+      limpiarBuffer()
     }
-  }, [open, manual, buffer])
-
-  const limpiarBuffer = () => {
-    setBuffer("")
-    if (bufferTimer.current) clearTimeout(bufferTimer.current)
-  }
+  }, [open, manual])
 
   const iniciarCamara = async () => {
     setError(null)
-    if (!scannerRef.current) {
-      scannerRef.current = new Html5Qrcode(ELEMENT_ID, {
-        formatsToSupport: [
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E,
-          Html5QrcodeSupportedFormats.CODE_128,
-          Html5QrcodeSupportedFormats.CODE_39,
-          Html5QrcodeSupportedFormats.CODE_93,
-          Html5QrcodeSupportedFormats.ITF,
-        ],
-      })
-    }
-
     try {
-      await scannerRef.current.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 260, height: 120 } },
-        (text) => {
-          // Evitar lecturas duplicadas espurias.
-          const now = Date.now()
-          if (now - lastScan.current < 1500) return
-          lastScan.current = now
-          setScanning(false)
-          void detenerCamara()
-          onCodigoLeido(text.trim())
-        },
-        () => {},
-      )
+      if (!scannerRef.current) {
+        scannerRef.current = new Html5Qrcode(ELEMENT_ID, {
+          verbose: false,
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,
+            Html5QrcodeSupportedFormats.ITF,
+          ],
+        })
+      }
+
+      // Probar cámara trasera (environment); si falla, usar la frontal por defecto.
+      const intentarConFacing = async (facingMode: string) => {
+        await scannerRef.current!.start(
+          { facingMode },
+          {
+            fps: 10,
+            qrbox: (viewportWidth: number, viewportHeight: number) => {
+              const ancho = Math.min(280, Math.floor(viewportWidth * 0.85))
+              const alto = Math.min(120, Math.floor(ancho * 0.42))
+              return { width: ancho, height: alto }
+            },
+          },
+          (text) => {
+            // Evitar lecturas duplicadas espurias.
+            const now = Date.now()
+            if (now - lastScan.current < 1500) return
+            lastScan.current = now
+            setScanning(false)
+            void detenerCamara()
+            onCodigoLeido(text.trim())
+          },
+          () => {},
+        )
+      }
+
+      try {
+        await intentarConFacing("environment")
+      } catch (err) {
+        // Fallback a cámara frontal
+        await intentarConFacing("user")
+      }
       setScanning(true)
     } catch (err) {
       setError("No se pudo acceder a la cámara. Usa la entrada manual o un lector físico.")
@@ -145,7 +184,7 @@ export function EscanerCodigo({
         <div className="space-y-4">
           {!manual ? (
             <>
-              <div className="flex justify-between">
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => { setManual(true); void detenerCamara() }}>
                   <Keyboard className="w-4 h-4 mr-1" /> Ingresar código
                 </Button>
@@ -156,11 +195,16 @@ export function EscanerCodigo({
 
               <div
                 id={ELEMENT_ID}
-                className="w-full overflow-hidden rounded-lg border bg-black"
-                style={{ minHeight: 200 }}
+                className="w-full overflow-hidden rounded-lg border bg-black aspect-video"
+                style={{ minHeight: 180 }}
               />
 
               {error && <p className="text-sm text-red-500">{error}</p>}
+              {!error && !scanning && (
+                <p className="text-xs text-gray-500 text-center">
+                  También puedes usar un lector de código de barras USB directamente.
+                </p>
+              )}
             </>
           ) : (
             <div className="space-y-3">

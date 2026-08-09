@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import Navbar from "@/components/layout/navbar"
 import Footer from "@/components/layout/footer"
+import { BuscarPorCodigo } from "@/components/ui/buscar-por-codigo"
 import { Search, Filter, ShoppingCart } from "lucide-react"
 
 export default function ProductosPage() {
@@ -76,7 +77,7 @@ export default function ProductosPage() {
 
         {/* Filtros */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Búsqueda */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -87,6 +88,11 @@ export default function ProductosPage() {
                 value={filtros.busqueda}
                 onChange={(e) => setFiltros({ ...filtros, busqueda: e.target.value, page: 1 })}
               />
+            </div>
+
+            {/* Búsqueda por código de barras */}
+            <div className="flex items-center justify-center">
+              <BuscarPorCodigo />
             </div>
 
             {/* Categoría */}
