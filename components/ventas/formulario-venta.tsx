@@ -7,6 +7,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScanLine } from 'lucide-react'
+import { EscanerCodigo } from '@/components/ui/escaner-codigo'
+import { CrearProductoRapido } from '@/components/ventas/crear-producto-rapido'
 import { MetodoPago, Producto } from '@/lib/types'
 import { useState as useStateCallback } from 'react'
 
@@ -69,6 +72,12 @@ export function FormularioVenta({
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [exito, setExito] = useState<string | null>(null)
+
+  // Estados del escáner de código de barras
+  const [escanerAbierto, setEscanerAbierto] = useState(false)
+  const [crearAbierto, setCrearAbierto] = useState(false)
+  const [codigoPendiente, setCodigoPendiente] = useState('')
+  const [buscandoCodigo, setBuscandoCodigo] = useState(false)
 
   // Cargar productos
   useEffect(() => {
@@ -155,6 +164,68 @@ export function FormularioVenta({
     setCantidadManual(1)
     setPrecioManual(0)
     setError(null)
+  }
+
+  // Agregar producto directo (usado por el escáner) sin tocar el estado de selección
+  const agregarProductoDirecto = (producto: Producto, cantidad: number = 1) => {
+    const existente = detalles.find((d) => d.productoId === producto.id)
+    if (existente) {
+      setDetalles(
+        detalles.map((d) =>
+          d.id === existente.id ? { ...d, cantidad: d.cantidad + cantidad } : d,
+        ),
+      )
+    } else {
+      setDetalles([
+        ...detalles,
+        {
+          id: Math.random().toString(),
+          productoId: producto.id,
+          nombreProducto: producto.nombre,
+          cantidad,
+          precioUnitario: producto.precio,
+        },
+      ])
+    }
+    setError(null)
+  }
+
+  // Manejar código de barras escaneado o ingresado manualmente
+  const manejarCodigoLeido = async (codigo: string) => {
+    const codigoLimpio = codigo.trim()
+    if (!codigoLimpio) return
+
+    setBuscandoCodigo(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/productos/codigo/${encodeURIComponent(codigoLimpio)}`)
+      if (!response.ok) {
+        setError('Error al buscar el producto por código')
+        return
+      }
+      const data = await response.json()
+
+      if (data?.producto) {
+        agregarProductoDirecto(data.producto)
+        setExito(`✅ "${data.producto.nombre}" agregado a la venta`)
+        setTimeout(() => setExito(null), 3000)
+      } else {
+        setCodigoPendiente(codigoLimpio)
+        setCrearAbierto(true)
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error al buscar el producto')
+    } finally {
+      setBuscandoCodigo(false)
+      setEscanerAbierto(false)
+    }
+  }
+
+  // Cuando se crea un producto rápido desde el escáner
+  const manejarProductoCreado = (producto: { id: number; nombre: string; precio: number }) => {
+    agregarProductoDirecto({ ...producto, stock: 0, disponible: true } as Producto)
+    setExito(`✅ "${producto.nombre}" creado y agregado a la venta`)
+    setTimeout(() => setExito(null), 4000)
   }
 
   // Enviar producto a lista de compra
@@ -440,6 +511,25 @@ export function FormularioVenta({
 
               {/* Tab: Producto Existente */}
               <TabsContent value="existing" className="space-y-4 mt-4">
+                {/* Escáner de código de barras */}
+                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center sm:justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="text-sm text-purple-900">
+                    <p className="font-semibold">📷 Escanear producto</p>
+                    <p className="text-xs text-purple-800">
+                      Escanea el código de barras para agregarlo rápido a la venta
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => setEscanerAbierto(true)}
+                    disabled={buscandoCodigo}
+                    className="bg-purple-600 hover:bg-purple-700 text-white text-sm h-9"
+                  >
+                    <ScanLine className="w-4 h-4 mr-1" />
+                    {buscandoCodigo ? 'Buscando...' : 'Escanear'}
+                  </Button>
+                </div>
+
                 {/* Buscador de productos */}
                 <div>
                   <Label htmlFor="busqueda-producto" className="text-sm md:text-base">🔍 Buscar Producto</Label>
@@ -710,6 +800,22 @@ export function FormularioVenta({
           </Button>
         </CardContent>
       </Card>
+
+      {/* Escáner de código de barras */}
+      <EscanerCodigo
+        open={escanerAbierto}
+        onOpenChange={setEscanerAbierto}
+        onCodigoLeido={manejarCodigoLeido}
+        titulo="Escanear producto para la venta"
+      />
+
+      {/* Crear producto rápido cuando el código no existe */}
+      <CrearProductoRapido
+        open={crearAbierto}
+        onOpenChange={setCrearAbierto}
+        codigoInicial={codigoPendiente}
+        onProductoCreado={manejarProductoCreado}
+      />
     </div>
   )
 }

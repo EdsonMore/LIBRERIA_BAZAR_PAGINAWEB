@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
+import { EscanerCodigo } from "@/components/ui/escaner-codigo"
 
 interface Categoria {
   id: number
@@ -18,6 +19,7 @@ interface Producto {
   stock: number
   categoria_id: number
   imagen: string
+  codigoBarras: string
   disponible: boolean
 }
 
@@ -26,6 +28,7 @@ export default function EditarProductoPage() {
   const params = useParams()
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(false)
+  const [escanerAbierto, setEscanerAbierto] = useState(false)
   const [producto, setProducto] = useState<Producto | null>(null)
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function EditarProductoPage() {
           stock: data.stock || 0,
           categoria_id: data.categoria_id || 0,
           imagen: data.imagen || "",
+          codigoBarras: data.codigoBarras || "",
           disponible: data.disponible || false,
         })
       }
@@ -112,6 +116,7 @@ export default function EditarProductoPage() {
         stock: stockNum,
         categoria_id: Number(producto.categoria_id),
         imagen: producto.imagen || "",
+        codigo_barras: producto.codigoBarras || "",
         disponible: Boolean(producto.disponible),
       }
 
@@ -278,6 +283,26 @@ export default function EditarProductoPage() {
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={producto.codigoBarras}
+              onChange={(e) => setProducto({ ...producto, codigoBarras: e.target.value })}
+              placeholder="Ej: 7754001234567"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={() => setEscanerAbierto(true)}
+              className="px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700"
+            >
+              📷 Escanear
+            </button>
+          </div>
+        </div>
+
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -315,6 +340,15 @@ export default function EditarProductoPage() {
           </button>
         </div>
       </form>
+
+      <EscanerCodigo
+        open={escanerAbierto}
+        onOpenChange={setEscanerAbierto}
+        onCodigoLeido={(codigo) => {
+          setProducto((prev) => (prev ? { ...prev, codigoBarras: codigo } : prev))
+        }}
+        titulo="Escanear código de barras"
+      />
     </div>
   )
 }
